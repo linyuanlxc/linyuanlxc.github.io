@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="LJL,lxchw@qq.com"><title>MachineLearning-2 · welcome</title><meta name="description" content="梯度下降算法采用分治的思路，不断划分区块，进行搜索，但是会有可能陷入局部最优解
+梯度：目标函数对权重求导。导数为负的方向就是最小指的方向
+在单变量的函数中，梯度其实就是函数的微分，代表着函数在某个给定点的切线的斜率在多变量函数中，梯度是一个向量，向量有方向，梯度的方向就指出了函数在给定点的上升最快的"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><meta name="generator" content="Hexo 6.3.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">welcome</a></h3><div class="description"><p>小镇做题家</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="http://github.com/linyuanlxc"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/mylogo.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>MachineLearning-2</a></h3></div><div class="post-content"><h1 id="梯度下降算法"><a href="#梯度下降算法" class="headerlink" title="梯度下降算法"></a>梯度下降算法</h1><p>采用分治的思路，不断划分区块，进行搜索，但是会有可能陷入局部最优解</p>
+<p>梯度：目标函数对权重求导。导数为负的方向就是最小指的方向</p>
+<p>在单变量的函数中，梯度其实就是函数的微分，代表着函数在某个给定点的切线的斜率<br>在多变量函数中，梯度是一个向量，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向</p>
+<p>即：ω &#x3D; ω + α*θ。θ为梯度，α为学习率或步长</p>
+<p>类似于贪心算法，只看眼前最好的选择，不一定能得到最优结果，但能得到局部最优结果</p>
+<p>鞍点：导数为零 </p>
+<hr>
+<p>##随机梯度下降算法</p>
+<p>梯度下降衍生版本：随机梯度下降（stochastic gradient descent）。随机选择单个样本的损失函数求导。可以避免陷入鞍点。SGD算法是从样本中随机抽出一组，训练后按梯度更新一次，然后再抽取一组，再更新一次，在样本量及其大的情况下，可能不用训练完所有的样本就可以获得一个损失值在可接受范围之内的模型了。</p>
+<hr>
+<p>针对于MachineLearning-1的问题，梯度下降算法代码如下</p>
+<pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+# 数据集
+x_data = &#123;1.0, 2.0, 3.0&#125;
+y_data = &#123;2.0, 4.0, 6.0&#125;
+
+# 初始权重猜测
+w = 1.0
+
+
+# 定义模型
+def forward(x):
+    return x * w
+
+
+# 定义损失函数
+def cost(xs, ys):
+    cost = 0
+    for x, y in zip(xs, ys):
+        y_pred = forward(x)
+        cost += (y_pred - y) ** 2
+    return cost / len(xs)
+
+
+def gradient(xs, ys):
+    grad = 0
+    for x, y in zip(xs, ys):
+        grad += 2 * x * (x * w - y)
+    return grad / len(xs)
+
+
+print(&#39;Predict (before training)&#39;, 4, forward(4))
+for epoch in range(100):
+    cost_val = cost(x_data, y_data)
+    grad_val = gradient(x_data, y_data)
+    w -= 0.01 * grad_val
+    print(&#39;Epoch:&#39;, epoch, &#39;w=&#39;, w, &#39;loss=&#39;, cost_val)
+print(&#39;Predict (after training)&#39;, 4, forward(4))
+</code></pre>
+<p>随机梯度下降代码</p>
+<pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+# 数据集
+x_data = &#123;1.0, 2.0, 3.0&#125;
+y_data = &#123;2.0, 4.0, 6.0&#125;
+
+# 初始权重猜测
+w = 1.0
+
+
+# 定义模型
+def forward(x):
+    return x * w
+
+
+# 定义损失函数
+def loss(x, y):
+    y_pred = forward(x)
+    return (y_pred - y) ** 2
+
+
+def gradient(xs, ys):
+    return 2 * x * (x * w - y)
+
+
+print(&#39;Predict (before training)&#39;, 4, forward(4))
+for epoch in range(100):
+    for x, y in zip(x_data, y_data):
+        grad = gradient(x_data, y_data)
+        w -= 0.01 * grad
+        print(&#39;\tgrad:&#39;, x, y, grad)
+    print(&#39;progress:&#39;, epoch, &#39;w=&#39;, w, &#39;loss=&#39;, loss(x, y))
+print(&#39;Predict (after training)&#39;, 4, forward(4))
+</code></pre>
+<p>梯度下降算法可以并行化，随机梯度下降不行</p>
+<p>mini-batch：小批量随机梯度下降</p>
+<p>有关随机梯度下降文章</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&request_id=&biz_id=102&utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&spm=1018.2226.3001.4187">https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</a></p>
+</blockquote>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2023-08-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2023/08/13/MachineLearning-2/,welcome,MachineLearning-2,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2023/08/12/MachineLearning-1/" title="机器学习1">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
