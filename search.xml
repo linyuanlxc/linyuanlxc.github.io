@@ -150,7 +150,7 @@ y=x*w+b
 <p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
 ]]></content>
       <tags>
-        <tag>机器学习</tag>
+        <tag>MachineLearning</tag>
       </tags>
   </entry>
 </search>
