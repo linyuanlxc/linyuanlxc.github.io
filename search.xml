@@ -88,6 +88,9 @@ y=x*w+b
 </blockquote>
 <p>这个博客里面思维导图可以看一看捏</p>
 ]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
       <tags>
         <tag>机器学习</tag>
         <tag>Python</tag>
@@ -122,6 +125,9 @@ y=x*w+b
 <p><a href="https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&request_id=&biz_id=102&utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&spm=1018.2226.3001.4187">https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</a></p>
 </blockquote>
 ]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
       <tags>
         <tag>机器学习</tag>
         <tag>Python</tag>
@@ -151,6 +157,9 @@ y=x*w+b
 <p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
 <p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
 ]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
       <tags>
         <tag>机器学习</tag>
         <tag>Python</tag>
