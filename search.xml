@@ -189,7 +189,9 @@ compute the gradient(Backward)</p>
   <entry>
     <title>机器学习5</title>
     <url>/2023/08/20/MachineLearning-5/</url>
-    <content><![CDATA[<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
+    <content><![CDATA[<p>逻辑斯蒂回归</p>
+<span id="more"></span>
+<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
 regression)</h1>
 <p>名字虽然是回归，但实际上是分类</p>
 <p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
@@ -212,11 +214,25 @@ f(x)=\frac{1}{1+{\rm e}^{-x}}
   <entry>
     <title>机器学习4</title>
     <url>/2023/08/21/MachineLearning-4/</url>
-    <content><![CDATA[<p>#用pytorch实现线性回归(linear regression)</p>
+    <content><![CDATA[<p>用pytorch实现线性回归</p>
+<span id="more"></span>
+<h1 id="用pytorch实现线性回归linear-regression">用pytorch实现线性回归(linear
+regression)</h1>
 <p>使用梯度下降关键是求出损失函数对于权重的导数</p>
-<p>步骤 1. 准备数据集 2. 设计模型 3. 构建损失函数、优化器 4.
-训练周期</p>
-<p>训练的步骤 1. 求y^（预测结果） 2. 求损失函数 3. backward 4. 更新</p>
+<h2 id="步骤">步骤</h2>
+<ol type="1">
+<li>准备数据集</li>
+<li>设计模型</li>
+<li>构建损失函数、优化器</li>
+<li>训练周期</li>
+</ol>
+<h2 id="训练的步骤">训练的步骤</h2>
+<ol type="1">
+<li>求y^（预测结果）</li>
+<li>求损失函数</li>
+<li>backward</li>
+<li>更新</li>
+</ol>
 <p>问题同前几篇blog</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>], [<span class="number">2.0</span>], [<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">2.0</span>], [<span class="number">4.0</span>], [<span class="number">6.0</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinearModel</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(LinearModel, self).__init__()</span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>, <span class="number">1</span>)  <span class="comment"># 构造对象，包含权重与偏置</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        y_pred = self.linear(x)</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = LinearModel()<span class="comment">#可调用</span></span><br><span class="line"><span class="comment">#损失值应该是标量</span></span><br><span class="line">criterion = torch.nn.MSELoss(size_average=<span class="literal">False</span>)  <span class="comment"># false为不求平均值，即不除以N</span></span><br><span class="line"><span class="comment"># 优化器</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)  <span class="comment"># lr,学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred, y_data)</span><br><span class="line">    <span class="built_in">print</span>(epoch, loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()  <span class="comment"># 进行更新</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;w = &quot;</span>, model.linear.weight.item())  <span class="comment"># weight是矩阵</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;b = &quot;</span>, model.linear.bias.item())</span><br><span class="line"></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y_pred = &quot;</span>, y_test.data)</span><br></pre></td></tr></table></figure>
 <p>类名必须用大驼峰命名</p>
