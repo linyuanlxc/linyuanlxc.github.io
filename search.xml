@@ -195,7 +195,7 @@ regression)</h1>
 <p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
 <p>可以使用Sigmoid函数，将线性模型的结果压缩，比如：</p>
 <p><span class="math display">\[
-f(x)=frac{1}{1+{\rm e}^{-x}}
+\f(x)=frac{1}{1+{\rm e}^{-x}}
 \]</span></p>
 <div data-align="center">
 <p><img src="/2023/08/20/MachineLearning-5/MachineLearning-5-1.png" height="360"></p>
