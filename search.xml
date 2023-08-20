@@ -5,8 +5,11 @@
     <url>/2023/08/12/MachineLearning-1/</url>
     <content><![CDATA[<p>记录有关在pytorch学习中线性模型的知识</p>
 <span id="more"></span>
-<h1 id="线性模型"><a href="#线性模型" class="headerlink" title="线性模型"></a>线性模型</h1><hr>
-<h2 id="机器学习-machine-learning-几个步骤"><a href="#机器学习-machine-learning-几个步骤" class="headerlink" title="机器学习(machine learning)几个步骤"></a>机器学习(machine learning)几个步骤</h2><ol>
+<h1 id="线性模型">线性模型</h1>
+<hr>
+<h2 id="机器学习machine-learning几个步骤">机器学习(machine
+learning)几个步骤</h2>
+<ol type="1">
 <li>准备数据集(dataset)</li>
 <li>选择模型(model)</li>
 <li>训练(training)</li>
@@ -14,97 +17,99 @@
 </ol>
 <p>数据集分为两部分：训练集、测试集。</p>
 <p>训练集又可以细分为训练集、开发集</p>
-<p>损失函数是针对一个样本的,平均平方误差(Mean Square Error,mse)是针对于整个训练集。</p>
+<p>损失函数是针对一个样本的,平均平方误差(Mean Square
+Error,mse)是针对于整个训练集。</p>
 <p>训练神经网络本质上就是使用几个或者一些参数将一个模型变换为更加复杂的模型</p>
 <p>损失函数的选择很重要，因为它是一种对训练样本中要修正的错误进行优先处理的方法，可以强调或者忽略某些误差</p>
-<h2 id="过拟合"><a href="#过拟合" class="headerlink" title="过拟合"></a>过拟合</h2><p>用训练集去训练模型，在尽可能的使损失最小后，将模型在测试集验证时发现，模型产生的损失比预期的要高得多，即过拟合</p>
-<div align="center">
-<img src="/2023/08/12/MachineLearning-1/MachineLearning-1-3.jpg" height="360">
-引自《Deep Learning with PyTorch》
+<h2 id="过拟合">过拟合</h2>
+<p>用训练集去训练模型，在尽可能的使损失最小后，将模型在测试集验证时发现，模型产生的损失比预期的要高得多，即过拟合</p>
+<div data-align="center">
+<p><img src="/2023/08/12/MachineLearning-1/MachineLearning-1-3.jpg" height="360"> 引自《Deep
+Learning with PyTorch》</p>
 </div>
-
-<p>解决过拟合的方法</p>
-<ol>
-<li>在损失函数中添加惩罚项，以降低模型的成本，使其表现得更加平稳、变换更缓慢</li>
-<li>在输入样本中添加噪声，人为地在训练数据样本之间创建新的数据点，并使模型也拟合这些点</li>
-<li>···</li>
-</ol>
+<p>解决过拟合的方法 1.
+在损失函数中添加惩罚项，以降低模型的成本，使其表现得更加平稳、变换更缓慢
+2.
+在输入样本中添加噪声，人为地在训练数据样本之间创建新的数据点，并使模型也拟合这些点
+3. ···</p>
 <p>那么现在可以将训练神经网络（选择合适参数）的过程分为两步：增大参数直到拟合；缩小参数以避免出现过拟合</p>
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><p>Suppose that students would get y points in final exam, if they spent x hours in study</p>
-<div class="table-container">
+<h2 id="练习">练习</h2>
+<h3 id="question">Question</h3>
+<p>Suppose that students would get y points in final exam, if they spent
+x hours in study</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>x</th>
 <th>y</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>1</td>
 <td>2</td>
 </tr>
-<tr>
+<tr class="even">
 <td>2</td>
 <td>4</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>3</td>
 <td>6</td>
 </tr>
-<tr>
+<tr class="even">
 <td>4</td>
 <td>?</td>
 </tr>
 </tbody>
 </table>
+<h3 id="answer">Answer</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">	</span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"><span class="comment">#权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,w)</span><br><span class="line">    l_sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        y_pred_val = forward(x_val)</span><br><span class="line">        loss_val = loss(x_val, y_val)</span><br><span class="line">        l_sum += loss_val</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">    w_list.append(w)</span><br><span class="line">    mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">plt.plot(w_list, mse_list)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;loss&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<div data-align="center">
+<p><img src="/2023/08/12/MachineLearning-1/MachineLearning-1-1.png" height="360" title="y=x*w" alt="y=x*w">
+y=x*w</p>
 </div>
-<h3 id="Answer"><a href="#Answer" class="headerlink" title="Answer"></a>Answer</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">	</span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"><span class="comment">#权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,w)</span><br><span class="line">    l_sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        y_pred_val = forward(x_val)</span><br><span class="line">        loss_val = loss(x_val, y_val)</span><br><span class="line">        l_sum += loss_val</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">    w_list.append(w)</span><br><span class="line">    mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">plt.plot(w_list, mse_list)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;loss&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<div align="center">
-<img src="/2023/08/12/MachineLearning-1/MachineLearning-1-1.png" height="360" title="y=x*w" alt="y=x*w">
-y=x*w
-</div>
-
 <hr>
-<h3 id="Question-1"><a href="#Question-1" class="headerlink" title="Question"></a>Question</h3><p>Suppose that students would get y points in final exam, if they spent x hours in study.Try to use the model y=x*w+b, and draw the cost graph.</p>
-<div class="table-container">
+<h3 id="question-1">Question</h3>
+<p>Suppose that students would get y points in final exam, if they spent
+x hours in study.Try to use the model y=x*w+b, and draw the cost
+graph.</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>x</th>
 <th>y</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>1</td>
 <td>2</td>
 </tr>
-<tr>
+<tr class="even">
 <td>2</td>
 <td>4</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>3</td>
 <td>6</td>
 </tr>
-<tr>
+<tr class="even">
 <td>4</td>
 <td>?</td>
 </tr>
 </tbody>
 </table>
+<h3 id="answer-1">Answer</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w + b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">b_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="keyword">for</span> b <span class="keyword">in</span> np.arange(-<span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.1</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,  w, <span class="string">&#x27;b=&#x27;</span>, b)</span><br><span class="line">        l_sum = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">            y_pred_val = forward(x_val)</span><br><span class="line">            loss_val = loss(x_val, y_val)</span><br><span class="line">            l_sum += loss_val</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">        w_list.append(w)</span><br><span class="line">        b_list.append(b)</span><br><span class="line">        mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(mse_list)</span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = fig.add_subplot(projection=<span class="string">&#x27;3d&#x27;</span>)  <span class="comment"># 创建三维坐标系</span></span><br><span class="line">ax3d.plot_trisurf(w_list, b_list, mse_list)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<div data-align="center">
+<p><img src="/2023/08/12/MachineLearning-1/MachineLearning-1-2.png" height="360" title="y=x*w+b" alt="y=x*w+b">
+y=x*w+b</p>
 </div>
-<h3 id="Answer-1"><a href="#Answer-1" class="headerlink" title="Answer"></a>Answer</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w + b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">b_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="keyword">for</span> b <span class="keyword">in</span> np.arange(-<span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.1</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,  w, <span class="string">&#x27;b=&#x27;</span>, b)</span><br><span class="line">        l_sum = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">            y_pred_val = forward(x_val)</span><br><span class="line">            loss_val = loss(x_val, y_val)</span><br><span class="line">            l_sum += loss_val</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">        w_list.append(w)</span><br><span class="line">        b_list.append(b)</span><br><span class="line">        mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(mse_list)</span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = fig.add_subplot(projection=<span class="string">&#x27;3d&#x27;</span>)  <span class="comment"># 创建三维坐标系</span></span><br><span class="line">ax3d.plot_trisurf(w_list, b_list, mse_list)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<div align="center">
-<img src="/2023/08/12/MachineLearning-1/MachineLearning-1-2.png" height="360" title="y=x*w+b" alt="y=x*w+b">
-y=x*w+b
-</div>
-
 <hr>
 <p>matplotlib中的函数还不怎么会用，后面抽个时间看一看</p>
 <blockquote>
-<p><a href="https://blog.csdn.net/hustlei/article/details/122408179">https://blog.csdn.net/hustlei/article/details/122408179</a></p>
+<p>https://blog.csdn.net/hustlei/article/details/122408179</p>
 </blockquote>
 <p>这个博客里面思维导图可以看一看捏</p>
 ]]></content>
@@ -121,29 +126,28 @@ y=x*w+b
     <url>/2023/08/13/MachineLearning-2/</url>
     <content><![CDATA[<p>记录有关在pytorch学习中梯度下降算法的知识</p>
 <span id="more"></span>
-
-<h1 id="梯度下降算法"><a href="#梯度下降算法" class="headerlink" title="梯度下降算法"></a>梯度下降算法</h1><hr>
+<h1 id="梯度下降算法">梯度下降算法</h1>
+<hr>
 <p>采用分治的思路，不断划分区块，进行搜索，但是会有可能陷入局部最优解</p>
 <p>梯度：目标函数对权重求导。导数为负的方向就是最小指的方向</p>
-<p>在单变量的函数中，梯度其实就是函数的微分，代表着函数在某个给定点的切线的斜率<br>在多变量函数中，梯度是一个向量，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向</p>
+<p>在单变量的函数中，梯度其实就是函数的微分，代表着函数在某个给定点的切线的斜率
+在多变量函数中，梯度是一个向量，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向</p>
 <p>即：<code>ω = ω + α*θ</code>。θ为梯度，α为学习率或步长</p>
 <p>类似于贪心算法，只看眼前最好的选择，不一定能得到最优结果，但能得到局部最优结果</p>
-<p>鞍点：导数为零 </p>
+<p>鞍点：导数为零</p>
 <hr>
-<h2 id="随机梯度下降算法"><a href="#随机梯度下降算法" class="headerlink" title="随机梯度下降算法"></a>随机梯度下降算法</h2><p>梯度下降衍生版本：随机梯度下降（stochastic gradient descent）。随机选择单个样本的损失函数求导。可以避免陷入鞍点。SGD算法是从样本中随机抽出一组，训练后按梯度更新一次，然后再抽取一组，再更新一次，在样本量及其大的情况下，可能不用训练完所有的样本就可以获得一个损失值在可接受范围之内的模型了。</p>
+<h2 id="随机梯度下降算法">随机梯度下降算法</h2>
+<p>梯度下降衍生版本：随机梯度下降（stochastic gradient
+descent）。随机选择单个样本的损失函数求导。可以避免陷入鞍点。SGD算法是从样本中随机抽出一组，训练后按梯度更新一次，然后再抽取一组，再更新一次，在样本量及其大的情况下，可能不用训练完所有的样本就可以获得一个损失值在可接受范围之内的模型了。</p>
 <hr>
 <p>针对于MachineLearning-1的问题，梯度下降算法代码如下</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始权重猜测</span></span><br><span class="line">w = <span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cost</span>(<span class="params">xs, ys</span>):</span><br><span class="line">    cost = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(xs, ys):</span><br><span class="line">        y_pred = forward(x)</span><br><span class="line">        cost += (y_pred - y) ** <span class="number">2</span></span><br><span class="line">    <span class="keyword">return</span> cost / <span class="built_in">len</span>(xs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gradient</span>(<span class="params">xs, ys</span>):</span><br><span class="line">    grad = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(xs, ys):</span><br><span class="line">        grad += <span class="number">2</span> * x * (x * w - y)</span><br><span class="line">    <span class="keyword">return</span> grad / <span class="built_in">len</span>(xs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (before training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    cost_val = cost(x_data, y_data)</span><br><span class="line">    grad_val = gradient(x_data, y_data)</span><br><span class="line">    w -= <span class="number">0.01</span> * grad_val</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;Epoch:&#x27;</span>, epoch, <span class="string">&#x27;w=&#x27;</span>, w, <span class="string">&#x27;loss=&#x27;</span>, cost_val)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (after training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br></pre></td></tr></table></figure>
-
 <p>随机梯度下降代码</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始权重猜测</span></span><br><span class="line">w = <span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gradient</span>(<span class="params">xs, ys</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * x * (x * w - y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (before training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        grad = gradient(x_data, y_data)</span><br><span class="line">        w -= <span class="number">0.01</span> * grad</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;\tgrad:&#x27;</span>, x, y, grad)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;progress:&#x27;</span>, epoch, <span class="string">&#x27;w=&#x27;</span>, w, <span class="string">&#x27;loss=&#x27;</span>, loss(x, y))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (after training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br></pre></td></tr></table></figure>
-
 <p>梯度下降算法可以并行化，随机梯度下降不行</p>
 <p>mini-batch：小批量随机梯度下降</p>
-<p>有关随机梯度下降文章</p>
-<blockquote>
-<p><a href="https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&request_id=&biz_id=102&utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&spm=1018.2226.3001.4187">https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</a></p>
-</blockquote>
+<p>有关随机梯度下降文章 &gt;
+https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2<sub>all</sub>sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</p>
 ]]></content>
       <categories>
         <category>机器学习</category>
@@ -158,21 +162,18 @@ y=x*w+b
     <url>/2023/08/17/MachineLearning-3/</url>
     <content><![CDATA[<p>记录有关反向传播算法的知识</p>
 <span id="more"></span>
-
-<h1 id="反向传播（Back-Propagation）"><a href="#反向传播（Back-Propagation）" class="headerlink" title="反向传播（Back Propagation）"></a>反向传播（Back Propagation）</h1><p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain rule)，求其解析式，即反向传播算法。</p>
-<p>Back Propagation链式求导过程</p>
-<ol>
-<li>Create Computational Graph</li>
-<li>Local Gradient</li>
-<li>Given gradient from successive node</li>
-<li>Use chain rule to compute the gradient(Backward)</li>
-</ol>
-<p>Tensor 张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
+<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
+<p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
+rule)，求其解析式，即反向传播算法。</p>
+<p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
+Gradient 3. Given gradient from successive node 4. Use chain rule to
+compute the gradient(Backward)</p>
+<p>Tensor
+张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
 <p>正向的目标是求出本次的损失，反向的目标则是求出导数。蓝色为正向，红色为反向</p>
-<div align="center">
-<img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360">
+<div data-align="center">
+<p><img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360"></p>
 </div>
-
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">y_data = [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个Tensor变量，权重</span></span><br><span class="line">w = torch.Tensor([<span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 需要计算梯度</span></span><br><span class="line">w.requires_grad = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型，此时w是Tensor，*要计算Tensor与Tensor之间的乘法，所以有一个对x的自动类型强转</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数，构建计算图</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict (before training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br><span class="line"><span class="comment"># w.grad也是个梯度，w.grad.item才是标量</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        l = loss(x, y)  <span class="comment"># l是个张量，前馈过程，计算loss</span></span><br><span class="line">        l.backward()<span class="comment">#计算梯度</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\tgrad:&quot;</span>, x, y, w.grad.item())</span><br><span class="line">        w.data = w.data - <span class="number">0.01</span> * w.grad.data<span class="comment">#梯度用于更新权重</span></span><br><span class="line">        w.grad.data.zero_()  <span class="comment"># 梯度清零</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;process:&quot;</span>, epoch, l.item())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict(after training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br></pre></td></tr></table></figure>
 <p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
 <p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
@@ -188,9 +189,14 @@ y=x*w+b
   <entry>
     <title>MachineLearning-5</title>
     <url>/2023/08/20/MachineLearning-5/</url>
-    <content><![CDATA[<h1 id="逻辑斯蒂回归（logistic-regression"><a href="#逻辑斯蒂回归（logistic-regression" class="headerlink" title="逻辑斯蒂回归（logistic regression)"></a>逻辑斯蒂回归（logistic regression)</h1><p>名字虽然是回归，但实际上是分类</p>
+    <content><![CDATA[<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
+regression)</h1>
+<p>名字虽然是回归，但实际上是分类</p>
 <p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
-<script type="math/tex; mode=display">
-i\hbar\frac{\partial}{\partial t}\psi=-\frac{\hbar^2}{2m}\nabla^2\psi+V\psi</script>]]></content>
+<p><span class="math display">\[
+i\hbar\frac{\partial}{\partial
+t}\psi=-\frac{\hbar^2}{2m}\nabla^2\psi+V\psi
+\]</span></p>
+]]></content>
   </entry>
 </search>
