@@ -213,7 +213,7 @@ f(x)=\frac{1}{1+{\rm e}^{-x}}
   </entry>
   <entry>
     <title>机器学习4</title>
-    <url>/2023/08/21/MachineLearning-4/</url>
+    <url>/2023/08/20/MachineLearning-4/</url>
     <content><![CDATA[<p>用pytorch实现线性回归</p>
 <span id="more"></span>
 <h1 id="用pytorch实现线性回归linear-regression">用pytorch实现线性回归(linear
