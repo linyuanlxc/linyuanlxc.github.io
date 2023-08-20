@@ -29,15 +29,16 @@
 <meta property="og:site_name" content="L&#39;s Blog">
 <meta property="og:description" content="记录有关在pytorch学习中线性模型的知识">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2023/08/12/MachineLearning-1/MachineLearning-1-3.jpg">
 <meta property="og:image" content="http://example.com/2023/08/12/MachineLearning-1/MachineLearning-1-1.png">
 <meta property="og:image" content="http://example.com/2023/08/12/MachineLearning-1/MachineLearning-1-2.png">
 <meta property="article:published_time" content="2023-08-12T13:50:40.000Z">
-<meta property="article:modified_time" content="2023-08-17T15:05:04.096Z">
+<meta property="article:modified_time" content="2023-08-18T15:04:59.093Z">
 <meta property="article:author" content="LJL">
 <meta property="article:tag" content="机器学习">
 <meta property="article:tag" content="Python">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2023/08/12/MachineLearning-1/MachineLearning-1-1.png">
+<meta name="twitter:image" content="http://example.com/2023/08/12/MachineLearning-1/MachineLearning-1-3.jpg">
 
 <link rel="canonical" href="http://example.com/2023/08/12/MachineLearning-1/">
 
@@ -205,7 +206,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-08-17 23:05:04" itemprop="dateModified" datetime="2023-08-17T23:05:04+08:00">2023-08-17</time>
+                <time title="修改时间：2023-08-18 23:04:59" itemprop="dateModified" datetime="2023-08-18T23:04:59+08:00">2023-08-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -230,14 +231,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>519</span>
+              <span>805</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -251,7 +252,6 @@
       
         <p>记录有关在pytorch学习中线性模型的知识</p>
 <span id="more"></span>
-
 <h1 id="线性模型"><a href="#线性模型" class="headerlink" title="线性模型"></a>线性模型</h1><hr>
 <h2 id="机器学习-machine-learning-几个步骤"><a href="#机器学习-machine-learning-几个步骤" class="headerlink" title="机器学习(machine learning)几个步骤"></a>机器学习(machine learning)几个步骤</h2><ol>
 <li>准备数据集(dataset)</li>
@@ -262,7 +262,23 @@
 <p>数据集分为两部分：训练集、测试集。</p>
 <p>训练集又可以细分为训练集、开发集</p>
 <p>损失函数是针对一个样本的,平均平方误差(Mean Square Error,mse)是针对于整个训练集。</p>
+<p>训练神经网络本质上就是使用几个或者一些参数将一个模型变换为更加复杂的模型</p>
+<p>损失函数的选择很重要，因为它是一种对训练样本中要修正的错误进行优先处理的方法，可以强调或者忽略某些误差</p>
+<h2 id="过拟合"><a href="#过拟合" class="headerlink" title="过拟合"></a>过拟合</h2><p>用训练集去训练模型，在尽可能的使损失最小后，将模型在测试集验证时发现，模型产生的损失比预期的要高得多，即过拟合</p>
+<div align="center">
+<img src="/2023/08/12/MachineLearning-1/MachineLearning-1-3.jpg" height="360">
+引自《Deep Learning with PyTorch》
+</div>
+
+<p>解决过拟合的方法</p>
+<ol>
+<li>在损失函数中添加惩罚项，以降低模型的成本，使其表现得更加平稳、变换更缓慢</li>
+<li>在输入样本中添加噪声，人为地在训练数据样本之间创建新的数据点，并使模型也拟合这些点</li>
+<li>···</li>
+</ol>
+<p>那么现在可以将训练神经网络（选择合适参数）的过程分为两步：增大参数直到拟合；缩小参数以避免出现过拟合</p>
 <h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><p>Suppose that students would get y points in final exam, if they spent x hours in study</p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -270,7 +286,8 @@
 <th>y</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>1</td>
 <td>2</td>
 </tr>
@@ -286,16 +303,18 @@
 <td>4</td>
 <td>?</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <h3 id="Answer"><a href="#Answer" class="headerlink" title="Answer"></a>Answer</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">	</span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"><span class="comment">#权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,w)</span><br><span class="line">    l_sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        y_pred_val = forward(x_val)</span><br><span class="line">        loss_val = loss(x_val, y_val)</span><br><span class="line">        l_sum += loss_val</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">    w_list.append(w)</span><br><span class="line">    mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">plt.plot(w_list, mse_list)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;loss&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-
 <div align="center">
 <img src="/2023/08/12/MachineLearning-1/MachineLearning-1-1.png" height="360" title="y=x*w" alt="y=x*w">
 y=x*w
 </div>
 
 <hr>
-<h3 id="Question-1"><a href="#Question-1" class="headerlink" title="Question"></a>Question</h3><p>Suppose that students would get y points in final exam, if they spent x hours in study.Try to use the model y&#x3D;x*w+b, and draw the cost graph.</p>
+<h3 id="Question-1"><a href="#Question-1" class="headerlink" title="Question"></a>Question</h3><p>Suppose that students would get y points in final exam, if they spent x hours in study.Try to use the model y=x*w+b, and draw the cost graph.</p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -303,7 +322,8 @@ y=x*w
 <th>y</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>1</td>
 <td>2</td>
 </tr>
@@ -319,9 +339,10 @@ y=x*w
 <td>4</td>
 <td>?</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <h3 id="Answer-1"><a href="#Answer-1" class="headerlink" title="Answer"></a>Answer</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w + b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 权重及其对应损失值</span></span><br><span class="line">w_list = []</span><br><span class="line">b_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> w <span class="keyword">in</span> np.arange(<span class="number">0.0</span>, <span class="number">4.1</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="keyword">for</span> b <span class="keyword">in</span> np.arange(-<span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.1</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;w=&#x27;</span>,  w, <span class="string">&#x27;b=&#x27;</span>, b)</span><br><span class="line">        l_sum = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> x_val, y_val <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">            y_pred_val = forward(x_val)</span><br><span class="line">            loss_val = loss(x_val, y_val)</span><br><span class="line">            l_sum += loss_val</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;\t&#x27;</span>, x_val, y_val, y_pred_val, loss_val)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;MSE=&#x27;</span>, l_sum/<span class="number">3</span>)</span><br><span class="line">        w_list.append(w)</span><br><span class="line">        b_list.append(b)</span><br><span class="line">        mse_list.append(l_sum/<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(mse_list)</span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = fig.add_subplot(projection=<span class="string">&#x27;3d&#x27;</span>)  <span class="comment"># 创建三维坐标系</span></span><br><span class="line">ax3d.plot_trisurf(w_list, b_list, mse_list)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-
 <div align="center">
 <img src="/2023/08/12/MachineLearning-1/MachineLearning-1-2.png" height="360" title="y=x*w+b" alt="y=x*w+b">
 y=x*w+b
@@ -415,7 +436,7 @@ y=x*w+b
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">线性模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-machine-learning-%E5%87%A0%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.</span> <span class="nav-text">机器学习(machine learning)几个步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0"><span class="nav-number">1.2.</span> <span class="nav-text">练习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Question"><span class="nav-number">1.2.1.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Answer"><span class="nav-number">1.2.2.</span> <span class="nav-text">Answer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Question-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Answer-1"><span class="nav-number">1.2.4.</span> <span class="nav-text">Answer</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">线性模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-machine-learning-%E5%87%A0%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.</span> <span class="nav-text">机器学习(machine learning)几个步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E6%8B%9F%E5%90%88"><span class="nav-number">1.2.</span> <span class="nav-text">过拟合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0"><span class="nav-number">1.3.</span> <span class="nav-text">练习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Question"><span class="nav-number">1.3.1.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Answer"><span class="nav-number">1.3.2.</span> <span class="nav-text">Answer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Question-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Answer-1"><span class="nav-number">1.3.4.</span> <span class="nav-text">Answer</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -431,7 +452,7 @@ y=x*w+b
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -493,7 +514,7 @@ y=x*w+b
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6 分钟</span>
+    <span title="站点阅读时长">8 分钟</span>
 </div>
 
         
@@ -564,6 +585,8 @@ y=x*w+b
 
 
 
+
+  
 
   
 
