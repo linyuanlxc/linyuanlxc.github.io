@@ -194,9 +194,16 @@ regression)</h1>
 <p>名字虽然是回归，但实际上是分类</p>
 <p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
 <p><span class="math display">\[
-i\hbar\frac{\partial}{\partial
-t}\psi=-\frac{\hbar^2}{2m}\nabla^2\psi+V\psi
+P = \frac
+{\sum_{i=1}^n (x_i- x)(y_i- y)}
+{\displaystyle \left[
+\sum_{i=1}^n (x_i-x)^2
+\sum_{i=1}^n (y_i-y)^2
+\right]^{1/2} }
 \]</span></p>
+<p><span class="math inline">\(A \\ B\)</span> 错误写法</p>
+<span class="math display">\[\begin{split} A\\B \end{split}\]</span>
+<p>。</p>
 ]]></content>
   </entry>
 </search>
