@@ -232,13 +232,12 @@ p(Y=Y_i|x_i,w) = π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
 \]</span></p>
 <p>当有m个样本时 <span class="math display">\[
 P = \prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
-L(w) = \log{e}{\prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]}
 \]</span></p>
 <p>对其取对数</p>
 <p><span class="math display">\[
 \begin{aligned}
-L(w) &amp;= \log{e}{\prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]} \\
-&amp;= \sum_{i=1}^m [ {Y_i} log{e}[π(x_i)] + {1-Y_i}log{e}[1-π(x_i)] ]
+L(w) &amp;= \log_{e}{\prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]} \\
+&amp;= \sum_{i=1}^m [ {Y_i} log_{e}π(x_i) + (1-Y_i)log_{e}[1-π(x_i)] ]
 \end{aligned}
 \]</span></p>
 ]]></content>
