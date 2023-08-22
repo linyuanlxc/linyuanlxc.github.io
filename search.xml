@@ -228,15 +228,16 @@ p(Y=Y_i|x_i,w) =
 \end{cases}
 \]</span></p>
 <p>则有 <span class="math display">\[
-p(Y=Y_i|x_i,w) = [π(x_i)]^{Y_i}·[1-π(x_i)]^{1-Y_i}]
+p(Y=Y_i|x_i,w) = π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
 \]</span></p>
 <p>当有m个样本时 <span class="math display">\[
-P = \prod_{i=1}^m [π(x_i)]^{Y_i}·[1-π(x_i)]^{1-Y_i}]
+P = \prod_{i=1}^m [[π(x_i)]^{Y_i}·[1-π(x_i)]^{1-Y_i}]
 \]</span></p>
 <p>对其取对数</p>
-<p>$$ L(w) &amp;= &amp;= _{i=1}^n
-[{Y_i}{log{e}{[π(x_i)]}+{1-Y_i}{log{e}{[1-π(x_i)]}]</p>
-<p>$$</p>
+<p><span class="math display">\[
+L(w) &amp;= \log{e}{\prod_{i=1}^m [π(x_i)]^{Y_i}·[1-π(x_i)]^{1-Y_i}]}
+&amp;= \sum_{i=1}^n [{Y_i}{log{e}{[π(x_i)]}+{1-Y_i}{log{e}{[1-π(x_i)]}]
+\]</span></p>
 ]]></content>
       <categories>
         <category>机器学习</category>
