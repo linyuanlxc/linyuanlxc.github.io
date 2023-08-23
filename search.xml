@@ -196,11 +196,11 @@ regression)</h1>
 <div data-align="center">
 <p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-2.png" height="360"></p>
 </div>
-<p>名字虽然是回归，但实际上是分类</p>
+<p>名字虽然是回归，但实际上是分类<img src="/2023/08/21/MachineLearning-5/2023-08-23-19-43-15.png"></p>
 <p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
 <p>可以使用Sigmoid函数，将线性模型的结果压缩，比如：</p>
 <p><span class="math display">\[
-f(x)=\frac{1}{1+{\rm e}^{-x}}
+f(x)=\frac{1}{1+{\rm e}^{-x}}![](2023-08-23-19-42-19.png)
 \]</span></p>
 <div data-align="center">
 <p><img src="/2023/08/21/MachineLearning-5/blog/myblog/source/_posts/MachineLearning-5/MachineLearning-5-1.png" height="360"></p>
