@@ -189,9 +189,7 @@ compute the gradient(Backward)</p>
   <entry>
     <title>机器学习4</title>
     <url>/2023/08/20/MachineLearning-4/</url>
-    <content><![CDATA[<p>用pytorch实现线性回归</p>
-<span id="more"></span>
-<h1 id="用pytorch实现线性回归linear-regression">用pytorch实现线性回归(linear
+    <content><![CDATA[<h1 id="用pytorch实现线性回归linear-regression">用pytorch实现线性回归(linear
 regression)</h1>
 <p>使用梯度下降关键是求出损失函数对于权重的导数</p>
 <h2 id="步骤">步骤</h2>
@@ -224,9 +222,7 @@ regression)</h1>
   <entry>
     <title>机器学习5</title>
     <url>/2023/08/21/MachineLearning-5/</url>
-    <content><![CDATA[<p>逻辑斯蒂回归</p>
-<span id="more"></span>
-<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
+    <content><![CDATA[<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
 regression)</h1>
 <div data-align="center">
 <p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-2.png" height="360"></p>
