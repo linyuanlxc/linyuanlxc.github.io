@@ -3,9 +3,7 @@
   <entry>
     <title>机器学习1</title>
     <url>/2023/08/12/MachineLearning-1/</url>
-    <content><![CDATA[<p>记录有关在pytorch学习中线性模型的知识</p>
-<span id="more"></span>
-<h1 id="线性模型">线性模型</h1>
+    <content><![CDATA[<h1 id="线性模型">线性模型</h1>
 <hr>
 <h2 id="机器学习machine-learning几个步骤">机器学习(machine
 learning)几个步骤</h2>
@@ -124,9 +122,7 @@ y=x*w+b</p>
   <entry>
     <title>机器学习2</title>
     <url>/2023/08/13/MachineLearning-2/</url>
-    <content><![CDATA[<p>记录有关在pytorch学习中梯度下降算法的知识</p>
-<span id="more"></span>
-<h1 id="梯度下降算法">梯度下降算法</h1>
+    <content><![CDATA[<h1 id="梯度下降算法">梯度下降算法</h1>
 <hr>
 <p>采用分治的思路，不断划分区块，进行搜索，但是会有可能陷入局部最优解</p>
 <p>梯度：目标函数对权重求导。导数为负的方向就是最小指的方向</p>
@@ -160,9 +156,7 @@ https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&am
   <entry>
     <title>机器学习3</title>
     <url>/2023/08/17/MachineLearning-3/</url>
-    <content><![CDATA[<p>记录有关反向传播算法的知识</p>
-<span id="more"></span>
-<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
+    <content><![CDATA[<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
 <p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
 rule)，求其解析式，即反向传播算法。</p>
 <p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
