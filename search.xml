@@ -141,7 +141,7 @@ descent）。随机选择单个样本的损失函数求导。可以避免陷入�
 <p>随机梯度下降代码</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = &#123;<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>&#125;</span><br><span class="line">y_data = &#123;<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始权重猜测</span></span><br><span class="line">w = <span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gradient</span>(<span class="params">xs, ys</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * x * (x * w - y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (before training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        grad = gradient(x_data, y_data)</span><br><span class="line">        w -= <span class="number">0.01</span> * grad</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;\tgrad:&#x27;</span>, x, y, grad)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;progress:&#x27;</span>, epoch, <span class="string">&#x27;w=&#x27;</span>, w, <span class="string">&#x27;loss=&#x27;</span>, loss(x, y))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Predict (after training)&#x27;</span>, <span class="number">4</span>, forward(<span class="number">4</span>))</span><br></pre></td></tr></table></figure>
 <p>梯度下降算法可以并行化，随机梯度下降不行</p>
-<p>mini-batch：小批量随机梯度下降</p>
+<p>mini-batch：小批量随机梯度下降。如果数据样本的数量很大，那么一轮的迭代会很耗时间，所以可以把这些数据样本划分为若干份，这些子集就叫做mini—batch</p>
 <p>有关随机梯度下降文章 &gt;
 https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2<sub>all</sub>sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</p>
 ]]></content>
@@ -310,7 +310,7 @@ $$
       </tags>
   </entry>
   <entry>
-    <title>FreeRTOS</title>
+    <title>FreeRTOS-1</title>
     <url>/2023/08/27/FreeRTOS-1/</url>
     <content><![CDATA[<p>我是跟着正点原子的教程来学的，感觉讲的可以，因此很多知识点参考了正点原子</p>
 <h1 id="为何使用freertos">为何使用FreeRTOS</h1>
@@ -397,6 +397,186 @@ $$
         <tag>FreeRTOS</tag>
         <tag>STM32</tag>
         <tag>C语言</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MachineLearning-6</title>
+    <url>/2023/08/29/MachineLearning-6/</url>
+    <content><![CDATA[<h1 id="多维输入">多维输入</h1>
+<p>对于标量或者一维的回归任务，其回归模型可以表示为<span class="math inline">\(\hat{y}=\sigma(x^{(i)}·w+b)\)</span>。其中<span class="math inline">\(\sigma\)</span>是激活函数，类似于sigmoid函数，i为第i个样本</p>
+<p>但对于多维的数据，例如有这么一个样本</p>
+<table>
+<thead>
+<tr class="header">
+<th>x1</th>
+<th>x2</th>
+<th>x3</th>
+<th>x4</th>
+<th>y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>11</td>
+<td>21</td>
+<td>31</td>
+<td>234</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>11</td>
+<td>21</td>
+<td>31</td>
+<td>234</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>11</td>
+<td>21</td>
+<td>31</td>
+<td>234</td>
+</tr>
+</tbody>
+</table>
+<p>对于这么一组数据来说，x1、x2、x3、x4被称为<strong>特征(feature)</strong>。那么回归模型的输入就是一组向量:</p>
+<p><span class="math display">\[
+\left[
+\begin{matrix}
+    x_1 &amp; x_2 &amp;x_3 &amp; x_4
+\end{matrix}
+\right]
+\]</span></p>
+<p>回归模型变为<span class="math inline">\(\hat{y}=\sigma(\sum_{n=1}^{4}
+x{_n^{(i)}}·w_n+b)=\sigma(z^{(i)})\)</span>，<span class="math inline">\(x{_n^{(i)}}\)</span>表示第i个样本的<span class="math inline">\(x_n\)</span>。其中的w·x虽然表示的是标量相乘，但是实际的含义是矩阵相乘，即</p>
+<p><span class="math display">\[
+\left[
+\begin{matrix}
+    x_1 &amp; x_2 &amp; x_3 &amp; x_4
+\end{matrix}
+\right]
+\left[
+\begin{matrix}
+    w_1\\
+    w_2\\
+    w_3\\
+    w_4\\
+\end{matrix}
+\right]
+\]</span></p>
+<p>计算结果依旧是标量</p>
+<h1 id="对于mini-batchn-samples">对于mini-batch(N samples)</h1>
+<p>回归模型依旧是<span class="math inline">\(\hat{y}=\sigma(\sum_{n=1}^{N}
+x{_n^{(i)}}·w_n+b)=\sigma(z^{(i)})\)</span></p>
+<p>现在有N个样本</p>
+<p><span class="math display">\[
+\left[
+\begin{matrix}
+    {\hat{y}}^{(1)} \\
+    \vdots \\
+    {\hat{y}}^{(N)} \\
+\end{matrix}
+\right] =
+\left[
+\begin{matrix}
+    \sigma(z^{(1)}) \\
+    \vdots \\
+    \sigma(z^{(N)}) \\
+\end{matrix}
+\right] =
+\sigma
+\left[
+\begin{matrix}
+    z^{(1)} \\
+    \vdots \\
+    z^{(N)} \\
+\end{matrix}
+\right]
+\]</span></p>
+<p><span class="math display">\[
+z^{(N)}=\left[
+\begin{matrix}
+    x^{(N)}_1 &amp; \cdots &amp; \cdots &amp; x^{(N)}_4
+\end{matrix}
+\right]
+\left[
+\begin{matrix}
+    w_1 \\
+    \vdots \\
+    \vdots \\
+    w_4
+\end{matrix}
+\right]+b
+\]</span></p>
+<p>计算结果为标量，转置不影响,其中4是feature数量</p>
+<p>那么我们就可以得到</p>
+<p><span class="math display">\[
+\left[
+\begin{matrix}
+    z^{(1)} \\
+    \vdots \\
+    z^{(N)} \\
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+    x^{(1)}_1 &amp; \cdots &amp; x^{(1)}_4\\
+    \vdots    &amp; \ddots &amp; \vdots   \\
+    x^{(N)}_1 &amp; \cdots &amp; x^{(N)}_4
+\end{matrix}
+\right]
+\left[
+\begin{matrix}
+    w_1 \\
+    \vdots \\
+    \vdots \\
+    w_4
+\end{matrix}
+\right]+
+\left[
+\begin{matrix}
+    b \\
+    \vdots \\
+    b\\
+\end{matrix}
+\right]
+\]</span></p>
+<p>设样本数量为N，feature的数量为n，则</p>
+<table>
+<thead>
+<tr class="header">
+<th>x</th>
+<th>w</th>
+<th>b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>N×n</td>
+<td>n×1</td>
+<td>N×1</td>
+</tr>
+</tbody>
+</table>
+<p>转成向量化的计算后，可利用并行化计算，提高计算速率。</p>
+<p>在改代码时，只需将<code>self.linear = torch.nn.Linear(1, 1)</code>改成<code>self.linear = torch.nn.Linear(n, 1)</code></p>
+<p>如果是多层网络，那么只需将上一层的输出，作为下一层的输入。</p>
+<div data-align="center">
+<p><img src="/2023/08/29/MachineLearning-6/MachineLearning-6-1.png" height="360"></p>
+</div>
+<h1 id="实际问题">实际问题</h1>
+<div data-align="center">
+<p><img src="/2023/08/29/MachineLearning-6/MachineLearning-6-2.png" height="360"></p>
+</div>
+<p>X1~X8为糖尿病病人的一系列指标，Y表示一年后病情是否加重。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xy = np.loadtxt(</span><br><span class="line">    <span class="string">&quot;D:\BaiduNetdiskDownload\PyTorch深度学习实践\diabetes.csv.gz&quot;</span>,</span><br><span class="line">    delimiter=<span class="string">&quot;,&quot;</span>,</span><br><span class="line">    dtype=np.float32,</span><br><span class="line">)</span><br><span class="line">x_data = torch.from_numpy(xy[:, :-<span class="number">1</span>])</span><br><span class="line">y_data = torch.from_numpy(xy[:, [-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Model</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(Model, self).__init__()</span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>, <span class="number">6</span>)  <span class="comment"># 8维到6维</span></span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>, <span class="number">4</span>)  <span class="comment"># 6维到4维</span></span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>, <span class="number">1</span>)  <span class="comment"># 4维到1维</span></span><br><span class="line">        self.activate = torch.nn.Sigmoid()</span><br><span class="line">        <span class="comment"># self.activate=torch.nn.ReLU()#采用不同的激活函数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = self.activate(self.linear1(x))</span><br><span class="line">        x = self.activate(self.linear2(x))</span><br><span class="line">        x = self.activate(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = Model()</span><br><span class="line"></span><br><span class="line">criterion = torch.nn.BCELoss(size_average=<span class="literal">True</span>)  <span class="comment"># false为不求平均值，即不除以N</span></span><br><span class="line"><span class="comment"># 优化器</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)  <span class="comment"># lr,学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    <span class="comment"># 前馈</span></span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred, y_data)</span><br><span class="line">    <span class="built_in">print</span>(epoch, loss.item())</span><br><span class="line">    <span class="comment"># 反馈</span></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    <span class="comment"># 更新</span></span><br><span class="line">    optimizer.step()  <span class="comment"># 进行更新</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">x_test = torch.Tensor([[-<span class="number">0.29</span>, <span class="number">0.49</span>, <span class="number">0.18</span>, -<span class="number">0.29</span>, <span class="number">0.00</span>, <span class="number">0.00</span>, -<span class="number">0.53</span>, -<span class="number">0.03</span>]])</span><br><span class="line"></span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y_pred = &quot;</span>, y_test.data)</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>Python</tag>
       </tags>
   </entry>
 </search>
