@@ -400,7 +400,7 @@ $$
       </tags>
   </entry>
   <entry>
-    <title>MachineLearning-6</title>
+    <title>机器学习6</title>
     <url>/2023/08/29/MachineLearning-6/</url>
     <content><![CDATA[<h1 id="多维输入">多维输入</h1>
 <p>对于标量或者一维的回归任务，其回归模型可以表示为<span class="math inline">\(\hat{y}=\sigma(x^{(i)}·w+b)\)</span>。其中<span class="math inline">\(\sigma\)</span>是激活函数，类似于sigmoid函数，i为第i个样本</p>
@@ -577,6 +577,211 @@ z^{(N)}=\left[
       <tags>
         <tag>机器学习</tag>
         <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>FreeRTOS-2</title>
+    <url>/2023/09/02/FreeRTOS-2/</url>
+    <content><![CDATA[<h1 id="任务操作相关的api函数">任务操作相关的API函数</h1>
+<table>
+<thead>
+<tr class="header">
+<th>API函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>xTaskCreate()</td>
+<td>动态方式创建任务</td>
+</tr>
+<tr class="even">
+<td>xTaskCreateStatic()</td>
+<td>静态方式创建任务</td>
+</tr>
+<tr class="odd">
+<td>xTaskDelete()</td>
+<td>删除任务</td>
+</tr>
+</tbody>
+</table>
+<p>由xTaskCreate()创建的任务，在创建成功后立马进入就绪态。被删除的任务将从所有的列表删除。动态创建方式是由FreeRTOS进行内存管理，静态则是由人工进行管理。静态创建比较麻烦，因此大多使用动态创建。</p>
+<p>若使用静态创建，需要将宏<code>configSUPPORT_STATIC_ALLOCATION</code>置为1。同样若为动态创建，则需将宏<code>configSUPPORT_DYNAMIC_ALLOCATION</code>置为1。</p>
+<h2 id="xtaskcreate函数">xTaskCreate()函数</h2>
+<p>函数原型</p>
+<div data-align="center">
+<p><img src="/2023/09/02/FreeRTOS-2/FreeRTOS-2-1.png" height="360"></p>
+</div>
+<p>形参描述</p>
+<table>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 84%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pxTaskCode</td>
+<td>指向任务函数的指针，即任务函数的名字</td>
+</tr>
+<tr class="even">
+<td>pcName</td>
+<td>任务函数的名字</td>
+</tr>
+<tr class="odd">
+<td>usStackDepth</td>
+<td>任务堆栈大小，单位：字</td>
+</tr>
+<tr class="even">
+<td>pvParameters</td>
+<td>传递给任务函数的参数</td>
+</tr>
+<tr class="odd">
+<td>uxPriority</td>
+<td>任务函数优先级</td>
+</tr>
+<tr class="even">
+<td>pxCreatedTask</td>
+<td>任务句柄，任务成功创建后，会返回任务句柄。任务句柄就是任务的任务控制块</td>
+</tr>
+</tbody>
+</table>
+<p>返回值</p>
+<table>
+<thead>
+<tr class="header">
+<th>返回值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pdPASS</td>
+<td>任务创建成功</td>
+</tr>
+<tr class="even">
+<td>errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY</td>
+<td>内存不足，任务创建失败</td>
+</tr>
+</tbody>
+</table>
+<h2 id="xtaskcreatestatic函数">xTaskCreateStatic()函数</h2>
+<p>函数原型</p>
+<div data-align="center">
+<p><img src="/2023/09/02/FreeRTOS-2/FreeRTOS-2-2.png" height="360"></p>
+</div>
+<p>形参描述</p>
+<table>
+<colgroup>
+<col style="width: 12%">
+<col style="width: 87%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pxTaskCode</td>
+<td>指向任务函数的指针，即任务函数的名字</td>
+</tr>
+<tr class="even">
+<td>pcName</td>
+<td>任务函数的名字</td>
+</tr>
+<tr class="odd">
+<td>ulStackDepth</td>
+<td>任务堆栈大小，单位：字</td>
+</tr>
+<tr class="even">
+<td>pvParameters</td>
+<td>传递给任务函数的参数</td>
+</tr>
+<tr class="odd">
+<td>uxPriority</td>
+<td>任务函数优先级</td>
+</tr>
+<tr class="even">
+<td>puxStackBuffer</td>
+<td>任务栈指针，内存由用户分配提供,就是定义一个数组，数组的名字就是这个指针，数组的大小就是任务堆栈大小</td>
+</tr>
+<tr class="odd">
+<td>pxTaskBuffer</td>
+<td>任务控制块指针，内存由用户分配提供</td>
+</tr>
+<tr class="even">
+<td>pxCreatedTask</td>
+<td>任务句柄，任务成功创建后，会返回任务句柄。任务句柄就是任务的任务控制块</td>
+</tr>
+</tbody>
+</table>
+<p>返回值</p>
+<table>
+<thead>
+<tr class="header">
+<th>返回值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>用户没有提供相应的内存，任务创建失败</td>
+</tr>
+<tr class="even">
+<td>其他值</td>
+<td>任务句柄，创建成功</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vtaskdelete函数">vTaskDelete()函数</h2>
+<table>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vTaskToDelete</td>
+<td>待删除的任务的句柄</td>
+</tr>
+</tbody>
+</table>
+<p>当传入的实参为<code>NULL</code>时，代表删除任务自身</p>
+<p>该函数无返回值</p>
+<h1 id="命名规范">命名规范</h1>
+<ul>
+<li>u: unsigned</li>
+<li>s: short</li>
+<li>l: long</li>
+<li>c: char</li>
+<li>x:
+用户自定义的数据类型，如结构体，队列等。表示的类型为BaseType_t。如函数<code>xTaskCreate()</code>，其返回值就是BaseType_t类型</li>
+<li>e: 枚举</li>
+<li>p: 指针</li>
+<li>prv: static函数</li>
+<li>v: void函数，无返回值，如<code>vTaskDelete()</code></li>
+</ul>
+<p>函数名包含了该函数的返回值、函数所在的文件、函数功能。</p>
+<p>如<code>xTaskCreateStatic()</code>，其返回值类型为BaseType_t，在task.c文件中，功能是静态创建任务。</p>
+<p>参考：<code>https://blog.csdn.net/freestep96/article/details/126692753</code></p>
+]]></content>
+      <categories>
+        <category>STM32</category>
+      </categories>
+      <tags>
+        <tag>FreeRTOS</tag>
+        <tag>STM32</tag>
+        <tag>C语言</tag>
       </tags>
   </entry>
 </search>

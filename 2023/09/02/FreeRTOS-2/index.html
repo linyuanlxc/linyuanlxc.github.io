@@ -22,24 +22,25 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="FreeRTOS基本知识">
+  <meta name="description" content="FreeRTOS任务操作以及一些命名规范">
 <meta property="og:type" content="article">
-<meta property="og:title" content="FreeRTOS-1">
-<meta property="og:url" content="http://example.com/2023/08/27/FreeRTOS-1/index.html">
+<meta property="og:title" content="FreeRTOS-2">
+<meta property="og:url" content="http://example.com/2023/09/02/FreeRTOS-2/index.html">
 <meta property="og:site_name" content="L&#39;s Blog">
-<meta property="og:description" content="FreeRTOS基本知识">
+<meta property="og:description" content="FreeRTOS任务操作以及一些命名规范">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2023/08/27/FreeRTOS-1/FreeRTOS-1-1.png">
-<meta property="article:published_time" content="2023-08-27T02:30:00.000Z">
-<meta property="article:modified_time" content="2023-08-29T05:46:28.116Z">
+<meta property="og:image" content="http://example.com/2023/09/02/FreeRTOS-2/FreeRTOS-2-1.png">
+<meta property="og:image" content="http://example.com/2023/09/02/FreeRTOS-2/FreeRTOS-2-2.png">
+<meta property="article:published_time" content="2023-09-02T05:58:53.000Z">
+<meta property="article:modified_time" content="2023-09-02T05:58:53.920Z">
 <meta property="article:author" content="LJL">
 <meta property="article:tag" content="FreeRTOS">
 <meta property="article:tag" content="STM32">
 <meta property="article:tag" content="C语言">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2023/08/27/FreeRTOS-1/FreeRTOS-1-1.png">
+<meta name="twitter:image" content="http://example.com/2023/09/02/FreeRTOS-2/FreeRTOS-2-1.png">
 
-<link rel="canonical" href="http://example.com/2023/08/27/FreeRTOS-1/">
+<link rel="canonical" href="http://example.com/2023/09/02/FreeRTOS-2/">
 
 
 <script id="page-configurations">
@@ -52,7 +53,7 @@
   };
 </script>
 
-  <title>FreeRTOS-1 | L's Blog</title>
+  <title>FreeRTOS-2 | L's Blog</title>
   
 
 
@@ -175,7 +176,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2023/08/27/FreeRTOS-1/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/09/02/FreeRTOS-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -188,7 +189,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          FreeRTOS-1
+          FreeRTOS-2
         </h1>
 
         <div class="post-meta">
@@ -198,15 +199,8 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-08-27 10:30:00" itemprop="dateCreated datePublished" datetime="2023-08-27T10:30:00+08:00">2023-08-27</time>
+              <time title="创建时间：2023-09-02 13:58:53" itemprop="dateCreated datePublished" datetime="2023-09-02T13:58:53+08:00">2023-09-02</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-08-29 13:46:28" itemprop="dateModified" datetime="2023-08-29T13:46:28+08:00">2023-08-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -230,16 +224,16 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>690</span>
+              <span>672</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>2 分钟</span>
             </span>
-            <div class="post-description">FreeRTOS基本知识</div>
+            <div class="post-description">FreeRTOS任务操作以及一些命名规范</div>
 
         </div>
       </header>
@@ -250,83 +244,198 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>我是跟着正点原子的教程来学的，感觉讲的可以，因此很多知识点参考了正点原子</p>
-<h1 id="为何使用freertos">为何使用FreeRTOS</h1>
-<p>裸机在处理任务时，可以采用主函数while循环加中断处理函数的方法，但是这种方法实时性差，代码结构臃肿，并且当某个任务要执行delay()时，CPU只能干等，无法在这段时间去处理其他任务，不能充分利用CPU资源。</p>
-<p>FreeRTOS为每个任务划分时间片，优先级。优先级相同的任务在执行时在划分的时间片内执行。在某个任务堵塞(delay)时，该任务进入堵塞状态，CPU可以转去执行其他的任务。</p>
-<h1 id="freertos任务调度">FreeRTOS任务调度</h1>
-<h2 id="任务调度器">任务调度器</h2>
-<p>任务调度器就是通过某种调度算法决定要执行哪一个任务</p>
-<h2 id="任务调度方式">任务调度方式</h2>
-<ul>
-<li>抢占式调度
-<ul>
-<li>高优先级抢占低优先级</li>
-<li><strong>被抢占的任务会进入就绪态</strong></li>
-<li>高优先级不结束，低优先级不能执行</li>
-</ul></li>
-<li>时间片调度
-<ul>
-<li><strong>优先级相同</strong>的任务会划分时间片，</li>
-<li><strong>每个任务执行一个时间片</strong>，执行完后不断流转</li>
-<li><strong>时间片的大小取决于系统滴答定时器</strong></li>
-<li>倘若某个任务有一楼最好原因只执行0.2个时间片，那么在后面的运行中这个缺少的时间片并不会补回来，还是按照一个时间片执行</li>
-</ul></li>
-<li>协程式调度</li>
-</ul>
-<h2 id="任务状态">任务状态</h2>
-<ul>
-<li>运行态：某个任务正在被执行，那么该任务就处于运行态。在STM32中，只有一个任务处于运行态</li>
-<li>就绪态：某个任务可以被执行，但是还未被执行，那么就处于就绪态</li>
-<li>阻塞态：某任务在等待延时或者外部事件，则处于阻塞态</li>
-<li>挂起态：类似于暂停，使用函数vTaskSuspend()挂起，使用vTaskResume()解挂，进入就绪态</li>
-</ul>
-<div data-align="center">
-<p><img src="/2023/08/27/FreeRTOS-1/FreeRTOS-1-1.png" height="360"></p>
-</div>
-<p>由上图可知，<strong>仅有就绪态可以转变成运行态；任何任务想要转变为运行态，都要先转变成就绪态</strong></p>
-<h2 id="任务列表">任务列表</h2>
-<p>除运行态外，其他三种状态都有任务列表</p>
-<ul>
-<li>就绪列表</li>
-</ul>
+        <h1 id="任务操作相关的api函数">任务操作相关的API函数</h1>
 <table>
 <thead>
 <tr class="header">
-<th>标志位</th>
-<th>任务列表</th>
+<th>API函数</th>
+<th>描述</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>bit31</td>
-<td>pxReadyTasksLists[31]</td>
+<td>xTaskCreate()</td>
+<td>动态方式创建任务</td>
 </tr>
 <tr class="even">
-<td>bit30</td>
-<td>pxReadyTasksLists[30]</td>
+<td>xTaskCreateStatic()</td>
+<td>静态方式创建任务</td>
 </tr>
 <tr class="odd">
-<td>·····</td>
-<td>·····················</td>
-</tr>
-<tr class="even">
-<td>bit1</td>
-<td>pxReadyTasksLists[1]</td>
-</tr>
-<tr class="odd">
-<td>bit0</td>
-<td>pxReadyTasksLists[0]</td>
+<td>xTaskDelete()</td>
+<td>删除任务</td>
 </tr>
 </tbody>
 </table>
-<p>标志位置一表示该就绪态优先级列表有任务，反之无任务。</p>
-<p>数字越大，优先级等级越高。这一点与STM32中断优先级的高低不一样。</p>
-<p>任务调度器就是在就绪列表中选择优先级最高的任务来执行，即进入运行态。</p>
+<p>由xTaskCreate()创建的任务，在创建成功后立马进入就绪态。被删除的任务将从所有的列表删除。动态创建方式是由FreeRTOS进行内存管理，静态则是由人工进行管理。静态创建比较麻烦，因此大多使用动态创建。</p>
+<p>若使用静态创建，需要将宏<code>configSUPPORT_STATIC_ALLOCATION</code>置为1。同样若为动态创建，则需将宏<code>configSUPPORT_DYNAMIC_ALLOCATION</code>置为1。</p>
+<h2 id="xtaskcreate函数">xTaskCreate()函数</h2>
+<p>函数原型</p>
+<div data-align="center">
+<p><img src="/2023/09/02/FreeRTOS-2/FreeRTOS-2-1.png" height="360"></p>
+</div>
+<p>形参描述</p>
+<table>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 84%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pxTaskCode</td>
+<td>指向任务函数的指针，即任务函数的名字</td>
+</tr>
+<tr class="even">
+<td>pcName</td>
+<td>任务函数的名字</td>
+</tr>
+<tr class="odd">
+<td>usStackDepth</td>
+<td>任务堆栈大小，单位：字</td>
+</tr>
+<tr class="even">
+<td>pvParameters</td>
+<td>传递给任务函数的参数</td>
+</tr>
+<tr class="odd">
+<td>uxPriority</td>
+<td>任务函数优先级</td>
+</tr>
+<tr class="even">
+<td>pxCreatedTask</td>
+<td>任务句柄，任务成功创建后，会返回任务句柄。任务句柄就是任务的任务控制块</td>
+</tr>
+</tbody>
+</table>
+<p>返回值</p>
+<table>
+<thead>
+<tr class="header">
+<th>返回值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pdPASS</td>
+<td>任务创建成功</td>
+</tr>
+<tr class="even">
+<td>errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY</td>
+<td>内存不足，任务创建失败</td>
+</tr>
+</tbody>
+</table>
+<h2 id="xtaskcreatestatic函数">xTaskCreateStatic()函数</h2>
+<p>函数原型</p>
+<div data-align="center">
+<p><img src="/2023/09/02/FreeRTOS-2/FreeRTOS-2-2.png" height="360"></p>
+</div>
+<p>形参描述</p>
+<table>
+<colgroup>
+<col style="width: 12%">
+<col style="width: 87%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pxTaskCode</td>
+<td>指向任务函数的指针，即任务函数的名字</td>
+</tr>
+<tr class="even">
+<td>pcName</td>
+<td>任务函数的名字</td>
+</tr>
+<tr class="odd">
+<td>ulStackDepth</td>
+<td>任务堆栈大小，单位：字</td>
+</tr>
+<tr class="even">
+<td>pvParameters</td>
+<td>传递给任务函数的参数</td>
+</tr>
+<tr class="odd">
+<td>uxPriority</td>
+<td>任务函数优先级</td>
+</tr>
+<tr class="even">
+<td>puxStackBuffer</td>
+<td>任务栈指针，内存由用户分配提供,就是定义一个数组，数组的名字就是这个指针，数组的大小就是任务堆栈大小</td>
+</tr>
+<tr class="odd">
+<td>pxTaskBuffer</td>
+<td>任务控制块指针，内存由用户分配提供</td>
+</tr>
+<tr class="even">
+<td>pxCreatedTask</td>
+<td>任务句柄，任务成功创建后，会返回任务句柄。任务句柄就是任务的任务控制块</td>
+</tr>
+</tbody>
+</table>
+<p>返回值</p>
+<table>
+<thead>
+<tr class="header">
+<th>返回值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>用户没有提供相应的内存，任务创建失败</td>
+</tr>
+<tr class="even">
+<td>其他值</td>
+<td>任务句柄，创建成功</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vtaskdelete函数">vTaskDelete()函数</h2>
+<table>
+<thead>
+<tr class="header">
+<th>形参</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vTaskToDelete</td>
+<td>待删除的任务的句柄</td>
+</tr>
+</tbody>
+</table>
+<p>当传入的实参为<code>NULL</code>时，代表删除任务自身</p>
+<p>该函数无返回值</p>
+<h1 id="命名规范">命名规范</h1>
 <ul>
-<li>阻塞列表：pxDelayedTaskList</li>
-<li>挂起列表：xSuspendedTaskList</li>
+<li>u: unsigned</li>
+<li>s: short</li>
+<li>l: long</li>
+<li>c: char</li>
+<li>x:
+用户自定义的数据类型，如结构体，队列等。表示的类型为BaseType_t。如函数<code>xTaskCreate()</code>，其返回值就是BaseType_t类型</li>
+<li>e: 枚举</li>
+<li>p: 指针</li>
+<li>prv: static函数</li>
+<li>v: void函数，无返回值，如<code>vTaskDelete()</code></li>
 </ul>
+<p>函数名包含了该函数的返回值、函数所在的文件、函数功能。</p>
+<p>如<code>xTaskCreateStatic()</code>，其返回值类型为BaseType_t，在task.c文件中，功能是静态创建任务。</p>
+<p>参考：<code>https://blog.csdn.net/freestep96/article/details/126692753</code></p>
 
     </div>
 
@@ -348,13 +457,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2023/08/21/MachineLearning-5/" rel="prev" title="机器学习5">
-      <i class="fa fa-chevron-left"></i> 机器学习5
+    <a href="/2023/08/29/MachineLearning-6/" rel="prev" title="机器学习6">
+      <i class="fa fa-chevron-left"></i> 机器学习6
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2023/08/29/MachineLearning-6/" rel="next" title="机器学习6">
-      机器学习6 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -413,7 +519,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BD%95%E4%BD%BF%E7%94%A8freertos"><span class="nav-number">1.</span> <span class="nav-text">为何使用FreeRTOS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#freertos%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">FreeRTOS任务调度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">任务调度器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E6%96%B9%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">任务调度方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81"><span class="nav-number">2.3.</span> <span class="nav-text">任务状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E5%88%97%E8%A1%A8"><span class="nav-number">2.4.</span> <span class="nav-text">任务列表</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E6%93%8D%E4%BD%9C%E7%9B%B8%E5%85%B3%E7%9A%84api%E5%87%BD%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">任务操作相关的API函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#xtaskcreate%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.</span> <span class="nav-text">xTaskCreate()函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xtaskcreatestatic%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">xTaskCreateStatic()函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vtaskdelete%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">vTaskDelete()函数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"><span class="nav-number">2.</span> <span class="nav-text">命名规范</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
