@@ -788,6 +788,12 @@ z^{(N)}=\left[
     <title>OV2640</title>
     <url>/2023/10/08/OV2640/</url>
     <content><![CDATA[<h1 id="dcmi">DCMI</h1>
+<ul>
+<li><p>VSYNC:帧信号，摄像头输出，用于标记一帧数据的开始与结束</p></li>
+<li><p>HREF:行中断信号，摄像头输出，用于标记一行数据的开始与结束</p></li>
+<li><p>D0-D7(D0-D9):数据线。</p></li>
+</ul>
+<p>dcmi我是直接用cube配置的，比较简单。</p>
 <h1 id="sccbserial-camera-control-bus协议">SCCB(Serial Camera Control
 Bus)协议</h1>
 <p>SCCB与I2C协议类似，由两根线组成：SCL(SIO_C)(时钟线)、SDA(SIO_D)(数据线)。值得注意的是，在SCCB的手册(我看的是《OmniVision
@@ -825,9 +831,21 @@ Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-
 <div data-align="center">
 <p><img src="/2023/10/08/OV2640/OV2640-4.png" height="360"></p>
 </div>
-<p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据</p>
-<p>VSYNC:帧信号，摄像头输出，用于标记一帧数据的开始与结束</p>
-<p>HREF:行中断信号，摄像头输出，用于标记一行数据的开始与结束</p>
+<p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据。</p>
+<h2 id="需要注意的几点">需要注意的几点</h2>
+<ol type="1">
+<li>在通过SCCB往OV2640写数据时，尤其要注意<strong>pdown这个引脚要设置为低电平，即退出低功耗模式。</strong></li>
+<li><strong>SDA引脚在写数据的时候应该设置为开漏模式</strong>，这一点在数据手册上有说明。如果是推挽，我测试的是不成功的。接受信息的时候，理当设置为输入模式，但是我设置为开漏输出，通过read_pin()函数(即读取GPIO口高低电平的函数)也能读取数据。但是有些博客说如果设置GPIO口为输出模式，虽然<strong>也可以读取到高低电平，但只适用于推挽模式，对开漏模式并不适用</strong>。至于为什么我设置为开漏模式也能读取到高低电平，原因还需要查一查。</li>
+<li>如果想要看一看自己写的SCCB协议是否正确，可以通过读OV2640的产品ID寄存器和生产商ID寄存器，生产商ID可以在datasheet上面查到，产品ID查不到，我读出来的是0x2642，与正点原子读出来的是一样的。</li>
+<li>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。</li>
+<li>SCCB是和I2C兼容的，可以用cube配置I2C实现SCCB协议。可以参考<code>https://gitee.com/studentwei/stm32h750vbt-cubmx</code>。强烈推荐，代码十分简洁。</li>
+</ol>
 ]]></content>
+      <categories>
+        <category>STM32</category>
+      </categories>
+      <tags>
+        <tag>STM32</tag>
+      </tags>
   </entry>
 </search>
