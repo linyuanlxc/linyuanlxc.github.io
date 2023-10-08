@@ -815,31 +815,31 @@ Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应
 在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位
 - SCCB传输单位：相</p>
 <p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-1.png" height="360"></p>
-</div>
 <p>phase-1 ID
 Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write
 1-read)。Sub-address 是内存地址。</p>
 <div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-2.png" height="240"></p>
+<p><img src="/2023/10/08/OV2640/OV2640-1.png" height="240"></p>
 </div>
 <p>写操作：三相写传输周期</p>
 <ul>
 <li>设备写通信地址，内存地址，所写数据</li>
 </ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-2.png" height="240"></p>
+</div>
 <p>读操作</p>
 <ul>
 <li>两相写传输周期:设备写通信地址，内存地址</li>
 </ul>
 <div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-3.png" height="240"></p>
+<p><img src="/2023/10/08/OV2640/OV2640-3.png" height="120"></p>
 </div>
 <ul>
 <li>两相读传输周期：设备读通信地址，所读数据</li>
 </ul>
 <div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-4.png" height="240"></p>
+<p><img src="/2023/10/08/OV2640/OV2640-4.png" height="120"></p>
 </div>
 <p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据。</p>
 <h2 id="需要注意的几点">需要注意的几点</h2>
@@ -852,7 +852,7 @@ Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-
 <li>这个点与OV2640无关，是有关于使用cube配置STM32H7的一个问题。H7的最高主频为480M，但是我一开始配置时，发现不管怎么配时钟树，虽然时钟树能显示480M，但是实际我用定时器输出PWM的频率只有400M。<strong>要将<code>RCC</code>下的<code>Product rivision</code>设置为<code>rev.V</code>才行，默认是rev.Y。务必注意！！！</strong></li>
 </ol>
 <div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-5.png" height="240"></p>
+<p><img src="/2023/10/08/OV2640/OV2640-5.png" height="180"></p>
 </div>
 <ol start="7" type="1">
 <li>在拿到0V2640后一定要看一看模块上是否已经有了给XCLK提供时钟信号的晶振，这个信号时不可或缺的，如果没有，可以尝试用单片机发PWM当做时钟信号(这就是上面我说PWM频率为400M的原因)，XCLK信号频率一般为24M，应该可以为其他频率，具体要参看手册。这个方法我没有成功，但大概率是模块本身的问题，如果没有晶振可以试一下。</li>
