@@ -812,8 +812,10 @@ Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应
 <p>相同点： - 起始信号、停止信号 -
 信号有效性(SDA只能在SCL为低电平时变化)</p>
 <p>不同点： -
-在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位
-- SCCB传输单位：相</p>
+在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位</p>
+<ul>
+<li>SCCB传输单位：相</li>
+</ul>
 <p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
 <p>phase-1 ID
 Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write

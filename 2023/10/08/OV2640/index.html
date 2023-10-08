@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://example.com/2023/10/08/OV2640/OV2640-4.png">
 <meta property="og:image" content="http://example.com/2023/10/08/OV2640/OV2640-5.png">
 <meta property="article:published_time" content="2023-10-08T14:52:00.000Z">
-<meta property="article:modified_time" content="2023-10-08T16:29:55.594Z">
+<meta property="article:modified_time" content="2023-10-08T16:33:18.783Z">
 <meta property="article:author" content="LJL">
 <meta property="article:tag" content="STM32">
 <meta name="twitter:card" content="summary">
@@ -207,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-09 00:29:55" itemprop="dateModified" datetime="2023-10-09T00:29:55+08:00">2023-10-09</time>
+                <time title="修改时间：2023-10-09 00:33:18" itemprop="dateModified" datetime="2023-10-09T00:33:18+08:00">2023-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -277,8 +277,10 @@ Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应
 <p>相同点： - 起始信号、停止信号 -
 信号有效性(SDA只能在SCL为低电平时变化)</p>
 <p>不同点： -
-在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位
-- SCCB传输单位：相</p>
+在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位</p>
+<ul>
+<li>SCCB传输单位：相</li>
+</ul>
 <p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
 <p>phase-1 ID
 Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write
