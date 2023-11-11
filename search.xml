@@ -298,15 +298,26 @@
   <entry>
     <title>机器学习1</title>
     <url>/2023/08/12/MachineLearning-1/</url>
-    <content><![CDATA[<h1 id="线性模型">线性模型</h1>
+    <content><![CDATA[<h2 id="一些基本概念"># 一些基本概念</h2>
+<h2 id="张量">张量</h2>
+<p>pytorch中的基本数据结构，可以理解为多维数组。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.ones(<span class="number">3</span>)  <span class="comment"># 创建一个大小为3的一维张量，用1.0填充</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(a))</span><br><span class="line">a[<span class="number">2</span>] = <span class="number">55</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br></pre></td></tr></table></figure>
+<p>可以通过从0开始的索引来访问张量中的每一个元素，也可以修改值</p>
+<hr>
+<h1 id="线性模型">线性模型</h1>
 <hr>
 <h2 id="机器学习machine-learning几个步骤">机器学习(machine
 learning)几个步骤</h2>
 <ol type="1">
-<li>准备数据集(dataset)</li>
-<li>选择模型(model)</li>
-<li>训练(training)</li>
-<li>应用(inferring)</li>
+<li><p><strong>准备数据集(dataset)</strong></p>
+<p>将我们的数据转变成张量(tensor)，一般使用torch.utils.data包下的Dataset类中的API接口。还有加载数据集，一般是使用DataLoader类。有时还需要对数据集进行预处理，如下。</p>
+<p><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">form torchvision <span class="keyword">import</span> transforms</span><br><span class="line">preprocess = transforms.Compose([</span><br><span class="line">    transforms.Resize(<span class="number">256</span>),</span><br><span class="line">    transforms.CenterCrop(<span class="number">224</span>),</span><br><span class="line">    transforms.ToTensor(),</span><br><span class="line">    transforms.Normalize(</span><br><span class="line">        mean=[<span class="number">0.485</span>,<span class="number">0.456</span>,<span class="number">0.406</span>],</span><br><span class="line">        std=[<span class="number">0.229</span>,<span class="number">0.224</span>,<span class="number">0.225</span>]</span><br><span class="line">    )</span><br><span class="line">]</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<p>这个预处理函数的意思是：将输入图像缩放到256<em>256，围绕中心将图像裁剪为224</em>224个像素，将其转换成张量，对其RGB分量进行归一化处理，使其具有定义的均值和标准差。</p></li>
+<li><p><strong>选择模型(model)。例如pytorch提供的cv相关的模型</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> models</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">dir</span>(models))</span><br></pre></td></tr></table></figure>
+<p>通过上述代码可以查看cv相关的模型。</p></li>
+<li><p><strong>训练(training)</strong></p></li>
+<li><p><strong>应用(inferring)</strong></p></li>
 </ol>
 <p>数据集分为两部分：训练集、测试集。</p>
 <p>训练集又可以细分为训练集、开发集</p>
@@ -314,6 +325,7 @@ learning)几个步骤</h2>
 Error,mse)是针对于整个训练集。</p>
 <p>训练神经网络本质上就是使用几个或者一些参数将一个模型变换为更加复杂的模型</p>
 <p>损失函数的选择很重要，因为它是一种对训练样本中要修正的错误进行优先处理的方法，可以强调或者忽略某些误差</p>
+<p>优化器：torch.optiom中提供，用于更新</p>
 <h2 id="过拟合">过拟合</h2>
 <p>用训练集去训练模型，在尽可能的使损失最小后，将模型在测试集验证时发现，模型产生的损失比预期的要高得多，即过拟合</p>
 <div data-align="center">
@@ -326,6 +338,7 @@ Learning with PyTorch》</p>
 在输入样本中添加噪声，人为地在训练数据样本之间创建新的数据点，并使模型也拟合这些点
 3. ···</p>
 <p>那么现在可以将训练神经网络（选择合适参数）的过程分为两步：增大参数直到拟合；缩小参数以避免出现过拟合</p>
+<h2 id="损失函数">损失函数</h2>
 <h2 id="练习">练习</h2>
 <h3 id="question">Question</h3>
 <p>Suppose that students would get y points in final exam, if they spent
@@ -852,7 +865,7 @@ Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-
 <li><p>在通过SCCB往OV2640写数据时，尤其要注意<strong>pdown这个引脚要设置为低电平，即退出低功耗模式。</strong></p></li>
 <li><p><strong>SDA引脚在写数据的时候应该设置为开漏模式</strong>，这一点在数据手册上有说明。如果是推挽，我测试的是不成功的。接受信息的时候，理当设置为输入模式，但是我设置为开漏输出，通过read_pin()函数(即读取GPIO口高低电平的函数)也能读取数据。但是有些博客说如果设置GPIO口为输出模式，虽然<strong>也可以读取到高低电平，但只适用于推挽模式，对开漏模式并不适用</strong>。至于为什么我设置为开漏模式也能读取到高低电平，原因还需要查一查。</p></li>
 <li><p>如果想要看一看自己写的SCCB协议是否正确，可以通过读OV2640的产品ID寄存器和生产商ID寄存器，生产商ID可以在datasheet上面查到，产品ID查不到，我读出来的是0x2642，与正点原子读出来的是一样的。</p></li>
-<li><p>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。</p></li>
+<li><p>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。问了客服，应该是出厂版本问题。</p></li>
 <li><p>SCCB是和I2C兼容的，可以用cube配置I2C实现SCCB协议。可以参考<code>https://gitee.com/studentwei/stm32h750vbt-cubmx</code>。强烈推荐，代码十分简洁。</p></li>
 <li><p>这个点与OV2640无关，是有关于使用cube配置STM32H7的一个问题。H7的最高主频为480M，但是我一开始配置时，发现不管怎么配时钟树，虽然时钟树能显示480M，但是实际我用定时器输出PWM的频率只有400M。<strong>要将<code>RCC</code>下的<code>Product rivision</code>设置为<code>rev.V</code>才行，默认是rev.Y。务必注意！！！</strong></p></li>
 </ol>
