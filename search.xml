@@ -299,52 +299,19 @@
     <title>机器学习1</title>
     <url>/2023/08/12/MachineLearning-1/</url>
     <content><![CDATA[<h1 id="一些基本概念">一些基本概念</h1>
-<table style="width:6%;">
-<colgroup>
-<col style="width: 5%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td>## 张量</td>
-</tr>
-<tr class="even">
-<td>pytorch中的基本数据结构，可以理解为多维数组。</td>
-</tr>
-<tr class="odd">
-<td><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.ones(<span class="number">3</span>)  <span class="comment"># 创建一个大小为3的一维张量，用1.0填充</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(a))</span><br><span class="line">a[<span class="number">2</span>] = <span class="number">55</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br></pre></td></tr></table></figure></td>
-</tr>
-<tr class="even">
-<td><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = torch.tensor([[<span class="number">2</span>, <span class="number">3</span>], [<span class="number">3</span>, <span class="number">4</span>]])  <span class="comment"># 创建一个2维张量</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(a))</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">a[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">55</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="built_in">print</span>(a.shape)  <span class="comment">#查看每个维度上张量的大小</span></span><br></pre></td></tr></table></figure></td>
-</tr>
-<tr class="odd">
-<td>可以通过从0开始的索引来访问张量中的每一个元素，也可以修改值。</td>
-</tr>
-<tr class="even">
-<td>切片的方法也适用于张量。</td>
-</tr>
-<tr class="odd">
-<td><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:])    <span class="comment">#第一行之后的所有行，所有列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:,:])  <span class="comment">#第一行之后的所有行，所有列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:,<span class="number">0</span>])  <span class="comment">#第一行之后的所有行，第一列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="literal">None</span>])  <span class="comment">#增加大小为一的维度，类似于unsqueeze()方法</span></span><br></pre></td></tr></table></figure></td>
-</tr>
-<tr class="even">
-<td><strong>张量的大小、偏移量、步长</strong>。张量的大小是一个元组，表示张量在每个维度上有多少个元素；偏移量是指存储区中某个元素相对于张量中第一个元素的索引；步长是指存储区中为了获得下一个元素需要跳过的元素数量，它是一个元组，指示当索引在每个维度增加1时在储存区中要跳过的元素数量。</td>
-</tr>
-<tr class="odd">
-<td><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.tensor(</span><br><span class="line">    [[[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">6</span>, <span class="number">7</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">8</span>]], [[<span class="number">13</span>, <span class="number">32</span>, <span class="number">11</span>], [<span class="number">41</span>, <span class="number">46</span>, <span class="number">7</span>], [<span class="number">52</span>, <span class="number">65</span>, <span class="number">84</span>]]]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(a.size())</span><br><span class="line">point = a[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>]</span><br><span class="line"><span class="built_in">print</span>(point)</span><br><span class="line"><span class="built_in">print</span>(point.storage_offset())  <span class="comment"># 该元素相对于第一个元素的偏移</span></span><br><span class="line"><span class="built_in">print</span>(a.stride())  <span class="comment"># 步长</span></span><br><span class="line"><span class="built_in">print</span>(a.dim())  <span class="comment">#查看张量的维度</span></span><br></pre></td></tr></table></figure></td>
-</tr>
-<tr class="even">
-<td>需要注意的是，通过索引的方式去更改子张量，会影响原始张量，这是因为子张量与原始张量索引了相同的存储区。可以使用clone()方法复制新的张量。</td>
-</tr>
-<tr class="odd">
-<td><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.tensor(</span><br><span class="line">    [[[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">6</span>, <span class="number">7</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">8</span>]], [[<span class="number">13</span>, <span class="number">32</span>, <span class="number">11</span>], [<span class="number">41</span>, <span class="number">46</span>, <span class="number">7</span>], [<span class="number">52</span>, <span class="number">65</span>, <span class="number">84</span>]]]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(a.size())</span><br><span class="line">point = a[<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line"><span class="built_in">print</span>(point)</span><br><span class="line">point[<span class="number">1</span>] = <span class="number">111</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">point1 = point.clone()  <span class="comment"># 复制新的张量</span></span><br><span class="line"><span class="built_in">print</span>(point1)</span><br><span class="line">point1[<span class="number">1</span>] = <span class="number">222</span></span><br><span class="line"><span class="built_in">print</span>(point1)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br></pre></td></tr></table></figure></td>
-</tr>
-<tr class="even">
-<td>此外，张量还有其他操作。如：转置t()方法、连续contiguous()方法。张量还具有设备属性，可以指定在CPU或者GPU上创建张量。可以将张量保存(save()方法)，也可以加载本地张量(load()方法)。可以通过<code>h5py</code>库，将张量转化成NumPy数组，这样可以适用于不同的库。</td>
-</tr>
-<tr class="odd">
-<td># 线性模型</td>
-</tr>
-</tbody>
-</table>
+<h2 id="张量">张量</h2>
+<p>pytorch中的基本数据结构，可以理解为多维数组。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.ones(<span class="number">3</span>)  <span class="comment"># 创建一个大小为3的一维张量，用1.0填充</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(a))</span><br><span class="line">a[<span class="number">2</span>] = <span class="number">55</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = torch.tensor([[<span class="number">2</span>, <span class="number">3</span>], [<span class="number">3</span>, <span class="number">4</span>]])  <span class="comment"># 创建一个2维张量</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(a))</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">a[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">55</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="built_in">print</span>(a.shape)  <span class="comment">#查看每个维度上张量的大小</span></span><br></pre></td></tr></table></figure>
+<p>可以通过从0开始的索引来访问张量中的每一个元素，也可以修改值。</p>
+<p>切片的方法也适用于张量。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:])    <span class="comment">#第一行之后的所有行，所有列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:,:])  <span class="comment">#第一行之后的所有行，所有列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="number">1</span>:,<span class="number">0</span>])  <span class="comment">#第一行之后的所有行，第一列</span></span><br><span class="line"><span class="built_in">print</span>(a[<span class="literal">None</span>])  <span class="comment">#增加大小为一的维度，类似于unsqueeze()方法</span></span><br></pre></td></tr></table></figure>
+<p><strong>张量的大小、偏移量、步长</strong>。张量的大小是一个元组，表示张量在每个维度上有多少个元素；偏移量是指存储区中某个元素相对于张量中第一个元素的索引；步长是指存储区中为了获得下一个元素需要跳过的元素数量，它是一个元组，指示当索引在每个维度增加1时在储存区中要跳过的元素数量。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.tensor(</span><br><span class="line">    [[[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">6</span>, <span class="number">7</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">8</span>]], [[<span class="number">13</span>, <span class="number">32</span>, <span class="number">11</span>], [<span class="number">41</span>, <span class="number">46</span>, <span class="number">7</span>], [<span class="number">52</span>, <span class="number">65</span>, <span class="number">84</span>]]]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(a.size())</span><br><span class="line">point = a[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>]</span><br><span class="line"><span class="built_in">print</span>(point)</span><br><span class="line"><span class="built_in">print</span>(point.storage_offset())  <span class="comment"># 该元素相对于第一个元素的偏移</span></span><br><span class="line"><span class="built_in">print</span>(a.stride())  <span class="comment"># 步长</span></span><br><span class="line"><span class="built_in">print</span>(a.dim())  <span class="comment">#查看张量的维度</span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是，通过索引的方式去更改子张量，会影响原始张量，这是因为子张量与原始张量索引了相同的存储区。可以使用clone()方法复制新的张量。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">a = torch.tensor(</span><br><span class="line">    [[[<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>], [<span class="number">1</span>, <span class="number">6</span>, <span class="number">7</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">8</span>]], [[<span class="number">13</span>, <span class="number">32</span>, <span class="number">11</span>], [<span class="number">41</span>, <span class="number">46</span>, <span class="number">7</span>], [<span class="number">52</span>, <span class="number">65</span>, <span class="number">84</span>]]]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(a.size())</span><br><span class="line">point = a[<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line"><span class="built_in">print</span>(point)</span><br><span class="line">point[<span class="number">1</span>] = <span class="number">111</span></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">point1 = point.clone()  <span class="comment"># 复制新的张量</span></span><br><span class="line"><span class="built_in">print</span>(point1)</span><br><span class="line">point1[<span class="number">1</span>] = <span class="number">222</span></span><br><span class="line"><span class="built_in">print</span>(point1)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br></pre></td></tr></table></figure>
+<p>此外，张量还有其他操作。如：转置t()方法、连续contiguous()方法。张量还具有设备属性，可以指定在CPU或者GPU上创建张量。可以将张量保存(save()方法)，也可以加载本地张量(load()方法)。可以通过<code>h5py</code>库，将张量转化成NumPy数组，这样可以适用于不同的库。</p>
+<h1 id="线性模型">线性模型</h1>
 <h2 id="机器学习machine-learning几个步骤">机器学习(machine
 learning)几个步骤</h2>
 <ol type="1">
