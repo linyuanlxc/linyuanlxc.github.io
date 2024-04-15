@@ -296,6 +296,33 @@
       </tags>
   </entry>
   <entry>
+    <title>机器学习3</title>
+    <url>/2023/08/17/MachineLearning-3/</url>
+    <content><![CDATA[<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
+<p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
+rule)，求其解析式，即反向传播算法。</p>
+<p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
+Gradient 3. Given gradient from successive node 4. Use chain rule to
+compute the gradient(Backward)</p>
+<p>Tensor
+张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
+<p>正向的目标是求出本次的损失，反向的目标则是求出导数。蓝色为正向，红色为反向</p>
+<div data-align="center">
+<p><img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360"></p>
+</div>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">y_data = [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个Tensor变量，权重</span></span><br><span class="line">w = torch.Tensor([<span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 需要计算梯度</span></span><br><span class="line">w.requires_grad = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型，此时w是Tensor，*要计算Tensor与Tensor之间的乘法，所以有一个对x的自动类型强转</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数，构建计算图</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict (before training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br><span class="line"><span class="comment"># w.grad也是个梯度，w.grad.item才是标量</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        l = loss(x, y)  <span class="comment"># l是个张量，前馈过程，计算loss</span></span><br><span class="line">        l.backward()<span class="comment">#计算梯度</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\tgrad:&quot;</span>, x, y, w.grad.item())</span><br><span class="line">        w.data = w.data - <span class="number">0.01</span> * w.grad.data<span class="comment">#梯度用于更新权重</span></span><br><span class="line">        w.grad.data.zero_()  <span class="comment"># 梯度清零</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;process:&quot;</span>, epoch, l.item())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict(after training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br></pre></td></tr></table></figure>
+<p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
+<p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>机器学习1</title>
     <url>/2023/08/12/MachineLearning-1/</url>
     <content><![CDATA[<h1 id="一些基本概念">一些基本概念</h1>
@@ -458,33 +485,6 @@ descent）。随机选择单个样本的损失函数求导。可以避免陷入�
 <p>mini-batch：小批量随机梯度下降。如果数据样本的数量很大，那么一轮的迭代会很耗时间，所以可以把这些数据样本划分为若干份，这些子集就叫做mini—batch</p>
 <p>有关随机梯度下降文章 &gt;
 https://blog.csdn.net/qq_58146842/article/details/121280968?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86&amp;utm_medium=distribute.pc_search_result.none-task-blog-2<sub>all</sub>sobaiduweb~default-1-121280968.nonecase&amp;spm=1018.2226.3001.4187</p>
-]]></content>
-      <categories>
-        <category>机器学习</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>机器学习3</title>
-    <url>/2023/08/17/MachineLearning-3/</url>
-    <content><![CDATA[<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
-<p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
-rule)，求其解析式，即反向传播算法。</p>
-<p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
-Gradient 3. Given gradient from successive node 4. Use chain rule to
-compute the gradient(Backward)</p>
-<p>Tensor
-张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
-<p>正向的目标是求出本次的损失，反向的目标则是求出导数。蓝色为正向，红色为反向</p>
-<div data-align="center">
-<p><img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360"></p>
-</div>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">y_data = [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个Tensor变量，权重</span></span><br><span class="line">w = torch.Tensor([<span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 需要计算梯度</span></span><br><span class="line">w.requires_grad = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型，此时w是Tensor，*要计算Tensor与Tensor之间的乘法，所以有一个对x的自动类型强转</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数，构建计算图</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict (before training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br><span class="line"><span class="comment"># w.grad也是个梯度，w.grad.item才是标量</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        l = loss(x, y)  <span class="comment"># l是个张量，前馈过程，计算loss</span></span><br><span class="line">        l.backward()<span class="comment">#计算梯度</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\tgrad:&quot;</span>, x, y, w.grad.item())</span><br><span class="line">        w.data = w.data - <span class="number">0.01</span> * w.grad.data<span class="comment">#梯度用于更新权重</span></span><br><span class="line">        w.grad.data.zero_()  <span class="comment"># 梯度清零</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;process:&quot;</span>, epoch, l.item())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict(after training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br></pre></td></tr></table></figure>
-<p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
-<p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
 ]]></content>
       <categories>
         <category>机器学习</category>
