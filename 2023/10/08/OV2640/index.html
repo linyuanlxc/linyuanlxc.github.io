@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="OV2640配置的相关知识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OV2640">
+<meta property="og:url" content="https://linyuanlxc.github.io/2023/10/08/OV2640/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="OV2640配置的相关知识">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-1.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-2.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-3.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-4.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-5.png">
+<meta property="article:published_time" content="2023-10-08T14:52:00.000Z">
+<meta property="article:modified_time" content="2023-10-13T13:52:50.330Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="STM32">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2023/10/08/OV2640/OV2640-1.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2023/10/08/OV2640/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2023/10/08/OV2640/","path":"2023/10/08/OV2640/","title":"OV2640"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OV2640 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#dcmi"><span class="nav-number">1.</span> <span class="nav-text">DCMI</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#sccbserial-camera-control-bus%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.</span> <span class="nav-text">SCCB(Serial Camera Control
+Bus)协议</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E5%87%A0%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">需要注意的几点</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">昨日看花花灼灼，今日看花花欲落</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2023/10/08/OV2640/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="昨日看花花灼灼，今日看花花欲落">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OV2640 | L's Blog">
+      <meta itemprop="description" content="OV2640配置的相关知识">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OV2640
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-08 22:52:00" itemprop="dateCreated datePublished" datetime="2023-10-08T22:52:00+08:00">2023-10-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-13 21:52:50" itemprop="dateModified" datetime="2023-10-13T21:52:50+08:00">2023-10-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/STM32/" itemprop="url" rel="index"><span itemprop="name">STM32</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">OV2640配置的相关知识</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="dcmi">DCMI</h1>
+<ul>
+<li><p>VSYNC:帧信号，摄像头输出，用于标记一帧数据的开始与结束</p></li>
+<li><p>HREF:行中断信号，摄像头输出，用于标记一行数据的开始与结束</p></li>
+<li><p>D0-D7(D0-D9):数据线。</p></li>
+</ul>
+<p>dcmi我是直接用cube配置的，比较简单。</p>
+<p>用到的一些hal库dcmi函数</p>
+<ul>
+<li>__HAL_DCMI_ENABLE_IT(&amp;hdcmi,
+DCMI_IT_FRAME);//使能dcmi帧中断</li>
+<li>HAL_DCMI_Start_DMA(&amp;hdcmi, DCMI_MODE_SNAPSHOT,
+(uint32_t)JpegBuffer, pictureBufferLength);
+//以dma方式启动dcmi，我看dcmi源文件，似乎也提供了这一种启动方式，因此在配置dcmi的时候一定要配置dma</li>
+<li>HAL_DCMI_Suspend(hdcmi); // 挂起 DCMI</li>
+<li>HAL_DCMI_Stop(hdcmi); // 停止dcmi,DMA传输</li>
+</ul>
+<h1 id="sccbserial-camera-control-bus协议">SCCB(Serial Camera Control
+Bus)协议</h1>
+<p>SCCB与I2C协议类似，由两根线组成：SCL(SIO_C)(时钟线)、SDA(SIO_D)(数据线)。值得注意的是，在SCCB的手册(我看的是《OmniVision
+Technologies Seril Camera Control Bus(SCCB)
+Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应该是作为片选信号</del>，用来表明信号的开始传输与结束传输，这种方式支持一个主机与多个从机连接。如果只用两根线的话，那就只能支持一主机一从机。</p>
+<p>相同点：</p>
+<ul>
+<li>起始信号、停止信号</li>
+<li>信号有效性(SDA只能在SCL为低电平时变化)</li>
+</ul>
+<p>不同点：</p>
+<ul>
+<li>在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位</li>
+<li>SCCB传输单位：相</li>
+</ul>
+<p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
+<p>phase-1 ID
+Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write
+1-read)。Sub-address 是内存地址。</p>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-1.png" height="240"></p>
+</div>
+<p>写操作：三相写传输周期</p>
+<ul>
+<li>设备写通信地址，内存地址，所写数据</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-2.png" height="240"></p>
+</div>
+<p>读操作</p>
+<ul>
+<li>两相写传输周期:设备写通信地址，内存地址</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-3.png" height="120"></p>
+</div>
+<ul>
+<li>两相读传输周期：设备读通信地址，所读数据</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-4.png" height="120"></p>
+</div>
+<p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据。</p>
+<h1 id="需要注意的几点">需要注意的几点</h1>
+<ol type="1">
+<li><p>在通过SCCB往OV2640写数据时，尤其要注意<strong>pdown这个引脚要设置为低电平，即退出低功耗模式。</strong></p></li>
+<li><p><strong>SDA引脚在写数据的时候应该设置为开漏模式</strong>，这一点在数据手册上有说明。如果是推挽，我测试的是不成功的。接受信息的时候，理当设置为输入模式，但是我设置为开漏输出，通过read_pin()函数(即读取GPIO口高低电平的函数)也能读取数据。但是有些博客说如果设置GPIO口为输出模式，虽然<strong>也可以读取到高低电平，但只适用于推挽模式，对开漏模式并不适用</strong>。至于为什么我设置为开漏模式也能读取到高低电平，原因还需要查一查。</p></li>
+<li><p>如果想要看一看自己写的SCCB协议是否正确，可以通过读OV2640的产品ID寄存器和生产商ID寄存器，生产商ID可以在datasheet上面查到，产品ID查不到，我读出来的是0x2642，与正点原子读出来的是一样的。</p></li>
+<li><p>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。问了客服，应该是出厂版本问题。</p></li>
+<li><p>SCCB是和I2C兼容的，可以用cube配置I2C实现SCCB协议。可以参考<code>https://gitee.com/studentwei/stm32h750vbt-cubmx</code>。强烈推荐，代码十分简洁。</p></li>
+<li><p>这个点与OV2640无关，是有关于使用cube配置STM32H7的一个问题。H7的最高主频为480M，但是我一开始配置时，发现不管怎么配时钟树，虽然时钟树能显示480M，但是实际我用定时器输出PWM的频率只有400M。<strong>要将<code>RCC</code>下的<code>Product rivision</code>设置为<code>rev.V</code>才行，默认是rev.Y。务必注意！！！</strong></p></li>
+</ol>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-5.png" height="180"></p>
+</div>
+<ol start="7" type="1">
+<li>在拿到0V2640后一定要看一看模块上是否已经有了给XCLK提供时钟信号的晶振，这个信号时不可或缺的，如果没有，可以尝试用单片机发PWM当做时钟信号(这就是上面我说PWM频率为400M的原因)，XCLK信号频率一般为24M，应该可以为其他频率，具体要参看手册。这个方法我没有成功，但大概率是模块本身的问题，如果没有晶振可以试一下。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/STM32/" rel="tag"># STM32</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/09/02/FreeRTOS-2/" rel="prev" title="FreeRTOS-2">
+                  <i class="fa fa-angle-left"></i> FreeRTOS-2
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">7k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">26 分钟</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
