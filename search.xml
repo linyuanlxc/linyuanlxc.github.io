@@ -1,6 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>FreeRTOS-1</title>
+    <url>/2023/08/27/FreeRTOS-1/</url>
+    <content><![CDATA[<p>我是跟着正点原子的教程来学的，感觉讲的可以，因此很多知识点参考了正点原子</p>
+<h1 id="为何使用freertos">为何使用FreeRTOS</h1>
+<p>裸机在处理任务时，可以采用主函数while循环加中断处理函数的方法，但是这种方法实时性差，代码结构臃肿，并且当某个任务要执行delay()时，CPU只能干等，无法在这段时间去处理其他任务，不能充分利用CPU资源。</p>
+<p>FreeRTOS为每个任务划分时间片，优先级。优先级相同的任务在执行时在划分的时间片内执行。在某个任务堵塞(delay)时，该任务进入堵塞状态，CPU可以转去执行其他的任务。</p>
+<h1 id="freertos任务调度">FreeRTOS任务调度</h1>
+<h2 id="任务调度器">任务调度器</h2>
+<p>任务调度器就是通过某种调度算法决定要执行哪一个任务</p>
+<h2 id="任务调度方式">任务调度方式</h2>
+<ul>
+<li>抢占式调度
+<ul>
+<li>高优先级抢占低优先级</li>
+<li><strong>被抢占的任务会进入就绪态</strong></li>
+<li>高优先级不结束，低优先级不能执行</li>
+</ul></li>
+<li>时间片调度
+<ul>
+<li><strong>优先级相同</strong>的任务会划分时间片，</li>
+<li><strong>每个任务执行一个时间片</strong>，执行完后不断流转</li>
+<li><strong>时间片的大小取决于系统滴答定时器</strong></li>
+<li>倘若某个任务有一楼最好原因只执行0.2个时间片，那么在后面的运行中这个缺少的时间片并不会补回来，还是按照一个时间片执行</li>
+</ul></li>
+<li>协程式调度</li>
+</ul>
+<h2 id="任务状态">任务状态</h2>
+<ul>
+<li>运行态：某个任务正在被执行，那么该任务就处于运行态。在STM32中，只有一个任务处于运行态</li>
+<li>就绪态：某个任务可以被执行，但是还未被执行，那么就处于就绪态</li>
+<li>阻塞态：某任务在等待延时或者外部事件，则处于阻塞态</li>
+<li>挂起态：类似于暂停，使用函数vTaskSuspend()挂起，使用vTaskResume()解挂，进入就绪态</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/08/27/FreeRTOS-1/FreeRTOS-1-1.png" height="360"></p>
+</div>
+<p>由上图可知，<strong>仅有就绪态可以转变成运行态；任何任务想要转变为运行态，都要先转变成就绪态</strong></p>
+<h2 id="任务列表">任务列表</h2>
+<p>除运行态外，其他三种状态都有任务列表</p>
+<ul>
+<li>就绪列表</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>标志位</th>
+<th>任务列表</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>bit31</td>
+<td>pxReadyTasksLists[31]</td>
+</tr>
+<tr class="even">
+<td>bit30</td>
+<td>pxReadyTasksLists[30]</td>
+</tr>
+<tr class="odd">
+<td>·····</td>
+<td>·····················</td>
+</tr>
+<tr class="even">
+<td>bit1</td>
+<td>pxReadyTasksLists[1]</td>
+</tr>
+<tr class="odd">
+<td>bit0</td>
+<td>pxReadyTasksLists[0]</td>
+</tr>
+</tbody>
+</table>
+<p>标志位置一表示该就绪态优先级列表有任务，反之无任务。</p>
+<p>数字越大，优先级等级越高。这一点与STM32中断优先级的高低不一样。</p>
+<p>任务调度器就是在就绪列表中选择优先级最高的任务来执行，即进入运行态。</p>
+<ul>
+<li>阻塞列表：pxDelayedTaskList</li>
+<li>挂起列表：xSuspendedTaskList</li>
+</ul>
+]]></content>
+      <categories>
+        <category>STM32</category>
+      </categories>
+      <tags>
+        <tag>FreeRTOS</tag>
+        <tag>STM32</tag>
+        <tag>C语言</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>FreeRTOS-2</title>
     <url>/2023/09/02/FreeRTOS-2/</url>
     <content><![CDATA[<h1 id="任务操作相关的api函数">任务操作相关的API函数</h1>
@@ -206,96 +296,6 @@
       </tags>
   </entry>
   <entry>
-    <title>FreeRTOS-1</title>
-    <url>/2023/08/27/FreeRTOS-1/</url>
-    <content><![CDATA[<p>我是跟着正点原子的教程来学的，感觉讲的可以，因此很多知识点参考了正点原子</p>
-<h1 id="为何使用freertos">为何使用FreeRTOS</h1>
-<p>裸机在处理任务时，可以采用主函数while循环加中断处理函数的方法，但是这种方法实时性差，代码结构臃肿，并且当某个任务要执行delay()时，CPU只能干等，无法在这段时间去处理其他任务，不能充分利用CPU资源。</p>
-<p>FreeRTOS为每个任务划分时间片，优先级。优先级相同的任务在执行时在划分的时间片内执行。在某个任务堵塞(delay)时，该任务进入堵塞状态，CPU可以转去执行其他的任务。</p>
-<h1 id="freertos任务调度">FreeRTOS任务调度</h1>
-<h2 id="任务调度器">任务调度器</h2>
-<p>任务调度器就是通过某种调度算法决定要执行哪一个任务</p>
-<h2 id="任务调度方式">任务调度方式</h2>
-<ul>
-<li>抢占式调度
-<ul>
-<li>高优先级抢占低优先级</li>
-<li><strong>被抢占的任务会进入就绪态</strong></li>
-<li>高优先级不结束，低优先级不能执行</li>
-</ul></li>
-<li>时间片调度
-<ul>
-<li><strong>优先级相同</strong>的任务会划分时间片，</li>
-<li><strong>每个任务执行一个时间片</strong>，执行完后不断流转</li>
-<li><strong>时间片的大小取决于系统滴答定时器</strong></li>
-<li>倘若某个任务有一楼最好原因只执行0.2个时间片，那么在后面的运行中这个缺少的时间片并不会补回来，还是按照一个时间片执行</li>
-</ul></li>
-<li>协程式调度</li>
-</ul>
-<h2 id="任务状态">任务状态</h2>
-<ul>
-<li>运行态：某个任务正在被执行，那么该任务就处于运行态。在STM32中，只有一个任务处于运行态</li>
-<li>就绪态：某个任务可以被执行，但是还未被执行，那么就处于就绪态</li>
-<li>阻塞态：某任务在等待延时或者外部事件，则处于阻塞态</li>
-<li>挂起态：类似于暂停，使用函数vTaskSuspend()挂起，使用vTaskResume()解挂，进入就绪态</li>
-</ul>
-<div data-align="center">
-<p><img src="/2023/08/27/FreeRTOS-1/FreeRTOS-1-1.png" height="360"></p>
-</div>
-<p>由上图可知，<strong>仅有就绪态可以转变成运行态；任何任务想要转变为运行态，都要先转变成就绪态</strong></p>
-<h2 id="任务列表">任务列表</h2>
-<p>除运行态外，其他三种状态都有任务列表</p>
-<ul>
-<li>就绪列表</li>
-</ul>
-<table>
-<thead>
-<tr class="header">
-<th>标志位</th>
-<th>任务列表</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>bit31</td>
-<td>pxReadyTasksLists[31]</td>
-</tr>
-<tr class="even">
-<td>bit30</td>
-<td>pxReadyTasksLists[30]</td>
-</tr>
-<tr class="odd">
-<td>·····</td>
-<td>·····················</td>
-</tr>
-<tr class="even">
-<td>bit1</td>
-<td>pxReadyTasksLists[1]</td>
-</tr>
-<tr class="odd">
-<td>bit0</td>
-<td>pxReadyTasksLists[0]</td>
-</tr>
-</tbody>
-</table>
-<p>标志位置一表示该就绪态优先级列表有任务，反之无任务。</p>
-<p>数字越大，优先级等级越高。这一点与STM32中断优先级的高低不一样。</p>
-<p>任务调度器就是在就绪列表中选择优先级最高的任务来执行，即进入运行态。</p>
-<ul>
-<li>阻塞列表：pxDelayedTaskList</li>
-<li>挂起列表：xSuspendedTaskList</li>
-</ul>
-]]></content>
-      <categories>
-        <category>STM32</category>
-      </categories>
-      <tags>
-        <tag>FreeRTOS</tag>
-        <tag>STM32</tag>
-        <tag>C语言</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>机器学习1</title>
     <url>/2023/08/12/MachineLearning-1/</url>
     <content><![CDATA[<h1 id="一些基本概念">一些基本概念</h1>
@@ -434,6 +434,33 @@ y=x*w+b</p>
       </tags>
   </entry>
   <entry>
+    <title>机器学习3</title>
+    <url>/2023/08/17/MachineLearning-3/</url>
+    <content><![CDATA[<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
+<p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
+rule)，求其解析式，即反向传播算法。</p>
+<p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
+Gradient 3. Given gradient from successive node 4. Use chain rule to
+compute the gradient(Backward)</p>
+<p>Tensor
+张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
+<p>正向的目标是求出本次的损失，反向的目标则是求出导数。蓝色为正向，红色为反向</p>
+<div data-align="center">
+<p><img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360"></p>
+</div>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">y_data = [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个Tensor变量，权重</span></span><br><span class="line">w = torch.Tensor([<span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 需要计算梯度</span></span><br><span class="line">w.requires_grad = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型，此时w是Tensor，*要计算Tensor与Tensor之间的乘法，所以有一个对x的自动类型强转</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数，构建计算图</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict (before training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br><span class="line"><span class="comment"># w.grad也是个梯度，w.grad.item才是标量</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        l = loss(x, y)  <span class="comment"># l是个张量，前馈过程，计算loss</span></span><br><span class="line">        l.backward()<span class="comment">#计算梯度</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\tgrad:&quot;</span>, x, y, w.grad.item())</span><br><span class="line">        w.data = w.data - <span class="number">0.01</span> * w.grad.data<span class="comment">#梯度用于更新权重</span></span><br><span class="line">        w.grad.data.zero_()  <span class="comment"># 梯度清零</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;process:&quot;</span>, epoch, l.item())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict(after training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br></pre></td></tr></table></figure>
+<p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
+<p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>机器学习2</title>
     <url>/2023/08/13/MachineLearning-2/</url>
     <content><![CDATA[<h1 id="梯度下降算法">梯度下降算法</h1>
@@ -498,215 +525,6 @@ regression)</h1>
       <tags>
         <tag>机器学习</tag>
         <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>机器学习3</title>
-    <url>/2023/08/17/MachineLearning-3/</url>
-    <content><![CDATA[<h1 id="反向传播back-propagation">反向传播（Back Propagation）</h1>
-<p>权重太多，求解析式十分复杂，因此在面对复杂网络时，尝试把网络看作是一个图，根据链式法则(chain
-rule)，求其解析式，即反向传播算法。</p>
-<p>Back Propagation链式求导过程 1. Create Computational Graph 2. Local
-Gradient 3. Given gradient from successive node 4. Use chain rule to
-compute the gradient(Backward)</p>
-<p>Tensor
-张量，pytorch里的重要组成，可以是标量，也可以是向量，矩阵。它包含数据（data），导数（grad），即权重与损失函数对权重的导数。</p>
-<p>正向的目标是求出本次的损失，反向的目标则是求出导数。蓝色为正向，红色为反向</p>
-<div data-align="center">
-<p><img src="/2023/08/17/MachineLearning-3/MachineLearning-3-1.png" height="360"></p>
-</div>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据集</span></span><br><span class="line">x_data = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">y_data = [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个Tensor变量，权重</span></span><br><span class="line">w = torch.Tensor([<span class="number">1.0</span>])</span><br><span class="line"><span class="comment"># 需要计算梯度</span></span><br><span class="line">w.requires_grad = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型，此时w是Tensor，*要计算Tensor与Tensor之间的乘法，所以有一个对x的自动类型强转</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> x * w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数，构建计算图</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">x, y</span>):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    <span class="keyword">return</span> (y_pred - y) ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict (before training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br><span class="line"><span class="comment"># w.grad也是个梯度，w.grad.item才是标量</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> <span class="built_in">zip</span>(x_data, y_data):</span><br><span class="line">        l = loss(x, y)  <span class="comment"># l是个张量，前馈过程，计算loss</span></span><br><span class="line">        l.backward()<span class="comment">#计算梯度</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\tgrad:&quot;</span>, x, y, w.grad.item())</span><br><span class="line">        w.data = w.data - <span class="number">0.01</span> * w.grad.data<span class="comment">#梯度用于更新权重</span></span><br><span class="line">        w.grad.data.zero_()  <span class="comment"># 梯度清零</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;process:&quot;</span>, epoch, l.item())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;predict(after training)&quot;</span>, <span class="number">4</span>, forward(<span class="number">4</span>).item())</span><br></pre></td></tr></table></figure>
-<p>需要注意的是每一次通过.backward()计算的梯度会累积，因此在更新后，需要通过.grad.data.zero()将梯度置零</p>
-<p>权重是指w，梯度是指loss对w的导数。要先通过前向过程求出loss，求出loss后通过反向传播求出loss对w的导数,再根据随机梯度下降算法或者其他算法对权重w进行更新。</p>
-]]></content>
-      <categories>
-        <category>机器学习</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>机器学习5</title>
-    <url>/2023/08/21/MachineLearning-5/</url>
-    <content><![CDATA[<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
-regression)</h1>
-<div data-align="center">
-<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-2.png" height="360"></p>
-</div>
-<p>名字虽然是回归，但实际上是分类</p>
-<p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
-<p>可以使用Sigmoid函数(s型函数)，将线性模型的结果压缩，比如：</p>
-<p><span class="math display">\[
-f(x)=\frac{1}{1+{\rm e}^{-x}}
-\]</span></p>
-<p>那么预测结果(0~1)就为</p>
-<p><span class="math display">\[
-\hat{y} = f(w·x+b)=\frac{1}{1+{\rm e}^{-(w·x+b)}}
-\]</span></p>
-<div data-align="center">
-<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-1.png" height="360"></p>
-</div>
-<!--
-## 逻辑斯蒂回归模型
-
-<div align=center>
-<img src="MachineLearning-5-3.png" height = '360'>
-</div>
-
-最后的判别结果是通过比较P(Y=1|x)和P(Y=0|x)的大小来确定的，若Y=1大，那么Y=1，反之Y=0
-
-<p /hidden>
-## 损失函数
-<div align=center>
-<img src="MachineLearning-5-5.png" height = '360'>
-</div>
-
-<div align=center>
-<img src="MachineLearning-5-4.png" height = '360'>
-</div>
-
-### 对数似然函数
-
-似然函数可以理解成通过已知的结果去倒推出最大概率得到该结果的参数，即“模型已定，参数未知”。就比如已知一些数据，我们对这个模型使用正态分布，那么我们就可以求出与已知的数据对应最好的那条拟合曲线，求出均值μ，标准差σ。
-
-对于逻辑斯蒂回归,近似看成二项分布
-
-$$
-p(Y=Y_i|x_i,w) = 
-\begin{cases}
-[π(x_i)]^{Y_i}      & Y_i=1 \\
-[1-π(x_i)]^{1-Y_i}] & Y_i=0 \\
-\end{cases}
-$$
-
-则有
-$$
-p(Y=Y_i|x_i,w) = π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
-$$
-
-当有m个样本时
-$$
-P = \prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
-$$
-
-对其取对数
-
-$$
-\begin{aligned}
-L(w) &= \log_{e}{\prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]} \\
-&= \sum_{i=1}^m [ {Y_i} log_{e}π(x_i) + (1-Y_i)log_{e}[1-π(x_i)] ] 
-\end{aligned}
-$$
--->
-<h2 id="损失函数">损失函数</h2>
-<div data-align="center">
-<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-6.png" height="360"></p>
-</div>
-<p>损失函数不再使用MSE，采用下面的式子</p>
-<ul>
-<li>当预测结果 <span class="math inline">\(\hat{y}=1\)</span>，实际结果为<span class="math inline">\(1\)</span>时，<span class="math inline">\(loss=0\)</span></li>
-<li>当预测结果 <span class="math inline">\(\hat{y}=0\)</span>，实际结果为<span class="math inline">\(1\)</span>时，<span class="math inline">\(loss=+\infty\)</span></li>
-<li>当预测结果 <span class="math inline">\(\hat{y}=1\)</span>，实际结果为<span class="math inline">\(0\)</span>时，<span class="math inline">\(loss=-\infty\)</span></li>
-<li>当预测结果 <span class="math inline">\(\hat{y}=0\)</span>，实际结果为<span class="math inline">\(0\)</span>时，<span class="math inline">\(loss=0\)</span></li>
-</ul>
-<h2 id="代码">代码</h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>], [<span class="number">2.0</span>], [<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">0</span>], [<span class="number">0</span>], [<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LogisticRegreesionModel</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(LogisticRegreesionModel, self).__init__()</span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>, <span class="number">1</span>)  <span class="comment"># 构造对象，包含权重与偏置</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        y_pred = F.sigmoid(self.linear(x))</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = LogisticRegreesionModel()</span><br><span class="line"></span><br><span class="line">criterion = torch.nn.BCELoss(size_average=<span class="literal">False</span>)  <span class="comment"># false为不求平均值，即不除以N</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)  <span class="comment"># 优化器 lr,学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred, y_data)</span><br><span class="line">    <span class="built_in">print</span>(epoch, loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()  <span class="comment"># 进行更新</span></span><br><span class="line"></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y_pred = &quot;</span>, y_test.data)</span><br></pre></td></tr></table></figure>
-<p>如果用matplotlib绘图，也可以看见输出结果<span class="math inline">\(\hat{y}\)</span>为S型曲线</p>
-]]></content>
-      <categories>
-        <category>机器学习</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>OV2640</title>
-    <url>/2023/10/08/OV2640/</url>
-    <content><![CDATA[<h1 id="dcmi">DCMI</h1>
-<ul>
-<li><p>VSYNC:帧信号，摄像头输出，用于标记一帧数据的开始与结束</p></li>
-<li><p>HREF:行中断信号，摄像头输出，用于标记一行数据的开始与结束</p></li>
-<li><p>D0-D7(D0-D9):数据线。</p></li>
-</ul>
-<p>dcmi我是直接用cube配置的，比较简单。</p>
-<p>用到的一些hal库dcmi函数</p>
-<ul>
-<li>__HAL_DCMI_ENABLE_IT(&amp;hdcmi,
-DCMI_IT_FRAME);//使能dcmi帧中断</li>
-<li>HAL_DCMI_Start_DMA(&amp;hdcmi, DCMI_MODE_SNAPSHOT,
-(uint32_t)JpegBuffer, pictureBufferLength);
-//以dma方式启动dcmi，我看dcmi源文件，似乎也提供了这一种启动方式，因此在配置dcmi的时候一定要配置dma</li>
-<li>HAL_DCMI_Suspend(hdcmi); // 挂起 DCMI</li>
-<li>HAL_DCMI_Stop(hdcmi); // 停止dcmi,DMA传输</li>
-</ul>
-<h1 id="sccbserial-camera-control-bus协议">SCCB(Serial Camera Control
-Bus)协议</h1>
-<p>SCCB与I2C协议类似，由两根线组成：SCL(SIO_C)(时钟线)、SDA(SIO_D)(数据线)。值得注意的是，在SCCB的手册(我看的是《OmniVision
-Technologies Seril Camera Control Bus(SCCB)
-Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应该是作为片选信号</del>，用来表明信号的开始传输与结束传输，这种方式支持一个主机与多个从机连接。如果只用两根线的话，那就只能支持一主机一从机。</p>
-<p>相同点：</p>
-<ul>
-<li>起始信号、停止信号</li>
-<li>信号有效性(SDA只能在SCL为低电平时变化)</li>
-</ul>
-<p>不同点：</p>
-<ul>
-<li>在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位</li>
-<li>SCCB传输单位：相</li>
-</ul>
-<p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
-<p>phase-1 ID
-Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write
-1-read)。Sub-address 是内存地址。</p>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-1.png" height="240"></p>
-</div>
-<p>写操作：三相写传输周期</p>
-<ul>
-<li>设备写通信地址，内存地址，所写数据</li>
-</ul>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-2.png" height="240"></p>
-</div>
-<p>读操作</p>
-<ul>
-<li>两相写传输周期:设备写通信地址，内存地址</li>
-</ul>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-3.png" height="120"></p>
-</div>
-<ul>
-<li>两相读传输周期：设备读通信地址，所读数据</li>
-</ul>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-4.png" height="120"></p>
-</div>
-<p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据。</p>
-<h1 id="需要注意的几点">需要注意的几点</h1>
-<ol type="1">
-<li><p>在通过SCCB往OV2640写数据时，尤其要注意<strong>pdown这个引脚要设置为低电平，即退出低功耗模式。</strong></p></li>
-<li><p><strong>SDA引脚在写数据的时候应该设置为开漏模式</strong>，这一点在数据手册上有说明。如果是推挽，我测试的是不成功的。接受信息的时候，理当设置为输入模式，但是我设置为开漏输出，通过read_pin()函数(即读取GPIO口高低电平的函数)也能读取数据。但是有些博客说如果设置GPIO口为输出模式，虽然<strong>也可以读取到高低电平，但只适用于推挽模式，对开漏模式并不适用</strong>。至于为什么我设置为开漏模式也能读取到高低电平，原因还需要查一查。</p></li>
-<li><p>如果想要看一看自己写的SCCB协议是否正确，可以通过读OV2640的产品ID寄存器和生产商ID寄存器，生产商ID可以在datasheet上面查到，产品ID查不到，我读出来的是0x2642，与正点原子读出来的是一样的。</p></li>
-<li><p>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。问了客服，应该是出厂版本问题。</p></li>
-<li><p>SCCB是和I2C兼容的，可以用cube配置I2C实现SCCB协议。可以参考<code>https://gitee.com/studentwei/stm32h750vbt-cubmx</code>。强烈推荐，代码十分简洁。</p></li>
-<li><p>这个点与OV2640无关，是有关于使用cube配置STM32H7的一个问题。H7的最高主频为480M，但是我一开始配置时，发现不管怎么配时钟树，虽然时钟树能显示480M，但是实际我用定时器输出PWM的频率只有400M。<strong>要将<code>RCC</code>下的<code>Product rivision</code>设置为<code>rev.V</code>才行，默认是rev.Y。务必注意！！！</strong></p></li>
-</ol>
-<div data-align="center">
-<p><img src="/2023/10/08/OV2640/OV2640-5.png" height="180"></p>
-</div>
-<ol start="7" type="1">
-<li>在拿到0V2640后一定要看一看模块上是否已经有了给XCLK提供时钟信号的晶振，这个信号时不可或缺的，如果没有，可以尝试用单片机发PWM当做时钟信号(这就是上面我说PWM频率为400M的原因)，XCLK信号频率一般为24M，应该可以为其他频率，具体要参看手册。这个方法我没有成功，但大概率是模块本身的问题，如果没有晶振可以试一下。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>STM32</category>
-      </categories>
-      <tags>
-        <tag>STM32</tag>
       </tags>
   </entry>
   <entry>
@@ -880,6 +698,188 @@ z^{(N)}=\left[
 </div>
 <p>X1~X8为糖尿病病人的一系列指标，Y表示一年后病情是否加重。</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xy = np.loadtxt(</span><br><span class="line">    <span class="string">&quot;D:\BaiduNetdiskDownload\PyTorch深度学习实践\diabetes.csv.gz&quot;</span>,</span><br><span class="line">    delimiter=<span class="string">&quot;,&quot;</span>,</span><br><span class="line">    dtype=np.float32,</span><br><span class="line">)</span><br><span class="line">x_data = torch.from_numpy(xy[:, :-<span class="number">1</span>])</span><br><span class="line">y_data = torch.from_numpy(xy[:, [-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Model</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(Model, self).__init__()</span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>, <span class="number">6</span>)  <span class="comment"># 8维到6维</span></span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>, <span class="number">4</span>)  <span class="comment"># 6维到4维</span></span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>, <span class="number">1</span>)  <span class="comment"># 4维到1维</span></span><br><span class="line">        self.activate = torch.nn.Sigmoid()</span><br><span class="line">        <span class="comment"># self.activate=torch.nn.ReLU()#采用不同的激活函数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = self.activate(self.linear1(x))</span><br><span class="line">        x = self.activate(self.linear2(x))</span><br><span class="line">        x = self.activate(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = Model()</span><br><span class="line"></span><br><span class="line">criterion = torch.nn.BCELoss(size_average=<span class="literal">True</span>)  <span class="comment"># false为不求平均值，即不除以N</span></span><br><span class="line"><span class="comment"># 优化器</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)  <span class="comment"># lr,学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    <span class="comment"># 前馈</span></span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred, y_data)</span><br><span class="line">    <span class="built_in">print</span>(epoch, loss.item())</span><br><span class="line">    <span class="comment"># 反馈</span></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    <span class="comment"># 更新</span></span><br><span class="line">    optimizer.step()  <span class="comment"># 进行更新</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">x_test = torch.Tensor([[-<span class="number">0.29</span>, <span class="number">0.49</span>, <span class="number">0.18</span>, -<span class="number">0.29</span>, <span class="number">0.00</span>, <span class="number">0.00</span>, -<span class="number">0.53</span>, -<span class="number">0.03</span>]])</span><br><span class="line"></span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y_pred = &quot;</span>, y_test.data)</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>OV2640</title>
+    <url>/2023/10/08/OV2640/</url>
+    <content><![CDATA[<h1 id="dcmi">DCMI</h1>
+<ul>
+<li><p>VSYNC:帧信号，摄像头输出，用于标记一帧数据的开始与结束</p></li>
+<li><p>HREF:行中断信号，摄像头输出，用于标记一行数据的开始与结束</p></li>
+<li><p>D0-D7(D0-D9):数据线。</p></li>
+</ul>
+<p>dcmi我是直接用cube配置的，比较简单。</p>
+<p>用到的一些hal库dcmi函数</p>
+<ul>
+<li>__HAL_DCMI_ENABLE_IT(&amp;hdcmi,
+DCMI_IT_FRAME);//使能dcmi帧中断</li>
+<li>HAL_DCMI_Start_DMA(&amp;hdcmi, DCMI_MODE_SNAPSHOT,
+(uint32_t)JpegBuffer, pictureBufferLength);
+//以dma方式启动dcmi，我看dcmi源文件，似乎也提供了这一种启动方式，因此在配置dcmi的时候一定要配置dma</li>
+<li>HAL_DCMI_Suspend(hdcmi); // 挂起 DCMI</li>
+<li>HAL_DCMI_Stop(hdcmi); // 停止dcmi,DMA传输</li>
+</ul>
+<h1 id="sccbserial-camera-control-bus协议">SCCB(Serial Camera Control
+Bus)协议</h1>
+<p>SCCB与I2C协议类似，由两根线组成：SCL(SIO_C)(时钟线)、SDA(SIO_D)(数据线)。值得注意的是，在SCCB的手册(我看的是《OmniVision
+Technologies Seril Camera Control Bus(SCCB)
+Specification》)上，有说SCCB是有三根线的，另外一根SCCB_E<del>应该是作为片选信号</del>，用来表明信号的开始传输与结束传输，这种方式支持一个主机与多个从机连接。如果只用两根线的话，那就只能支持一主机一从机。</p>
+<p>相同点：</p>
+<ul>
+<li>起始信号、停止信号</li>
+<li>信号有效性(SDA只能在SCL为低电平时变化)</li>
+</ul>
+<p>不同点：</p>
+<ul>
+<li>在第九个周期，I2C的SDA内容为应答信号；SCCB的SDA在写周期为Don't-Care位，在读周期为NA位</li>
+<li>SCCB传输单位：相</li>
+</ul>
+<p>在SCCB中，数据传输的最基本单位叫做<code>相(phase)</code>。一个相包含9个位，前八个位是八位连续数据，第九个位是<code>Don't Care</code>或者<code>NA</code>，这个到底是哪一个取决于是读还是写。</p>
+<p>phase-1 ID
+Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-write
+1-read)。Sub-address 是内存地址。</p>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-1.png" height="240"></p>
+</div>
+<p>写操作：三相写传输周期</p>
+<ul>
+<li>设备写通信地址，内存地址，所写数据</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-2.png" height="240"></p>
+</div>
+<p>读操作</p>
+<ul>
+<li>两相写传输周期:设备写通信地址，内存地址</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-3.png" height="120"></p>
+</div>
+<ul>
+<li>两相读传输周期：设备读通信地址，所读数据</li>
+</ul>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-4.png" height="120"></p>
+</div>
+<p>需要注意的是SCCB不支持连续读写，只能写一个数据读一个数据。</p>
+<h1 id="需要注意的几点">需要注意的几点</h1>
+<ol type="1">
+<li><p>在通过SCCB往OV2640写数据时，尤其要注意<strong>pdown这个引脚要设置为低电平，即退出低功耗模式。</strong></p></li>
+<li><p><strong>SDA引脚在写数据的时候应该设置为开漏模式</strong>，这一点在数据手册上有说明。如果是推挽，我测试的是不成功的。接受信息的时候，理当设置为输入模式，但是我设置为开漏输出，通过read_pin()函数(即读取GPIO口高低电平的函数)也能读取数据。但是有些博客说如果设置GPIO口为输出模式，虽然<strong>也可以读取到高低电平，但只适用于推挽模式，对开漏模式并不适用</strong>。至于为什么我设置为开漏模式也能读取到高低电平，原因还需要查一查。</p></li>
+<li><p>如果想要看一看自己写的SCCB协议是否正确，可以通过读OV2640的产品ID寄存器和生产商ID寄存器，生产商ID可以在datasheet上面查到，产品ID查不到，我读出来的是0x2642，与正点原子读出来的是一样的。</p></li>
+<li><p>OV2640的地址在手册上面写的是0x60或0x61，但实际用这两个地址来写读数据是错误的，应该用0x30。这一点是看正点原子的程序才知道的，原因等我问问技术客服。问了客服，应该是出厂版本问题。</p></li>
+<li><p>SCCB是和I2C兼容的，可以用cube配置I2C实现SCCB协议。可以参考<code>https://gitee.com/studentwei/stm32h750vbt-cubmx</code>。强烈推荐，代码十分简洁。</p></li>
+<li><p>这个点与OV2640无关，是有关于使用cube配置STM32H7的一个问题。H7的最高主频为480M，但是我一开始配置时，发现不管怎么配时钟树，虽然时钟树能显示480M，但是实际我用定时器输出PWM的频率只有400M。<strong>要将<code>RCC</code>下的<code>Product rivision</code>设置为<code>rev.V</code>才行，默认是rev.Y。务必注意！！！</strong></p></li>
+</ol>
+<div data-align="center">
+<p><img src="/2023/10/08/OV2640/OV2640-5.png" height="180"></p>
+</div>
+<ol start="7" type="1">
+<li>在拿到0V2640后一定要看一看模块上是否已经有了给XCLK提供时钟信号的晶振，这个信号时不可或缺的，如果没有，可以尝试用单片机发PWM当做时钟信号(这就是上面我说PWM频率为400M的原因)，XCLK信号频率一般为24M，应该可以为其他频率，具体要参看手册。这个方法我没有成功，但大概率是模块本身的问题，如果没有晶振可以试一下。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>STM32</category>
+      </categories>
+      <tags>
+        <tag>STM32</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>机器学习5</title>
+    <url>/2023/08/21/MachineLearning-5/</url>
+    <content><![CDATA[<h1 id="逻辑斯蒂回归logistic-regression">逻辑斯蒂回归（logistic
+regression)</h1>
+<div data-align="center">
+<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-2.png" height="360"></p>
+</div>
+<p>名字虽然是回归，但实际上是分类</p>
+<p>回归问题的预测结果范围是实数，而分类问题的预测结果为0~1，因此需要映射</p>
+<p>可以使用Sigmoid函数(s型函数)，将线性模型的结果压缩，比如：</p>
+<p><span class="math display">\[
+f(x)=\frac{1}{1+{\rm e}^{-x}}
+\]</span></p>
+<p>那么预测结果(0~1)就为</p>
+<p><span class="math display">\[
+\hat{y} = f(w·x+b)=\frac{1}{1+{\rm e}^{-(w·x+b)}}
+\]</span></p>
+<div data-align="center">
+<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-1.png" height="360"></p>
+</div>
+<!--
+## 逻辑斯蒂回归模型
+
+<div align=center>
+<img src="MachineLearning-5-3.png" height = '360'>
+</div>
+
+最后的判别结果是通过比较P(Y=1|x)和P(Y=0|x)的大小来确定的，若Y=1大，那么Y=1，反之Y=0
+
+<p /hidden>
+## 损失函数
+<div align=center>
+<img src="MachineLearning-5-5.png" height = '360'>
+</div>
+
+<div align=center>
+<img src="MachineLearning-5-4.png" height = '360'>
+</div>
+
+### 对数似然函数
+
+似然函数可以理解成通过已知的结果去倒推出最大概率得到该结果的参数，即“模型已定，参数未知”。就比如已知一些数据，我们对这个模型使用正态分布，那么我们就可以求出与已知的数据对应最好的那条拟合曲线，求出均值μ，标准差σ。
+
+对于逻辑斯蒂回归,近似看成二项分布
+
+$$
+p(Y=Y_i|x_i,w) = 
+\begin{cases}
+[π(x_i)]^{Y_i}      & Y_i=1 \\
+[1-π(x_i)]^{1-Y_i}] & Y_i=0 \\
+\end{cases}
+$$
+
+则有
+$$
+p(Y=Y_i|x_i,w) = π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
+$$
+
+当有m个样本时
+$$
+P = \prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]
+$$
+
+对其取对数
+
+$$
+\begin{aligned}
+L(w) &= \log_{e}{\prod_{i=1}^m [π(x_i)^{Y_i}·[1-π(x_i)]^{1-Y_i}]} \\
+&= \sum_{i=1}^m [ {Y_i} log_{e}π(x_i) + (1-Y_i)log_{e}[1-π(x_i)] ] 
+\end{aligned}
+$$
+-->
+<h2 id="损失函数">损失函数</h2>
+<div data-align="center">
+<p><img src="/2023/08/21/MachineLearning-5/MachineLearning-5-6.png" height="360"></p>
+</div>
+<p>损失函数不再使用MSE，采用下面的式子</p>
+<ul>
+<li>当预测结果 <span class="math inline">\(\hat{y}=1\)</span>，实际结果为<span class="math inline">\(1\)</span>时，<span class="math inline">\(loss=0\)</span></li>
+<li>当预测结果 <span class="math inline">\(\hat{y}=0\)</span>，实际结果为<span class="math inline">\(1\)</span>时，<span class="math inline">\(loss=+\infty\)</span></li>
+<li>当预测结果 <span class="math inline">\(\hat{y}=1\)</span>，实际结果为<span class="math inline">\(0\)</span>时，<span class="math inline">\(loss=-\infty\)</span></li>
+<li>当预测结果 <span class="math inline">\(\hat{y}=0\)</span>，实际结果为<span class="math inline">\(0\)</span>时，<span class="math inline">\(loss=0\)</span></li>
+</ul>
+<h2 id="代码">代码</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>], [<span class="number">2.0</span>], [<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">0</span>], [<span class="number">0</span>], [<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LogisticRegreesionModel</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(LogisticRegreesionModel, self).__init__()</span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>, <span class="number">1</span>)  <span class="comment"># 构造对象，包含权重与偏置</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        y_pred = F.sigmoid(self.linear(x))</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = LogisticRegreesionModel()</span><br><span class="line"></span><br><span class="line">criterion = torch.nn.BCELoss(size_average=<span class="literal">False</span>)  <span class="comment"># false为不求平均值，即不除以N</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(), lr=<span class="number">0.01</span>)  <span class="comment"># 优化器 lr,学习率</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred, y_data)</span><br><span class="line">    <span class="built_in">print</span>(epoch, loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    loss.backward()</span><br><span class="line">    optimizer.step()  <span class="comment"># 进行更新</span></span><br><span class="line"></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y_pred = &quot;</span>, y_test.data)</span><br></pre></td></tr></table></figure>
+<p>如果用matplotlib绘图，也可以看见输出结果<span class="math inline">\(\hat{y}\)</span>为S型曲线</p>
 ]]></content>
       <categories>
         <category>机器学习</category>
