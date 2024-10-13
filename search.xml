@@ -822,9 +822,16 @@ z^{(N)}=\left[
 <p>可以改下程序验证一下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="type">char</span> *a[]=&#123;<span class="string">&quot;one&quot;</span>,<span class="string">&quot;two&quot;</span>,<span class="string">&quot;three&quot;</span>&#125;;  </span><br><span class="line">    <span class="type">char</span> **p1=a;  </span><br><span class="line">    <span class="type">int</span> i;  </span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;a[i] %s\n&quot;</span>,a[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;*p1[i] %c\n&quot;</span>,*p1[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;*(p1+i) %s\n&quot;</span>,*(p1+i));</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
 <p>那么打印的应该是这三个字符串的首个字符<code>o</code>，<code>t</code>，<code>t</code>。</p>
-<p>输出 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a[i] one</span><br><span class="line">*p1[i] o</span><br><span class="line">*(p1+i) one</span><br><span class="line">a[i] two</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) two</span><br><span class="line">a[i] three</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) three</span><br></pre></td></tr></table></figure> 确实如此。 # 指针的大小</p>
+<p>输出 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a[i] one</span><br><span class="line">*p1[i] o</span><br><span class="line">*(p1+i) one</span><br><span class="line">a[i] two</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) two</span><br><span class="line">a[i] three</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) three</span><br></pre></td></tr></table></figure> 确实如此。</p>
+<h1 id="指针的大小">指针的大小</h1>
 <p>指针存放的内容是地址，不同的系统的地址范围不同，与位数有关。32位系统下，指针大小为4字节，即32位，64位系统下，指针大小为8字节。</p>
 ]]></content>
+      <categories>
+        <category>C语言</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+      </tags>
   </entry>
   <entry>
     <title>OV2640</title>
