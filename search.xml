@@ -1006,5 +1006,11 @@ Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-
 </table>
 <p>刚好，<code>str4</code>一直打印，直到遇见<code>str3</code>的<code>\0</code>才停止，所以才是上面的结果。</p>
 ]]></content>
+      <categories>
+        <category>C语言</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+      </tags>
   </entry>
 </search>
