@@ -919,4 +919,92 @@ Address是指从机的地址，bit7-bit1是从机的地址，bit0是读写位(0-
         <tag>STM32</tag>
       </tags>
   </entry>
+  <entry>
+    <title>C语言里的一些小知识(随手记)</title>
+    <url>/2024/10/15/C%E8%AF%AD%E8%A8%80%E9%87%8C%E7%9A%84%E4%B8%80%E4%BA%9B%E5%B0%8F%E7%9F%A5%E8%AF%86-%E9%9A%8F%E6%89%8B%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="宏相关">宏相关</h1>
+<h2 id="include与define"><code>#include</code>与<code>#define</code></h2>
+<p>宏其实就是粘贴代码。宏定义的好处是可以减少代码重复，提高代码的可读性和可维护性。</p>
+<p>比如：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NAMES(X) X(TOM) X(JERRY) X(MIKE)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PRINT(X) puts(#X<span class="string">&quot; hello!&quot;</span>);</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    NAMES(PRINT);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码定义了两个宏：<code>NAMES</code> 和
+<code>PRINT</code>。<code>NAMES</code> 接受一个参数
+<code>X</code>，然后将
+<code>X(TOM)</code>、<code>X(JERRY)</code>、<code>X(MIKE)</code>
+展开为三个 <code>printf</code> 语句。<code>PRINT</code> 接受一个参数
+<code>X</code>，然后将 <code>#X</code> 展开为字符串
+<code>"X = %d\n"</code>，并用 <code>X</code> 作为参数。</p>
+<p>除此之外，<code>#include</code>是用来包含头文件的宏，<code>#include &lt;stdio.h&gt;</code>的作用就是把头文件<code>stdio.h</code>里的内容全部复制粘贴到这个源文件中。</p>
+<p>宏定义的展开是在预编译的阶段进行的，可以通过<code>gcc -E file.c</code>来查看预编译后的代码。上面代码预编译后的部分结果：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">char</span> *<span class="title function_">ctermid</span> <span class="params">(<span class="type">char</span> *__s)</span> __<span class="title function_">attribute__</span> <span class="params">((__nothrow__ , __leaf__))</span></span><br><span class="line">  __<span class="title function_">attribute__</span> <span class="params">((__access__ (__write_only__, <span class="number">1</span>)))</span>;</span><br><span class="line"># <span class="number">867</span> <span class="string">&quot;/usr/include/stdio.h&quot;</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">flockfile</span> <span class="params">(FILE *__stream)</span> __<span class="title function_">attribute__</span> <span class="params">((__nothrow__ , __leaf__))</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">ftrylockfile</span> <span class="params">(FILE *__stream)</span> __<span class="title function_">attribute__</span> <span class="params">((__nothrow__ , __leaf__))</span> ;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">funlockfile</span> <span class="params">(FILE *__stream)</span> __<span class="title function_">attribute__</span> <span class="params">((__nothrow__ , __leaf__))</span>;</span><br><span class="line"># <span class="number">885</span> <span class="string">&quot;/usr/include/stdio.h&quot;</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> __uflow (FILE *);</span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> __overflow (FILE *, <span class="type">int</span>);</span><br><span class="line"># <span class="number">902</span> <span class="string">&quot;/usr/include/stdio.h&quot;</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line"># <span class="number">10</span> <span class="string">&quot;new6.c&quot;</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"># <span class="number">14</span> <span class="string">&quot;new6.c&quot;</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;TOM&quot;</span><span class="string">&quot; hello!&quot;</span>); <span class="built_in">puts</span>(<span class="string">&quot;JERRY&quot;</span><span class="string">&quot; hello!&quot;</span>); <span class="built_in">puts</span>(<span class="string">&quot;MIKE&quot;</span><span class="string">&quot; hello!&quot;</span>);;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>前面那一部分是<code>stdio.h</code>中的内容，在<code>main</code>主函数中可以看到，相关的宏都已经被展开了。</p>
+<h2 id="include-header.h和include-header.h"><code>include &lt;header.h&gt;</code>和<code>#include "header.h"</code></h2>
+<p><code>#include &lt;header.h&gt;</code>是系统头文件，位于系统目录下，一般是由操作系统提供的。</p>
+<p><code>#include "header.h"</code>是用户头文件，位于当前目录下，一般是由程序员自己编写的。</p>
+<p>可以通过<code>gcc --verbose src.c</code>来查看头文件搜索路径。以上面的代码为例，<code>gcc --verbose new6.c</code>的关于头文件的搜索路径的输出如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;...&quot;</span> search starts here:</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;...&gt;</span> search starts here:</span></span><br><span class="line"> /usr/lib/gcc/x86_64-linux-gnu/<span class="number">11</span>/include</span><br><span class="line"> /usr/local/include</span><br><span class="line"> /usr/include/x86_64-linux-gnu</span><br><span class="line"> /usr/include</span><br><span class="line">End of search <span class="built_in">list</span>.</span><br></pre></td></tr></table></figure>
+<p>可以看到，系统头文件搜索路径在 <code>/usr/include</code>
+目录下，用户头文件搜索路径在当前目录下。</p>
+<h2 id="下划线">下划线</h2>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FORALL_REGS(_)  _(X) _(Y)</span></span><br></pre></td></tr></table></figure>
+<p>上面的宏定义了一个宏 <code>FORALL_REGS</code>，它接受一个参数
+<code>_</code>，然后将 <code>X</code> 和 <code>Y</code>
+作为参数展开。举个例子：<code>FORALL_REGS(PRINT)</code>, 展开为
+<code>PRINT(X) PRINT(Y)</code>。这个其实就是将之前的字母换成了下划线。</p>
+<h2 id="运算符">##运算符</h2>
+<p>在宏定义中，<code>##</code>
+是一个预处理器运算符，称为“标记拼接运算符”。它用于将两个标记（tokens）连接成一个单一的标记。</p>
+<p>如：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DEFIEN(X)       static int X, X##1;</span></span><br></pre></td></tr></table></figure>
+<p>当你使用 <code>DEFIEN(foo)</code>
+这个宏时，预处理器会将其展开为：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> foo, foo1;</span><br></pre></td></tr></table></figure>
+<p>这里，<code>X</code> 被替换为 <code>foo</code>，而 <code>X##1</code>
+会将 <code>X</code> 和 <code>1</code> 拼接成
+<code>foo1</code>。这样可以动态生成变量名，非常有用。</p>
+<h1 id="输入输出">输入输出</h1>
+<h2 id="打印字符串">打印字符串</h2>
+<p>用<code>printf("%s", str)</code>打印字符串时,str是这个字符串首个字符的地址,而不是字符串本身,当打印到结束符<code>\0</code>停止打印。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> str1[] = <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">    <span class="type">char</span> str2[] = &#123;<span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;o&#x27;</span>,<span class="string">&#x27;\0&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;d&#x27;</span>, <span class="string">&#x27;\0&#x27;</span>&#125;;</span><br><span class="line">    <span class="type">char</span> str3[] = &#123;<span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;d&#x27;</span>, <span class="string">&#x27;\0&#x27;</span>&#125;;</span><br><span class="line">    <span class="type">char</span> str4[] = &#123;<span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;d&#x27;</span>&#125;;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;str1:   %s\n&quot;</span>, str1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;str2:   %s\n&quot;</span>, str2);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;str3:   %s\n&quot;</span>, str3);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;str4:   %s\n&quot;</span>, str4);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;&amp;str1[0]: %s\n&quot;</span>, &amp;str1[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;&amp;str2[0]: %s\n&quot;</span>, &amp;str2[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;&amp;str3[0]: %s\n&quot;</span>, &amp;str3[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;&amp;str4[0]: %s\n&quot;</span>, &amp;str4[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p str1:   %p\n&quot;</span>, str1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p str2:   %p\n&quot;</span>, str2);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p str3:   %p\n&quot;</span>, str3);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p str4:   %p\n&quot;</span>, str4);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">str1:   hello world</span><br><span class="line">str2:   hello</span><br><span class="line">str3:   helloworld</span><br><span class="line">str4:   helloworldhelloworld</span><br><span class="line">&amp;str1[0]: hello world</span><br><span class="line">&amp;str2[0]: hello</span><br><span class="line">&amp;str3[0]: helloworld</span><br><span class="line">&amp;str4[0]: helloworldhelloworld</span><br><span class="line">p str1:   0x7ffdf492f950</span><br><span class="line">p str2:   0x7ffdf492f95c</span><br><span class="line">p str3:   0x7ffdf492f945</span><br><span class="line">p str4:   0x7ffdf492f93b</span><br></pre></td></tr></table></figure>
+<p>像<code>char str1[] = "hello world";</code>这种定义方式，编译器会自动在末尾添加结束符。如果像<code>str4</code>那样定义，结尾没有<code>\0</code>，那么会一直打印直到<code>\0</code>。</p>
+<p>我这个虚拟机是小端存储，那么在内存中，这些字符串应该是这样的：</p>
+<table>
+<thead>
+<tr class="header">
+<th>address</th>
+<th>memory</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>f93b</td>
+<td>h</td>
+</tr>
+<tr class="even">
+<td>···</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>f944</td>
+<td>d</td>
+</tr>
+<tr class="even">
+<td>f945</td>
+<td>h</td>
+</tr>
+<tr class="odd">
+<td>···</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>f94f</td>
+<td>\0</td>
+</tr>
+</tbody>
+</table>
+<p>刚好，<code>str4</code>一直打印，直到遇见<code>str3</code>的<code>\0</code>才停止，所以才是上面的结果。</p>
+]]></content>
+  </entry>
 </search>
