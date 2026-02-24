@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="指针的一些知识点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="指针">
+<meta property="og:url" content="https://linyuanlxc.github.io/2024/10/13/%E6%8C%87%E9%92%88/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="指针的一些知识点">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-10-13T11:37:18.000Z">
+<meta property="article:modified_time" content="2024-10-13T12:03:00.501Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="C语言">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2024/10/13/%E6%8C%87%E9%92%88/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2024/10/13/%E6%8C%87%E9%92%88/","path":"2024/10/13/指针/","title":"指针"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>指针 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">1.</span> <span class="nav-text">数组</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%90%8D"><span class="nav-number">1.1.</span> <span class="nav-text">数组名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E6%95%B0%E7%BB%84"><span class="nav-number">1.2.</span> <span class="nav-text">指针数组</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.</span> <span class="nav-text">指针的大小</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2024/10/13/%E6%8C%87%E9%92%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="指针 | L's Blog">
+      <meta itemprop="description" content="指针的一些知识点">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          指针
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-10-13 19:37:18 / 修改时间：20:03:00" itemprop="dateCreated datePublished" datetime="2024-10-13T19:37:18+08:00">2024-10-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C%E8%AF%AD%E8%A8%80/" itemprop="url" rel="index"><span itemprop="name">C语言</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>713</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">指针的一些知识点</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="数组">数组</h1>
+<h2 id="数组名">数组名</h2>
+<p>源码 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> a[]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">    <span class="type">int</span> *p1=&amp;a[<span class="number">0</span>];</span><br><span class="line">    <span class="type">int</span> *p2=&amp;a;</span><br><span class="line">    <span class="type">int</span> *p3=&amp;a[<span class="number">1</span>];</span><br><span class="line">    <span class="type">int</span> *p4=a;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p1=&amp;a[0],%p\n&quot;</span>,p1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p2=&amp;a,%p\n&quot;</span>,p2);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p3=&amp;a[1],%p\n&quot;</span>,p3);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;p4=a,%p\n&quot;</span>,p4);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> 输出 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p1=&amp;a[0],0x7fffd4c3fb90</span><br><span class="line">p2=&amp;a,0x7fffd4c3fb90</span><br><span class="line">p3=&amp;a[1],0x7fffd4c3fb94</span><br><span class="line">p4=a,0x7fffd4c3fb90</span><br></pre></td></tr></table></figure> 但是在编译时会出现警告：
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">new.c: In function ‘main’:</span><br><span class="line">new.c:15:13: warning: initialization of ‘int *’ from incompatible pointer type ‘int (*)[5]’ [-Wincompatible-pointer-types]</span><br><span class="line">   15 |     int *p2=&amp;a;</span><br><span class="line">      |             ^</span><br></pre></td></tr></table></figure>
+错误是类型不匹配。查了一下，是因为a是一个指针，类型是<code>int *</code>，而<code>&amp;a</code>是一个数组的地址，类型是<code>int (*)[5]</code>，不能直接赋值给<code>int *</code>指针，即使两者的内容是一样的。</p>
+<p>由上可见：<code>&amp;a[0]</code>，<code>a</code>都是指向数组首地址的指针，<code>&amp;a</code>也是指向数组首地址的指针，但是类型是<code>int (*)[5]</code>；<code>a[1]</code>与*(a+1)是一样的。</p>
+<h2 id="指针数组">指针数组</h2>
+<p>源码 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *a[]=&#123;<span class="string">&quot;one&quot;</span>,<span class="string">&quot;two&quot;</span>,<span class="string">&quot;three&quot;</span>&#125;;</span><br><span class="line">    <span class="type">char</span> *p1=a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> 编译后会出现警告： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">new2.c:6:14: warning: initialization of ‘char *’ from incompatible pointer type ‘char **’ [-Wincompatible-pointer-types]</span><br><span class="line">    6 |     char *p1=a;</span><br><span class="line">      |              ^</span><br></pre></td></tr></table></figure>
+错误·是类型不匹配。原因是<code>a</code>是一个指针，指向一个指针数组，这个指针数组里的内容也是指针，所以<code>a</code>是一个指向指针的指针，即二级指针，所以类型是<code>char **</code>，不能直接赋值给<code>char *</code>指针p1，将<code>char *p1=a</code>改为<code>char **p1=a</code>即可。</p>
+<p>打印这个指针数组指向的字符串 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="type">char</span> *a[]=&#123;<span class="string">&quot;one&quot;</span>,<span class="string">&quot;two&quot;</span>,<span class="string">&quot;three&quot;</span>&#125;;  </span><br><span class="line">    <span class="type">char</span> **p1=a;  </span><br><span class="line">    <span class="type">int</span> i;  </span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,a[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,*p1[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,*(p1+i));</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure></p>
+<p>编译后出现警告： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">new2.c:11:18: warning: format ‘%s’ expects argument of type ‘char *’, but argument 2 has type ‘int’ [-Wformat=]</span><br><span class="line">   11 |         printf(&quot;%s\n&quot;,*p1[i]);</span><br><span class="line">      |                 ~^    ~~~~~~~~</span><br><span class="line">      |                  |    |</span><br><span class="line">      |                  |    int</span><br><span class="line">      |                  char *</span><br><span class="line">      |                 %d</span><br></pre></td></tr></table></figure>
+<code>*p1[i]</code>相当于是<code>*(*(p1+i))</code>，<code>(p1+0)</code>是一个指向字符串首地址的指针，那么<code>*(p1+0)</code>里的内容已经是字符串的首地址了，再解引用那么内容就是字符串里的首个字符，所以<code>*p1[i]</code>的内容就是字符串里的首个字符。</p>
+<p>要打印字符串，用的是<code>%s</code>,后面的参数应该是这个字符串的首地址，所以出现警告。</p>
+<p>可以改下程序验证一下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="type">char</span> *a[]=&#123;<span class="string">&quot;one&quot;</span>,<span class="string">&quot;two&quot;</span>,<span class="string">&quot;three&quot;</span>&#125;;  </span><br><span class="line">    <span class="type">char</span> **p1=a;  </span><br><span class="line">    <span class="type">int</span> i;  </span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;a[i] %s\n&quot;</span>,a[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;*p1[i] %c\n&quot;</span>,*p1[i]);  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;*(p1+i) %s\n&quot;</span>,*(p1+i));</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p>那么打印的应该是这三个字符串的首个字符<code>o</code>，<code>t</code>，<code>t</code>。</p>
+<p>输出 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a[i] one</span><br><span class="line">*p1[i] o</span><br><span class="line">*(p1+i) one</span><br><span class="line">a[i] two</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) two</span><br><span class="line">a[i] three</span><br><span class="line">*p1[i] t</span><br><span class="line">*(p1+i) three</span><br></pre></td></tr></table></figure> 确实如此。</p>
+<h1 id="指针的大小">指针的大小</h1>
+<p>指针存放的内容是地址，不同的系统的地址范围不同，与位数有关。32位系统下，指针大小为4字节，即32位，64位系统下，指针大小为8字节。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag"><i class="fa fa-tag"></i> C语言</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/10/08/OV2640/" rel="prev" title="OV2640">
+                  <i class="fa fa-angle-left"></i> OV2640
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/15/C%E8%AF%AD%E8%A8%80%E9%87%8C%E7%9A%84%E4%B8%80%E4%BA%9B%E5%B0%8F%E7%9F%A5%E8%AF%86-%E9%9A%8F%E6%89%8B%E8%AE%B0/" rel="next" title="C语言里的一些小知识(随手记)">
+                  C语言里的一些小知识(随手记) <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">9k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">32 分钟</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
