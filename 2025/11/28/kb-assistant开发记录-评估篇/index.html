@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记录kb-assistant中RAGAS评估框架集成、指标解读与Bad Case分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kb-assistant开发记录-评估篇">
+<meta property="og:url" content="https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="记录kb-assistant中RAGAS评估框架集成、指标解读与Bad Case分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/kb-assistant-4.png">
+<meta property="article:published_time" content="2025-11-28T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T15:17:29.555Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="评估">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/kb-assistant-4.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/","path":"2025/11/28/kb-assistant开发记录-评估篇/","title":"kb-assistant开发记录-评估篇"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>kb-assistant开发记录-评估篇 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%AF%84%E4%BC%B0"><span class="nav-number">1.</span> <span class="nav-text">为什么需要评估？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ragas%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">RAGAS框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E7%9A%84%E6%8C%87%E6%A0%87"><span class="nav-number">2.1.</span> <span class="nav-text">支持的指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E9%98%B6%E6%AE%B5"><span class="nav-number">2.1.1.</span> <span class="nav-text">检索阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%98%B6%E6%AE%B5"><span class="nav-number">2.1.2.</span> <span class="nav-text">生成阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AB%AF%E5%88%B0%E7%AB%AF"><span class="nav-number">2.1.3.</span> <span class="nav-text">端到端</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90ragas"><span class="nav-number">2.2.</span> <span class="nav-text">集成RAGAS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8C%87%E6%A0%87"><span class="nav-number">3.</span> <span class="nav-text">自定义指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mrr%E5%B9%B3%E5%9D%87%E5%80%92%E6%95%B0%E6%8E%92%E5%90%8D"><span class="nav-number">3.1.</span> <span class="nav-text">1. MRR（平均倒数排名）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#answer-completeness%E7%AD%94%E6%A1%88%E5%AE%8C%E6%95%B4%E6%80%A7"><span class="nav-number">3.2.</span> <span class="nav-text">2. Answer
+Completeness（答案完整性）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#context-utilization%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">3.3.</span> <span class="nav-text">3. Context
+Utilization（上下文利用率）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">评估流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%8C%96%E8%AF%84%E4%BC%B0%E6%B5%81%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">标准化评估流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bad-case%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">Bad Case分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%B5%81%E7%A8%8B"><span class="nav-number">5.1.</span> <span class="nav-text">分析流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E6%A1%88%E4%BE%8B"><span class="nav-number">5.2.</span> <span class="nav-text">典型案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B1%E6%A3%80%E7%B4%A2%E5%8F%AC%E5%9B%9E%E7%8E%87%E4%BD%8E"><span class="nav-number">5.2.1.</span> <span class="nav-text">案例1：检索召回率低</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B2%E7%AD%94%E6%A1%88%E5%B9%BB%E8%A7%89"><span class="nav-number">5.2.2.</span> <span class="nav-text">案例2：答案幻觉</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B3%E7%AD%94%E6%A1%88%E4%B8%8D%E5%AE%8C%E6%95%B4"><span class="nav-number">5.2.3.</span> <span class="nav-text">案例3：答案不完整</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E6%8A%A5%E5%91%8A"><span class="nav-number">6.</span> <span class="nav-text">评估报告</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%A5%E5%91%8A%E7%94%9F%E6%88%90"><span class="nav-number">6.1.</span> <span class="nav-text">报告生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E7%BB%93%E6%9E%9C%E7%A4%BA%E4%BE%8B"><span class="nav-number">6.2.</span> <span class="nav-text">评估结果示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E4%BC%98%E5%8C%96"><span class="nav-number">7.</span> <span class="nav-text">迭代优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%BE%AA%E7%8E%AF"><span class="nav-number">7.1.</span> <span class="nav-text">优化循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E4%BC%98%E5%8C%96%E6%8E%AA%E6%96%BD"><span class="nav-number">7.2.</span> <span class="nav-text">具体优化措施</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E4%BC%98%E5%8C%96"><span class="nav-number">7.2.1.</span> <span class="nav-text">1. 检索优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E8%AF%8D%E4%BC%98%E5%8C%96"><span class="nav-number">7.2.2.</span> <span class="nav-text">2. 提示词优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%B4%A8%E9%87%8F%E4%BC%98%E5%8C%96"><span class="nav-number">7.2.3.</span> <span class="nav-text">3. 数据质量优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E8%AE%B0%E5%BD%95"><span class="nav-number">7.3.</span> <span class="nav-text">优化记录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="kb-assistant开发记录-评估篇 | L's Blog">
+      <meta itemprop="description" content="记录kb-assistant中RAGAS评估框架集成、指标解读与Bad Case分析">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kb-assistant开发记录-评估篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-11-28 20:00:00" itemprop="dateCreated datePublished" datetime="2025-11-28T20:00:00+08:00">2025-11-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 23:17:29" itemprop="dateModified" datetime="2026-04-06T23:17:29+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">记录kb-assistant中RAGAS评估框架集成、指标解读与Bad Case分析</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇记录kb-assistant的性能评估系统，包括RAGAS框架集成、自定义指标、Bad
+Case分析等。评估是RAG系统迭代优化的关键。</p>
+</blockquote>
+<hr>
+<h2 id="为什么需要评估">为什么需要评估？</h2>
+<p>开发kb-assistant过程中发现： - 凭感觉优化不可靠 -
+需要量化指标指导优化方向 - 需要发现系统的弱点 - 需要跟踪迭代效果</p>
+<h2 id="ragas框架">RAGAS框架</h2>
+<p><a target="_blank" rel="noopener" href="https://docs.ragas.io/">RAGAS</a>是一个专门评估RAG系统的框架。</p>
+<h3 id="支持的指标">支持的指标</h3>
+<h4 id="检索阶段">检索阶段</h4>
+<ul>
+<li><strong>context_precision</strong>：检索结果中有多少是相关的</li>
+<li><strong>context_recall</strong>：相关文档被召回的比例</li>
+<li><strong>context_entity_recall</strong>：实体召回率</li>
+</ul>
+<h4 id="生成阶段">生成阶段</h4>
+<ul>
+<li><strong>faithfulness</strong>：答案是否忠实于上下文（检测幻觉）</li>
+<li><strong>answer_relevancy</strong>：答案与问题的相关性</li>
+<li><strong>answer_correctness</strong>：答案的正确性</li>
+<li><strong>answer_similarity</strong>：答案与标准答案的相似度</li>
+</ul>
+<h4 id="端到端">端到端</h4>
+<ul>
+<li><strong>answer_correctness</strong>：整体正确性</li>
+</ul>
+<h3 id="集成ragas">集成RAGAS</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># core/evaluation/evaluator.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RagasEvaluator</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, llm, embeddings</span>):</span><br><span class="line">        self._configure_ragas()</span><br><span class="line">        self.llm = llm</span><br><span class="line">        self.embeddings = embeddings</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_configure_ragas</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;配置RAGAS&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">from</span> langchain_community.chat_models <span class="keyword">import</span> ChatZhipuAI</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 使用智谱的LLM包装器</span></span><br><span class="line">        self._ragas_llm = ChatZhipuAI(</span><br><span class="line">            model=<span class="string">&quot;glm-4-flash&quot;</span>,</span><br><span class="line">            api_key=os.getenv(<span class="string">&quot;ZHIPUAI_API_KEY&quot;</span>),</span><br><span class="line">            temperature=<span class="number">0.1</span></span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 包装Embedding</span></span><br><span class="line">        <span class="keyword">class</span> <span class="title class_">_ProviderEmbeddings</span>(<span class="title class_ inherited__">Embeddings</span>):</span><br><span class="line">            <span class="keyword">def</span> <span class="title function_">embed_documents</span>(<span class="params">self, texts</span>):</span><br><span class="line">                <span class="keyword">return</span> self._provider.embed_text(texts)</span><br><span class="line">            <span class="keyword">def</span> <span class="title function_">embed_query</span>(<span class="params">self, text</span>):</span><br><span class="line">                <span class="keyword">return</span> self._provider.embed_text([text])[<span class="number">0</span>]</span><br><span class="line">        </span><br><span class="line">        self._ragas_embeddings = _ProviderEmbeddings(embeddings)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">evaluate_batch</span>(<span class="params">self, qa_logs: <span class="type">List</span>[<span class="built_in">dict</span>]</span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;批量评估QA日志&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 转换格式</span></span><br><span class="line">        dataset = self._convert_to_ragas_dataset(qa_logs)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 定义指标</span></span><br><span class="line">        metrics = [</span><br><span class="line">            faithfulness,</span><br><span class="line">            answer_relevancy,</span><br><span class="line">            context_precision,</span><br><span class="line">            context_recall,</span><br><span class="line">            context_entity_recall</span><br><span class="line">        ]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 运行评估</span></span><br><span class="line">        results = evaluate(</span><br><span class="line">            dataset=dataset,</span><br><span class="line">            metrics=metrics,</span><br><span class="line">            batch_size=<span class="number">5</span>,</span><br><span class="line">            llm=self._ragas_llm,</span><br><span class="line">            embeddings=self._ragas_embeddings</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> self._parse_results(results, qa_logs)</span><br></pre></td></tr></table></figure>
+<p><strong>踩坑记录</strong>：</p>
+<ol type="1">
+<li><p><strong>版本兼容性</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># RAGAS 0.2.x的API有变化</span></span><br><span class="line"><span class="comment"># 需要兼容不同版本的返回格式</span></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">hasattr</span>(results, <span class="string">&#x27;_scores_dict&#x27;</span>):</span><br><span class="line">    results_dict = results._scores_dict</span><br><span class="line"><span class="keyword">elif</span> <span class="built_in">hasattr</span>(results, <span class="string">&#x27;scores&#x27;</span>) <span class="keyword">and</span> <span class="built_in">isinstance</span>(results.scores, <span class="built_in">list</span>):</span><br><span class="line">    results_dict = &#123;k: [d[k] <span class="keyword">for</span> d <span class="keyword">in</span> results.scores] <span class="keyword">for</span> k <span class="keyword">in</span> results.scores[<span class="number">0</span>].keys()&#125;</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    results_dict = <span class="built_in">dict</span>(results)</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>中文支持</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用智谱ChatZhipuAI而不是ChatOpenAI</span></span><br><span class="line"><span class="comment"># 智谱对中文支持更好</span></span><br><span class="line"><span class="keyword">from</span> langchain_community.chat_models <span class="keyword">import</span> ChatZhipuAI</span><br><span class="line">self._ragas_llm = ChatZhipuAI(</span><br><span class="line">    model=<span class="string">&quot;glm-4-flash&quot;</span>,</span><br><span class="line">    api_key=api_key,</span><br><span class="line">    temperature=<span class="number">0.1</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h2 id="自定义指标">自定义指标</h2>
+<p>除了RAGAS的标准指标，我还添加了自定义指标：</p>
+<h3 id="mrr平均倒数排名">1. MRR（平均倒数排名）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">calculate_mrr</span>(<span class="params">contexts: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">str</span>]], golden_docs: <span class="type">List</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    计算MRR：第一个相关文档的排名倒数</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    示例：</span></span><br><span class="line"><span class="string">    contexts: [[&quot;doc1&quot;, &quot;doc2&quot;, &quot;doc3&quot;], [&quot;doc4&quot;, &quot;doc5&quot;]]</span></span><br><span class="line"><span class="string">    golden_docs: [&quot;doc2&quot;, &quot;doc5&quot;]</span></span><br><span class="line"><span class="string">    MRR = (1/2 + 1/2) / 2 = 0.5</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    mrr_sum = <span class="number">0</span></span><br><span class="line">    valid_queries = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> ctx_list, golden <span class="keyword">in</span> <span class="built_in">zip</span>(contexts, golden_docs):</span><br><span class="line">        <span class="keyword">for</span> rank, ctx <span class="keyword">in</span> <span class="built_in">enumerate</span>(ctx_list, <span class="number">1</span>):</span><br><span class="line">            <span class="keyword">if</span> ctx == golden:</span><br><span class="line">                mrr_sum += <span class="number">1.0</span> / rank</span><br><span class="line">                valid_queries += <span class="number">1</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> mrr_sum / valid_queries <span class="keyword">if</span> valid_queries &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="answer-completeness答案完整性">2. Answer
+Completeness（答案完整性）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">calculate_answer_completeness</span>(<span class="params">answer: <span class="built_in">str</span>, ground_truth: <span class="built_in">str</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    基于关键词覆盖率的完整性评估</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 提取关键词</span></span><br><span class="line">    answer_words = <span class="built_in">set</span>(jieba.cut(answer.lower()))</span><br><span class="line">    truth_words = <span class="built_in">set</span>(jieba.cut(ground_truth.lower()))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 计算交集</span></span><br><span class="line">    intersection = answer_words.intersection(truth_words)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 完整性得分</span></span><br><span class="line">    completeness = <span class="built_in">len</span>(intersection) / <span class="built_in">len</span>(truth_words) <span class="keyword">if</span> truth_words <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> completeness</span><br></pre></td></tr></table></figure>
+<h3 id="context-utilization上下文利用率">3. Context
+Utilization（上下文利用率）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">calculate_context_utilization</span>(<span class="params">contexts: <span class="type">List</span>[<span class="built_in">str</span>], golden_docs: <span class="type">List</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    评估检索内容中有多少被用于生成答案</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    ctx_words = <span class="built_in">set</span>()</span><br><span class="line">    <span class="keyword">for</span> ctx <span class="keyword">in</span> contexts:</span><br><span class="line">        ctx_words.update(jieba.cut(ctx.lower()))</span><br><span class="line">    </span><br><span class="line">    golden_words = <span class="built_in">set</span>()</span><br><span class="line">    <span class="keyword">for</span> doc <span class="keyword">in</span> golden_docs:</span><br><span class="line">        golden_words.update(jieba.cut(doc.lower()))</span><br><span class="line">    </span><br><span class="line">    utilization = <span class="built_in">len</span>(ctx_words.intersection(golden_words)) / <span class="built_in">len</span>(golden_words) <span class="keyword">if</span> golden_words <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> utilization</span><br></pre></td></tr></table></figure>
+<h2 id="评估流程">评估流程</h2>
+<h3 id="标准化评估流程">标准化评估流程</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># scripts/eval/run_benchmark.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run_benchmark</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;6步评估流程&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 1: 准备测试数据</span></span><br><span class="line">    dataset = DatasetLoader.load_dataset(<span class="string">&quot;crud_rag&quot;</span>, subset_size=<span class="number">100</span>)</span><br><span class="line">    corpus = DatasetLoader.extract_corpus(dataset)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 2: 语料库向量化</span></span><br><span class="line">    ingestor = EvalDataIngestor(...)</span><br><span class="line">    ingestor.ingest_corpus(corpus, collection_name=<span class="string">&quot;crud_rag_eval&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 3: 检索 + 生成</span></span><br><span class="line">    results = []</span><br><span class="line">    <span class="keyword">for</span> sample <span class="keyword">in</span> dataset:</span><br><span class="line">        <span class="comment"># 检索</span></span><br><span class="line">        retrieval_result = pipeline.retrieve(sample[<span class="string">&quot;question&quot;</span>])</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 生成答案</span></span><br><span class="line">        answer = pipeline.generate(sample[<span class="string">&quot;question&quot;</span>], retrieval_result.context)</span><br><span class="line">        </span><br><span class="line">        results.append(&#123;</span><br><span class="line">            <span class="string">&quot;question&quot;</span>: sample[<span class="string">&quot;question&quot;</span>],</span><br><span class="line">            <span class="string">&quot;answer&quot;</span>: answer,</span><br><span class="line">            <span class="string">&quot;contexts&quot;</span>: [ctx.content <span class="keyword">for</span> ctx <span class="keyword">in</span> retrieval_result.items],</span><br><span class="line">            <span class="string">&quot;ground_truth&quot;</span>: sample[<span class="string">&quot;answer&quot;</span>],</span><br><span class="line">            <span class="string">&quot;golden_docs&quot;</span>: sample[<span class="string">&quot;golden_docs&quot;</span>]</span><br><span class="line">        &#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 4-5: 指标计算</span></span><br><span class="line">    evaluator = RagasEvaluator(llm, embeddings)</span><br><span class="line">    metrics = evaluator.evaluate_with_ground_truth(</span><br><span class="line">        questions=[r[<span class="string">&quot;question&quot;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results],</span><br><span class="line">        answers=[r[<span class="string">&quot;answer&quot;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results],</span><br><span class="line">        contexts=[r[<span class="string">&quot;contexts&quot;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results],</span><br><span class="line">        ground_truths=[r[<span class="string">&quot;ground_truth&quot;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results],</span><br><span class="line">        documents=[r[<span class="string">&quot;golden_docs&quot;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results]</span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 6: 报告生成</span></span><br><span class="line">    report = ReportGenerator(metrics)</span><br><span class="line">    report.save_json(<span class="string">&quot;runtime/eval/crud_rag_eval.json&quot;</span>)</span><br><span class="line">    report.save_csv(<span class="string">&quot;runtime/eval/crud_rag_eval.csv&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> metrics</span><br></pre></td></tr></table></figure>
+<h2 id="bad-case分析">Bad Case分析</h2>
+<h3 id="分析流程">分析流程</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">analyze_bad_cases</span>(<span class="params">results, threshold=<span class="number">0.5</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;分析低分样本&quot;&quot;&quot;</span></span><br><span class="line">    bad_cases = []</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i, result <span class="keyword">in</span> <span class="built_in">enumerate</span>(results):</span><br><span class="line">        weak_metrics = &#123;&#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 检查各项指标</span></span><br><span class="line">        <span class="keyword">if</span> result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;faithfulness&quot;</span>] &lt; threshold:</span><br><span class="line">            weak_metrics[<span class="string">&quot;faithfulness&quot;</span>] = result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;faithfulness&quot;</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;context_recall&quot;</span>] &lt; threshold:</span><br><span class="line">            weak_metrics[<span class="string">&quot;context_recall&quot;</span>] = result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;context_recall&quot;</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;answer_correctness&quot;</span>] &lt; threshold:</span><br><span class="line">            weak_metrics[<span class="string">&quot;answer_correctness&quot;</span>] = result[<span class="string">&quot;metrics&quot;</span>][<span class="string">&quot;answer_correctness&quot;</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 如果有低分指标，记录为Bad Case</span></span><br><span class="line">        <span class="keyword">if</span> weak_metrics:</span><br><span class="line">            bad_cases.append(&#123;</span><br><span class="line">                <span class="string">&quot;sample_id&quot;</span>: i,</span><br><span class="line">                <span class="string">&quot;question&quot;</span>: result[<span class="string">&quot;question&quot;</span>][:<span class="number">100</span>],</span><br><span class="line">                <span class="string">&quot;answer&quot;</span>: result[<span class="string">&quot;answer&quot;</span>][:<span class="number">200</span>],</span><br><span class="line">                <span class="string">&quot;ground_truth&quot;</span>: result[<span class="string">&quot;ground_truth&quot;</span>][:<span class="number">200</span>],</span><br><span class="line">                <span class="string">&quot;weak_metrics&quot;</span>: weak_metrics,</span><br><span class="line">                <span class="string">&quot;all_metrics&quot;</span>: result[<span class="string">&quot;metrics&quot;</span>]</span><br><span class="line">            &#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> bad_cases</span><br></pre></td></tr></table></figure>
+<h3 id="典型案例">典型案例</h3>
+<h4 id="案例1检索召回率低">案例1：检索召回率低</h4>
+<p><strong>问题</strong>： - 问题："kb-assistant如何配置Qdrant？" -
+预期答案：包含配置URL、端口、集合名称 -
+实际答案：只提到用Docker启动Qdrant - Context Recall: 0.3</p>
+<p><strong>分析</strong>： - 查询词"配置Qdrant"被分词为["配置",
+"Qdrant"] - 相关文档中没有同时包含这两个词 -
+向量检索找到了相关文档，但BM25未命中</p>
+<p><strong>解决</strong>： - 增加同义词：配置 → 设置/部署 -
+提高向量检索权重 - 查询改写：将"如何配置"改为"Qdrant配置参数"</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 优化后权重</span></span><br><span class="line">retrieval_weights = &#123;</span><br><span class="line">    <span class="string">&quot;text_dense&quot;</span>: <span class="number">0.45</span>,  <span class="comment"># 从0.35提高</span></span><br><span class="line">    <span class="string">&quot;bm25&quot;</span>: <span class="number">0.15</span>,        <span class="comment"># 从0.20降低</span></span><br><span class="line">    <span class="string">&quot;graph&quot;</span>: <span class="number">0.25</span>,</span><br><span class="line">    <span class="string">&quot;image_clip&quot;</span>: <span class="number">0.15</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>效果</strong>：Context Recall从0.3提升到0.7</p>
+<h4 id="案例2答案幻觉">案例2：答案幻觉</h4>
+<p><strong>问题</strong>： - 问题："kb-assistant支持哪些Embedding模型？"
+- 上下文：只提到CLIP - 实际答案：声称支持OpenAI、BERT、CLIP等 -
+Faithfulness: 0.2</p>
+<p><strong>分析</strong>： - LLM根据训练知识回答了问题 -
+但这些知识不在提供的上下文中 - 模型在"编造"额外的信息</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 优化提示词</span></span><br><span class="line">messages = [</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你必须只基于提供的上下文回答。如果上下文中没有相关信息，明确说&#x27;根据现有资料，无法回答&#x27;。&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;上下文:\n<span class="subst">&#123;context&#125;</span>\n\n问题:\n<span class="subst">&#123;query&#125;</span>&quot;</span>&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时增加上下文数量</span></span><br><span class="line">top_k = <span class="number">15</span>  <span class="comment"># 从10增加到15</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>效果</strong>：Faithfulness从0.2提升到0.85</p>
+<h4 id="案例3答案不完整">案例3：答案不完整</h4>
+<p><strong>问题</strong>： - 问题："评估RAG系统有哪些指标？" -
+答案：只提到了faithfulness和context_recall -
+实际应该包括：faithfulness、answer_relevancy、context_precision、context_recall、answer_correctness等
+- Answer Completeness: 0.4</p>
+<p><strong>分析</strong>： - 检索到的文档只覆盖了部分指标 -
+需要增加检索深度</p>
+<p><strong>解决</strong>： - 增加top_k从10到20 -
+使用RRF融合提升排名靠后的相关文档 - 查询改写：添加"完整"、"所有"等词</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># RRF公式</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">reciprocal_rank_fusion</span>(<span class="params">rank_lists, k=<span class="number">60</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;RRF融合&quot;&quot;&quot;</span></span><br><span class="line">    scores = defaultdict(<span class="built_in">float</span>)</span><br><span class="line">    <span class="keyword">for</span> items <span class="keyword">in</span> rank_lists:</span><br><span class="line">        <span class="keyword">for</span> rank, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(items, start=<span class="number">1</span>):</span><br><span class="line">            scores[item.item_id] += <span class="number">1.0</span> / (k + rank)</span><br><span class="line">    <span class="keyword">return</span> scores</span><br></pre></td></tr></table></figure>
+<p><strong>效果</strong>：Answer Completeness从0.4提升到0.75</p>
+<h2 id="评估报告">评估报告</h2>
+<h3 id="报告生成">报告生成</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ReportGenerator</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save_json</span>(<span class="params">self, output_path: Path, pretty: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;保存JSON格式报告&quot;&quot;&quot;</span></span><br><span class="line">        data = &#123;</span><br><span class="line">            <span class="string">&quot;summary&quot;</span>: self.summary,</span><br><span class="line">            <span class="string">&quot;metrics&quot;</span>: self.metrics,</span><br><span class="line">            <span class="string">&quot;samples&quot;</span>: self.samples,</span><br><span class="line">            <span class="string">&quot;bad_cases&quot;</span>: self.bad_cases,</span><br><span class="line">            <span class="string">&quot;timestamp&quot;</span>: datetime.now().isoformat()</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(output_path, <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            <span class="keyword">if</span> pretty:</span><br><span class="line">                json.dump(data, f, ensure_ascii=<span class="literal">False</span>, indent=<span class="number">2</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                json.dump(data, f, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save_csv</span>(<span class="params">self, output_path: Path</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;保存CSV格式报告&quot;&quot;&quot;</span></span><br><span class="line">        rows = []</span><br><span class="line">        <span class="keyword">for</span> sample <span class="keyword">in</span> self.samples:</span><br><span class="line">            row = &#123;</span><br><span class="line">                <span class="string">&quot;question&quot;</span>: sample[<span class="string">&quot;question&quot;</span>],</span><br><span class="line">                <span class="string">&quot;answer&quot;</span>: sample[<span class="string">&quot;answer&quot;</span>],</span><br><span class="line">                <span class="string">&quot;ground_truth&quot;</span>: sample[<span class="string">&quot;ground_truth&quot;</span>]</span><br><span class="line">            &#125;</span><br><span class="line">            row.update(sample[<span class="string">&quot;metrics&quot;</span>])</span><br><span class="line">            rows.append(row)</span><br><span class="line">        </span><br><span class="line">        df = pd.DataFrame(rows)</span><br><span class="line">        df.to_csv(output_path, index=<span class="literal">False</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generate_summary_csv</span>(<span class="params">self, output_path: Path</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;生成指标摘要&quot;&quot;&quot;</span></span><br><span class="line">        summary = []</span><br><span class="line">        <span class="keyword">for</span> metric_name, values <span class="keyword">in</span> self.metrics.items():</span><br><span class="line">            summary.append(&#123;</span><br><span class="line">                <span class="string">&quot;metric&quot;</span>: metric_name,</span><br><span class="line">                <span class="string">&quot;mean&quot;</span>: np.mean(values),</span><br><span class="line">                <span class="string">&quot;std&quot;</span>: np.std(values),</span><br><span class="line">                <span class="string">&quot;min&quot;</span>: np.<span class="built_in">min</span>(values),</span><br><span class="line">                <span class="string">&quot;max&quot;</span>: np.<span class="built_in">max</span>(values),</span><br><span class="line">                <span class="string">&quot;median&quot;</span>: np.median(values)</span><br><span class="line">            &#125;)</span><br><span class="line">        </span><br><span class="line">        df = pd.DataFrame(summary)</span><br><span class="line">        df.to_csv(output_path, index=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="评估结果示例">评估结果示例</h3>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;summary&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;num_samples&quot;</span><span class="punctuation">:</span> <span class="number">100</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;success_rate&quot;</span><span class="punctuation">:</span> <span class="number">0.85</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;avg_latency_ms&quot;</span><span class="punctuation">:</span> <span class="number">1523.4</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;metrics&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;faithfulness&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;mean&quot;</span><span class="punctuation">:</span> <span class="number">0.823</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;std&quot;</span><span class="punctuation">:</span> <span class="number">0.156</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;min&quot;</span><span class="punctuation">:</span> <span class="number">0.2</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;max&quot;</span><span class="punctuation">:</span> <span class="number">1.0</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;context_recall&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;mean&quot;</span><span class="punctuation">:</span> <span class="number">0.756</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;std&quot;</span><span class="punctuation">:</span> <span class="number">0.234</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;min&quot;</span><span class="punctuation">:</span> <span class="number">0.0</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;max&quot;</span><span class="punctuation">:</span> <span class="number">1.0</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;bad_cases&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;sample_id&quot;</span><span class="punctuation">:</span> <span class="number">23</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;question&quot;</span><span class="punctuation">:</span> <span class="string">&quot;如何配置外部动力学引擎？&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;weak_metrics&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;context_recall&quot;</span><span class="punctuation">:</span> <span class="number">0.3</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;reason&quot;</span><span class="punctuation">:</span> <span class="string">&quot;检索召回率低，相关文档未被召回&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="迭代优化">迭代优化</h2>
+<h3 id="优化循环">优化循环</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">评估 → 分析Bad Case → 定位问题 → 优化 → 再评估</span><br></pre></td></tr></table></figure>
+<h3 id="具体优化措施">具体优化措施</h3>
+<h4 id="检索优化">1. 检索优化</h4>
+<p><strong>问题</strong>：Context Recall低</p>
+<p><strong>优化</strong>： - 增加top_k（10→20） - 调整融合权重 -
+优化查询改写</p>
+<p><strong>效果</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">优化前：Context Recall = 0.68</span><br><span class="line">优化后：Context Recall = 0.79</span><br><span class="line">提升：+16%</span><br></pre></td></tr></table></figure></p>
+<h4 id="提示词优化">2. 提示词优化</h4>
+<p><strong>问题</strong>：Faithfulness低（幻觉）</p>
+<p><strong>优化</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原提示</span></span><br><span class="line"><span class="string">&quot;请基于上下文回答问题&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 优化后</span></span><br><span class="line"><span class="string">&quot;你必须只基于提供的上下文回答。如果上下文中没有相关信息，明确说&#x27;根据现有资料，无法回答&#x27;。不要编造信息。&quot;</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>效果</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">优化前：Faithfulness = 0.71</span><br><span class="line">优化后：Faithfulness = 0.85</span><br><span class="line">提升：+20%</span><br></pre></td></tr></table></figure></p>
+<h4 id="数据质量优化">3. 数据质量优化</h4>
+<p><strong>问题</strong>：某些文档质量差</p>
+<p><strong>优化</strong>： - 清洗数据（去除HTML标签） - 拆分大文档 -
+补充缺失信息</p>
+<p><strong>效果</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">优化前：Answer Correctness = 0.72</span><br><span class="line">优化后：Answer Correctness = 0.81</span><br><span class="line">提升：+13%</span><br></pre></td></tr></table></figure></p>
+<h3 id="优化记录">优化记录</h3>
+<table>
+<colgroup>
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 14%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>迭代</th>
+<th>日期</th>
+<th>优化内容</th>
+<th>Context Recall</th>
+<th>Faithfulness</th>
+<th>Answer Correctness</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>v1.0</td>
+<td>2025-08</td>
+<td>初始版本</td>
+<td>0.68</td>
+<td>0.71</td>
+<td>0.72</td>
+</tr>
+<tr class="even">
+<td>v1.1</td>
+<td>2025-09</td>
+<td>增加top_k</td>
+<td>0.73</td>
+<td>0.71</td>
+<td>0.74</td>
+</tr>
+<tr class="odd">
+<td>v1.2</td>
+<td>2025-10</td>
+<td>优化提示词</td>
+<td>0.73</td>
+<td>0.85</td>
+<td>0.81</td>
+</tr>
+<tr class="even">
+<td>v1.3</td>
+<td>2025-11</td>
+<td>数据清洗</td>
+<td>0.79</td>
+<td>0.85</td>
+<td>0.81</td>
+</tr>
+</tbody>
+</table>
+<h2 id="总结">总结</h2>
+<p>评估的重要性： - 量化指标指导优化方向 - Bad Case分析发现具体问题 -
+跟踪迭代效果</p>
+<p>关键经验： - 不要只关注单一指标 - Faithfulness &gt; 0.8是底线 -
+Context Recall &gt; 0.7才合格 - 持续评估和优化</p>
+<div data-align="center">
+<p><img src="/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/kb-assistant-4.png" height="360"></p>
+</div>
+<blockquote>
+<p>通过评估系统，kb-assistant的质量有了明显提升。特别是Faithfulness从0.71提升到0.85，说明答案的可信度大幅改善。</p>
+</blockquote>
+<p><strong>下一步</strong>： - 建立自动化评估流水线 - 增加用户反馈收集 -
+实现在线学习 - 支持A/B测试</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/%E8%AF%84%E4%BC%B0/" rel="tag"><i class="fa fa-tag"></i> 评估</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/" rel="prev" title="kb-assistant开发记录-实现篇">
+                  <i class="fa fa-angle-left"></i> kb-assistant开发记录-实现篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/01/23/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E4%BC%98%E5%8C%96%E7%AF%87/" rel="next" title="kb-assistant开发记录-优化篇">
+                  kb-assistant开发记录-优化篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

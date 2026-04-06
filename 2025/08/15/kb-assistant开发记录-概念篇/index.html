@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记录kb-assistant项目中关于RAG与Agent的知识整理与学习心得">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kb-assistant开发记录-概念篇">
+<meta property="og:url" content="https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="记录kb-assistant项目中关于RAG与Agent的知识整理与学习心得">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/kb-assistant-1.png">
+<meta property="article:published_time" content="2025-08-15T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T15:07:55.746Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/kb-assistant-1.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/","path":"2025/08/15/kb-assistant开发记录-概念篇/","title":"kb-assistant开发记录-概念篇"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>kb-assistant开发记录-概念篇 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">项目背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rag%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">RAG核心概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFrag"><span class="nav-number">2.1.</span> <span class="nav-text">什么是RAG？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E6%96%B9%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">检索方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dense-retrieval%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. Dense Retrieval（向量检索）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bm25%E5%85%B3%E9%94%AE%E8%AF%8D%E6%A3%80%E7%B4%A2"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. BM25（关键词检索）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#graph-retrieval%E5%9B%BE%E8%B0%B1%E6%A3%80%E7%B4%A2"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. Graph Retrieval（图谱检索）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#image-retrieval%E5%9B%BE%E7%89%87%E6%A3%80%E7%B4%A2"><span class="nav-number">2.2.4.</span> <span class="nav-text">4. Image Retrieval（图片检索）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E8%9E%8D%E5%90%88"><span class="nav-number">2.3.</span> <span class="nav-text">混合检索融合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#agent%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">Agent概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFagent"><span class="nav-number">3.1.</span> <span class="nav-text">什么是Agent？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agent%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">Agent的工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kb-assistant%E4%B8%AD%E7%9A%84agent%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.3.</span> <span class="nav-text">kb-assistant中的Agent设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8Bprompt-engineering"><span class="nav-number">4.</span> <span class="nav-text">提示工程（Prompt Engineering）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8kb-assistant%E4%B8%AD%E7%9A%84%E5%AE%9E%E8%B7%B5"><span class="nav-number">4.1.</span> <span class="nav-text">在kb-assistant中的实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%94%B9%E5%86%99"><span class="nav-number">4.1.1.</span> <span class="nav-text">1. 查询改写</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AD%94%E6%A1%88%E7%94%9F%E6%88%90%E6%8F%90%E7%A4%BA"><span class="nav-number">4.1.2.</span> <span class="nav-text">2. 答案生成提示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%91%E6%A0%B7%E6%9C%AC%E6%8F%90%E7%A4%BAfew-shot"><span class="nav-number">4.1.3.</span> <span class="nav-text">3. 少样本提示（Few-shot）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E4%BC%98%E5%8C%96%E7%9A%84%E7%BB%8F%E9%AA%8C"><span class="nav-number">4.2.</span> <span class="nav-text">提示优化的经验</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87"><span class="nav-number">5.</span> <span class="nav-text">评估指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E9%98%B6%E6%AE%B5"><span class="nav-number">5.1.</span> <span class="nav-text">检索阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%98%B6%E6%AE%B5"><span class="nav-number">5.2.</span> <span class="nav-text">生成阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E8%AF%84%E4%BC%B0"><span class="nav-number">5.3.</span> <span class="nav-text">实现评估</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">开发中的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8fastapi%E8%80%8C%E4%B8%8D%E6%98%AFflask"><span class="nav-number">6.1.</span> <span class="nav-text">为什么用FastAPI而不是Flask？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8qdrant%E8%80%8C%E4%B8%8D%E6%98%AFmilvus"><span class="nav-number">6.2.</span> <span class="nav-text">为什么用Qdrant而不是Milvus？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8neo4j"><span class="nav-number">6.3.</span> <span class="nav-text">为什么用Neo4j？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A5%91%E7%BA%A6%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="nav-number">6.4.</span> <span class="nav-text">数据契约的重要性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">7.</span> <span class="nav-text">遇到的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#embedding%E7%BB%B4%E5%BA%A6%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="nav-number">7.1.</span> <span class="nav-text">1. Embedding维度不匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5io%E9%98%BB%E5%A1%9E"><span class="nav-number">7.2.</span> <span class="nav-text">2. 异步IO阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">7.3.</span> <span class="nav-text">3. 内存泄漏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%AF%BC%E5%85%A5"><span class="nav-number">7.4.</span> <span class="nav-text">4. 循环导入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5%E8%AE%A1%E5%88%92"><span class="nav-number">8.</span> <span class="nav-text">下一步计划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="kb-assistant开发记录-概念篇 | L's Blog">
+      <meta itemprop="description" content="记录kb-assistant项目中关于RAG与Agent的知识整理与学习心得">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kb-assistant开发记录-概念篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-08-15 20:00:00" itemprop="dateCreated datePublished" datetime="2025-08-15T20:00:00+08:00">2025-08-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 23:07:55" itemprop="dateModified" datetime="2026-04-06T23:07:55+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">记录kb-assistant项目中关于RAG与Agent的知识整理与学习心得</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇是kb-assistant开发记录的第一篇，主要整理RAG（检索增强生成）和Agent相关的概念。这些都是我在开发过程中学到的知识，记录下来方便回顾。</p>
+</blockquote>
+<hr>
+<h2 id="项目背景">项目背景</h2>
+<p>kb-assistant是一个个人知识库助手，目标是： -
+统一管理我的所有学习笔记、文档、代码 - 支持混合检索（文本、图片） -
+提供流式问答 - 能够评估回答质量</p>
+<h2 id="rag核心概念">RAG核心概念</h2>
+<h3 id="什么是rag">什么是RAG？</h3>
+<p>RAG = Retrieval（检索） + Augmentation（增强） +
+Generation（生成）</p>
+<p>简单说就是：先检索相关知识，然后把这些知识作为上下文提供给大语言模型，让模型基于这些知识回答问题。</p>
+<p><strong>工作流程</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户提问 → 检索知识库 → 获取相关文档 → 构建提示词 → LLM生成答案</span><br></pre></td></tr></table></figure></p>
+<p><strong>为什么需要RAG？</strong></p>
+<ol type="1">
+<li><strong>解决幻觉问题</strong>：LLM不知道的知识会瞎编，RAG提供真实上下文</li>
+<li><strong>知识更新</strong>：不用重新训练模型，只需更新知识库</li>
+<li><strong>可解释性</strong>：可以查看答案的来源</li>
+<li><strong>领域知识</strong>：专业知识可以存入知识库</li>
+</ol>
+<h3 id="检索方式">检索方式</h3>
+<p>在kb-assistant中，我实现了四种检索方式：</p>
+<h4 id="dense-retrieval向量检索">1. Dense Retrieval（向量检索）</h4>
+<ul>
+<li>把文本转换为向量（embedding）</li>
+<li>计算向量相似度</li>
+<li>优点：语义理解能力强</li>
+<li>缺点：需要向量数据库，检索速度较慢</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例代码</span></span><br><span class="line">query_vec = embedder.embed_query(<span class="string">&quot;什么是RAG？&quot;</span>)</span><br><span class="line">results = vector_store.search(<span class="string">&quot;kb_text_chunks&quot;</span>, query_vec, top_k=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="bm25关键词检索">2. BM25（关键词检索）</h4>
+<ul>
+<li>基于TF-IDF的改进算法</li>
+<li>计算关键词匹配度</li>
+<li>优点：速度快，精确匹配</li>
+<li>缺点：不理解语义</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用rank-bm25库</span></span><br><span class="line">bm25 = BM25Okapi(corpus)</span><br><span class="line">scores = bm25.get_scores(query)</span><br></pre></td></tr></table></figure>
+<h4 id="graph-retrieval图谱检索">3. Graph Retrieval（图谱检索）</h4>
+<ul>
+<li>从Neo4j图数据库中检索</li>
+<li>提取实体和关系</li>
+<li>优点：适合关系型查询</li>
+<li>缺点：需要维护图谱</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// Cypher查询示例</span><br><span class="line">MATCH (n:Entity &#123;name: &#x27;RAG&#x27;&#125;)&lt;-[:MENTIONS]-(d:Doc)</span><br><span class="line">RETURN d.id AS doc_id, d.content AS content</span><br></pre></td></tr></table></figure>
+<h4 id="image-retrieval图片检索">4. Image Retrieval（图片检索）</h4>
+<ul>
+<li>使用CLIP模型</li>
+<li>文本和图片在同一向量空间</li>
+<li>优点：支持多模态</li>
+<li>缺点：需要GPU加速</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文本搜图片</span></span><br><span class="line">image_vec = embedder.embed_query(<span class="string">&quot;查找有猫的图片&quot;</span>)</span><br><span class="line">results = vector_store.search(<span class="string">&quot;kb_image_assets&quot;</span>, image_vec, top_k=<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="混合检索融合">混合检索融合</h3>
+<p>在kb-assistant中，我没有只用一种检索方式，而是将四种结果融合：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 各路检索</span></span><br><span class="line">dense_items = vector_store.search(...)  <span class="comment"># 向量检索</span></span><br><span class="line">bm25_items = bm25.search(...)           <span class="comment"># 关键词检索  </span></span><br><span class="line">graph_items = graph_engine.search(...)  <span class="comment"># 图谱检索</span></span><br><span class="line">image_items = vector_store.search(...)  <span class="comment"># 图片检索</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 加权合并</span></span><br><span class="line">merged_scores = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> dense_items:</span><br><span class="line">    merged_scores[item.item_id] = item.score * weights[<span class="string">&quot;text_dense&quot;</span>]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> bm25_items:</span><br><span class="line">    merged_scores[item.item_id] += item.score * weights[<span class="string">&quot;bm25&quot;</span>]</span><br><span class="line"><span class="comment"># ... 其他路</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. RRF补偿（Reciprocal Rank Fusion）</span></span><br><span class="line">rrf_scores = reciprocal_rank_fusion([dense_items, bm25_items, graph_items, image_items])</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> merged_items:</span><br><span class="line">    item.score += rrf_scores.get(item.item_id, <span class="number">0.0</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>为什么要融合？</strong></p>
+<ul>
+<li>不同检索方式有各自的优缺点</li>
+<li>加权合并体现业务优先级</li>
+<li>RRF补偿保证公平性</li>
+<li>实验结果：融合后效果比单一方式好</li>
+</ul>
+<h2 id="agent概念">Agent概念</h2>
+<h3 id="什么是agent">什么是Agent？</h3>
+<p>Agent = LLM + Memory（记忆） + Planning（规划） + Tools（工具）</p>
+<p>简单说：让LLM能够使用工具、记住历史、进行规划的系统。</p>
+<p><strong>与传统RAG的区别</strong>： - RAG：一次检索，一次回答 -
+Agent：可以多次检索、使用工具、执行动作</p>
+<h3 id="agent的工作流程">Agent的工作流程</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户请求 → 理解意图 → 制定计划 → 执行步骤 → 观察结果 → 调整计划 → 完成目标</span><br></pre></td></tr></table></figure>
+<p><strong>示例</strong>：用户问"今天北京的天气怎么样？"</p>
+<ol type="1">
+<li>Agent理解意图：需要查询天气</li>
+<li>调用天气API工具</li>
+<li>获取天气数据</li>
+<li>整理回答用户</li>
+</ol>
+<h3 id="kb-assistant中的agent设计">kb-assistant中的Agent设计</h3>
+<p>目前kb-assistant主要是RAG，但预留了Agent的扩展接口：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, llm, tools, memory</span>):</span><br><span class="line">        self.llm = llm</span><br><span class="line">        self.tools = tools</span><br><span class="line">        self.memory = memory</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self, query</span>):</span><br><span class="line">        <span class="comment"># 1. 理解用户意图</span></span><br><span class="line">        intent = self.llm.generate(<span class="string">f&quot;理解这个查询的意图: <span class="subst">&#123;query&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 制定计划</span></span><br><span class="line">        plan = self.llm.generate(<span class="string">f&quot;为意图<span class="subst">&#123;intent&#125;</span>制定执行计划&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 执行计划</span></span><br><span class="line">        <span class="keyword">for</span> step <span class="keyword">in</span> plan:</span><br><span class="line">            <span class="comment"># 使用工具</span></span><br><span class="line">            <span class="keyword">if</span> step.tool:</span><br><span class="line">                result = self.tools[step.tool].execute(step.params)</span><br><span class="line">            <span class="comment"># 更新记忆</span></span><br><span class="line">            self.memory.add(step, result)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 生成最终答案</span></span><br><span class="line">        answer = self.llm.generate(<span class="string">f&quot;基于以下信息回答<span class="subst">&#123;query&#125;</span>: <span class="subst">&#123;self.memory.get_context()&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> answer</span><br></pre></td></tr></table></figure>
+<p><strong>未来的扩展方向</strong>： - 添加计算器工具 -
+添加网络搜索工具<br>
+- 添加代码执行工具 - 添加数据库查询工具</p>
+<h2 id="提示工程prompt-engineering">提示工程（Prompt Engineering）</h2>
+<h3 id="在kb-assistant中的实践">在kb-assistant中的实践</h3>
+<h4 id="查询改写">1. 查询改写</h4>
+<p>用户提问时，如果有多轮对话，需要改写查询使其独立：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">messages = [</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你是查询优化器。将用户问题改写为适合检索的单句。&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;历史对话:\n<span class="subst">&#123;history&#125;</span>\n\n当前问题:\n<span class="subst">&#123;query&#125;</span>\n\n改写后:&quot;</span>&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">rewritten_query = llm.generate(messages)</span><br></pre></td></tr></table></figure>
+<p><strong>示例</strong>： - 用户：它的原理是什么？ -
+历史：前面在讨论RAG - 改写：RAG检索增强生成的原理是什么？</p>
+<h4 id="答案生成提示">2. 答案生成提示</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">messages = [</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你是个人知识库助手。必须优先依据给定上下文回答。&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;上下文:\n<span class="subst">&#123;context&#125;</span>\n\n问题:\n<span class="subst">&#123;query&#125;</span>\n\n回答:&quot;</span>&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p><strong>技巧</strong>： - 明确要求"优先依据上下文" -
+告诉模型"不知道就说不知道" - 要求"给出简洁回答并附来源"</p>
+<h4 id="少样本提示few-shot">3. 少样本提示（Few-shot）</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">few_shot_examples = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">示例1:</span></span><br><span class="line"><span class="string">问题：什么是梯度下降？</span></span><br><span class="line"><span class="string">上下文：[梯度下降是一种优化算法...]</span></span><br><span class="line"><span class="string">回答：梯度下降是一种优化算法，通过迭代调整参数来最小化损失函数。来源：ML-2.md</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">示例2:</span></span><br><span class="line"><span class="string">问题：解释一下过拟合</span></span><br><span class="line"><span class="string">上下文：[过拟合是指模型在训练集上表现很好...]</span></span><br><span class="line"><span class="string">回答：过拟合是指模型在训练数据上表现很好，但在测试数据上表现差，泛化能力弱。来源：ML-1.md</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">现在请回答以下问题：</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+<h3 id="提示优化的经验">提示优化的经验</h3>
+<ol type="1">
+<li><strong>具体比模糊好</strong>：明确指出要做什么</li>
+<li><strong>例子很有帮助</strong>：给1-2个例子</li>
+<li><strong>角色设定有效</strong>：告诉模型"你是谁"</li>
+<li><strong>结构化输出</strong>：要求JSON格式或其他结构</li>
+</ol>
+<h2 id="评估指标">评估指标</h2>
+<h3 id="检索阶段">检索阶段</h3>
+<p>在开发kb-assistant时，需要评估检索质量：</p>
+<ul>
+<li><strong>Context Recall</strong>：检索内容是否包含了答案所需信息</li>
+<li><strong>Context Precision</strong>：检索结果中有多少是相关的</li>
+<li><strong>MRR</strong>：平均倒数排名，第一个相关结果的位置</li>
+</ul>
+<h3 id="生成阶段">生成阶段</h3>
+<ul>
+<li><strong>Faithfulness</strong>：答案是否忠实于上下文（检测幻觉）</li>
+<li><strong>Answer Relevancy</strong>：答案与问题的相关性</li>
+<li><strong>Answer Correctness</strong>：答案的正确性</li>
+</ul>
+<h3 id="实现评估">实现评估</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用RAGAS框架</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">evaluate</span>(<span class="params">retrieval_result, answer, ground_truth</span>):</span><br><span class="line">    metrics = [</span><br><span class="line">        faithfulness,</span><br><span class="line">        answer_relevancy,</span><br><span class="line">        context_precision,</span><br><span class="line">        context_recall</span><br><span class="line">    ]</span><br><span class="line">    </span><br><span class="line">    results = evaluate(</span><br><span class="line">        dataset=&#123;</span><br><span class="line">            <span class="string">&quot;question&quot;</span>: [query],</span><br><span class="line">            <span class="string">&quot;answer&quot;</span>: [answer],</span><br><span class="line">            <span class="string">&quot;contexts&quot;</span>: [[item.content <span class="keyword">for</span> item <span class="keyword">in</span> retrieval_result.items]],</span><br><span class="line">            <span class="string">&quot;ground_truth&quot;</span>: [ground_truth]</span><br><span class="line">        &#125;,</span><br><span class="line">        metrics=metrics</span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> results</span><br></pre></td></tr></table></figure>
+<h2 id="开发中的思考">开发中的思考</h2>
+<h3 id="为什么用fastapi而不是flask">为什么用FastAPI而不是Flask？</h3>
+<ul>
+<li>FastAPI自动生成API文档</li>
+<li>类型提示更好</li>
+<li>异步支持更完善</li>
+<li>性能更高</li>
+</ul>
+<h3 id="为什么用qdrant而不是milvus">为什么用Qdrant而不是Milvus？</h3>
+<ul>
+<li>Qdrant更轻量</li>
+<li>API更简单</li>
+<li>部署方便（Docker一键启动）</li>
+<li>性能足够</li>
+</ul>
+<h3 id="为什么用neo4j">为什么用Neo4j？</h3>
+<ul>
+<li>知识图谱适合表示文档间关系</li>
+<li>Cypher查询语言直观</li>
+<li>社区活跃</li>
+<li>可视化好</li>
+</ul>
+<h3 id="数据契约的重要性">数据契约的重要性</h3>
+<p>所有模块使用相同的数据结构（<code>core/types.py</code>）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RetrieverItem</span>:</span><br><span class="line">    item_id: <span class="built_in">str</span></span><br><span class="line">    content: <span class="built_in">str</span></span><br><span class="line">    source: <span class="built_in">str</span></span><br><span class="line">    score: <span class="built_in">float</span></span><br><span class="line">    metadata: <span class="built_in">dict</span></span><br></pre></td></tr></table></figure>
+<p>好处： - 避免字段不一致 - 类型安全 - 易于维护 - 支持IDE自动补全</p>
+<h2 id="遇到的坑">遇到的坑</h2>
+<h3 id="embedding维度不匹配">1. Embedding维度不匹配</h3>
+<p><strong>问题</strong>：更换Embedding模型后，向量维度变了，导致Qdrant报错</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 更换模型后必须全量重建索引</span></span><br><span class="line">python scripts/build_kb.py --full</span><br></pre></td></tr></table></figure></p>
+<h3 id="异步io阻塞">2. 异步IO阻塞</h3>
+<p><strong>问题</strong>：文件读取阻塞了主线程</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用aiofiles</span></span><br><span class="line"><span class="keyword">import</span> aiofiles</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">load_file</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> aiofiles.<span class="built_in">open</span>(path, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        content = <span class="keyword">await</span> f.read()</span><br><span class="line">    <span class="keyword">return</span> content</span><br></pre></td></tr></table></figure></p>
+<h3 id="内存泄漏">3. 内存泄漏</h3>
+<p><strong>问题</strong>：多次索引构建后内存占用越来越高</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用上下文管理器，确保资源释放</span></span><br><span class="line"><span class="keyword">with</span> QdrantVectorStoreAdapter(...) <span class="keyword">as</span> store:</span><br><span class="line">    store.upsert(...)</span><br></pre></td></tr></table></figure></p>
+<h3 id="循环导入">4. 循环导入</h3>
+<p><strong>问题</strong>：core模块间相互导入导致循环依赖</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将导入放在函数内部</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">some_function</span>():</span><br><span class="line">    <span class="keyword">from</span> core.types <span class="keyword">import</span> RetrieverItem</span><br><span class="line">    <span class="comment"># 使用...</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="下一步计划">下一步计划</h2>
+<ol type="1">
+<li><strong>Agent框架</strong>：实现真正的Agent，支持工具调用</li>
+<li><strong>多模态增强</strong>：更好地支持图片、表格、代码</li>
+<li><strong>主动学习</strong>：根据用户反馈自动优化检索</li>
+<li><strong>分布式部署</strong>：支持多实例、负载均衡</li>
+<li><strong>可视化界面</strong>：更好的调试和监控面板</li>
+</ol>
+<h2 id="总结">总结</h2>
+<p>通过kb-assistant项目，我深入理解了RAG的原理和实现。关键收获： -
+混合检索比单一检索效果好 - 数据契约很重要 - 评估指标帮助定位问题 -
+异步编程提升性能 - 工具链完善才能高效开发</p>
+<div data-align="center">
+<p><img src="/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/kb-assistant-1.png" height="360"></p>
+</div>
+<blockquote>
+<p>整个开发过程中最大的体会是：不要过度设计。先实现MVP，再逐步优化。很多功能（如RRF融合）都是后期根据实际效果添加的。</p>
+</blockquote>
+<p><strong>参考资料</strong>： - RAGAS文档 - LangChain官方文档 -
+Qdrant官方文档 - 《Building LLM Apps》</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/Agent/" rel="tag"><i class="fa fa-tag"></i> Agent</a>
+              <a href="/tags/LLM/" rel="tag"><i class="fa fa-tag"></i> LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/15/C%E8%AF%AD%E8%A8%80%E9%87%8C%E7%9A%84%E4%B8%80%E4%BA%9B%E5%B0%8F%E7%9F%A5%E8%AF%86-%E9%9A%8F%E6%89%8B%E8%AE%B0/" rel="prev" title="C语言里的一些小知识(随手记)">
+                  <i class="fa fa-angle-left"></i> C语言里的一些小知识(随手记)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/" rel="next" title="kb-assistant开发记录-架构篇">
+                  kb-assistant开发记录-架构篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

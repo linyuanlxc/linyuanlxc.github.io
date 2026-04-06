@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记录kb-assistant核心模块开发过程、踩坑经历与解决方案">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kb-assistant开发记录-实现篇">
+<meta property="og:url" content="https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="记录kb-assistant核心模块开发过程、踩坑经历与解决方案">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/kb-assistant-3.png">
+<meta property="article:published_time" content="2025-10-24T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T15:14:24.012Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="实现细节">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/kb-assistant-3.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/","path":"2025/10/24/kb-assistant开发记录-实现篇/","title":"kb-assistant开发记录-实现篇"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>kb-assistant开发记录-实现篇 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">核心模块实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97coreindexingbuilder.py"><span class="nav-number">2.1.</span> <span class="nav-text">1.
+索引构建模块（core&#x2F;indexing&#x2F;builder.py）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#indexbuilder%E7%B1%BB"><span class="nav-number">2.1.1.</span> <span class="nav-text">IndexBuilder类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#build%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.2.</span> <span class="nav-text">build方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E7%BC%96%E6%8E%92%E6%A8%A1%E5%9D%97coreorchestrationpipeline.py"><span class="nav-number">2.2.</span> <span class="nav-text">2.
+检索编排模块（core&#x2F;orchestration&#x2F;pipeline.py）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#retrievalorchestrator%E7%B1%BB"><span class="nav-number">2.2.1.</span> <span class="nav-text">RetrievalOrchestrator类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%A3%80%E7%B4%A2%E4%BC%98%E5%8C%96"><span class="nav-number">2.2.2.</span> <span class="nav-text">并行检索优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E5%BC%8F%E7%94%9F%E6%88%90%E6%A8%A1%E5%9D%97coregenerationprompting.py"><span class="nav-number">2.3.</span> <span class="nav-text">3.
+流式生成模块（core&#x2F;generation&#x2F;prompting.py）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%94%B9%E5%86%99"><span class="nav-number">2.3.1.</span> <span class="nav-text">查询改写</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E6%9E%84%E5%BB%BA"><span class="nav-number">2.3.2.</span> <span class="nav-text">上下文构建</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A5%91%E7%BA%A6coretypes.py"><span class="nav-number">2.4.</span> <span class="nav-text">4. 数据契约（core&#x2F;types.py）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web%E6%9C%8D%E5%8A%A1webappmain.py"><span class="nav-number">2.5.</span> <span class="nav-text">5. Web服务（webapp&#x2F;main.py）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#sse%E6%B5%81%E5%BC%8F%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.5.1.</span> <span class="nav-text">SSE流式接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6"><span class="nav-number">2.5.2.</span> <span class="nav-text">安全机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84bug"><span class="nav-number">3.</span> <span class="nav-text">遇到的Bug</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bug-1-%E5%BC%82%E6%AD%A5%E5%87%BD%E6%95%B0%E9%98%BB%E5%A1%9E"><span class="nav-number">3.1.</span> <span class="nav-text">Bug 1: 异步函数阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bug-2-%E6%96%87%E4%BB%B6%E5%8F%A5%E6%9F%84%E6%B3%84%E6%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">Bug 2: 文件句柄泄漏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bug-3-%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E9%94%99%E8%AF%AF"><span class="nav-number">3.3.</span> <span class="nav-text">Bug 3: 类型转换错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bug-4-%E6%97%B6%E5%8C%BA%E9%97%AE%E9%A2%98"><span class="nav-number">3.4.</span> <span class="nav-text">Bug 4: 时区问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">4.1.</span> <span class="nav-text">单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">4.2.</span> <span class="nav-text">集成测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">4.3.</span> <span class="nav-text">性能测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E7%BC%93%E5%AD%98"><span class="nav-number">5.1.</span> <span class="nav-text">1. 模型缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">5.2.</span> <span class="nav-text">2. 数据库连接池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%B9%E5%A4%84%E7%90%86"><span class="nav-number">5.3.</span> <span class="nav-text">3. 批处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5io"><span class="nav-number">5.4.</span> <span class="nav-text">4. 异步IO</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">6.</span> <span class="nav-text">性能数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">经验总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E5%AE%89%E5%85%A8%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">7.1.</span> <span class="nav-text">1. 类型安全很重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E8%A6%81%E8%AF%A6%E7%BB%86"><span class="nav-number">7.2.</span> <span class="nav-text">2. 日志要详细</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E8%A6%81%E5%AE%8C%E5%96%84"><span class="nav-number">7.3.</span> <span class="nav-text">3. 异常处理要完善</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84"><span class="nav-number">7.4.</span> <span class="nav-text">4. 测试覆盖关键路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7"><span class="nav-number">7.5.</span> <span class="nav-text">5. 性能监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5%E8%AE%A1%E5%88%92"><span class="nav-number">8.</span> <span class="nav-text">下一步计划</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="kb-assistant开发记录-实现篇 | L's Blog">
+      <meta itemprop="description" content="记录kb-assistant核心模块开发过程、踩坑经历与解决方案">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kb-assistant开发记录-实现篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-10-24 20:00:00" itemprop="dateCreated datePublished" datetime="2025-10-24T20:00:00+08:00">2025-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 23:14:24" itemprop="dateModified" datetime="2026-04-06T23:14:24+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">记录kb-assistant核心模块开发过程、踩坑经历与解决方案</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇记录kb-assistant核心模块的具体实现，包括索引构建、检索编排、流式生成等。这些都是实际编码过程中的细节和踩坑记录。</p>
+</blockquote>
+<hr>
+<h2 id="项目结构">项目结构</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">kb-assistant/</span><br><span class="line">├── webapp/                    # Web服务层</span><br><span class="line">│   ├── main.py               # FastAPI入口</span><br><span class="line">│   ├── bootstrap.py          # 启动引导</span><br><span class="line">│   ├── templates/            # HTML模板</span><br><span class="line">│   └── static/               # 静态资源</span><br><span class="line">├── core/                     # 核心业务逻辑</span><br><span class="line">│   ├── types.py              # 数据契约</span><br><span class="line">│   ├── config/               # 配置管理</span><br><span class="line">│   ├── ingestion/            # 数据摄入</span><br><span class="line">│   ├── indexing/             # 索引构建</span><br><span class="line">│   ├── retrieval/            # 检索引擎</span><br><span class="line">│   ├── orchestration/        # RAG编排</span><br><span class="line">│   ├── generation/           # 生成模块</span><br><span class="line">│   ├── providers/            # 模型提供层</span><br><span class="line">│   ├── evaluation/           # 性能评估</span><br><span class="line">│   └── observability/        # 可观测性</span><br><span class="line">├── scripts/                  # 脚本工具</span><br><span class="line">│   ├── build_kb.py           # 索引构建</span><br><span class="line">│   └── eval/                 # 评估脚本</span><br><span class="line">├── configs/                  # 配置文件</span><br><span class="line">└── kb_source/                # 知识源</span><br></pre></td></tr></table></figure>
+<h2 id="核心模块实现">核心模块实现</h2>
+<h3 id="索引构建模块coreindexingbuilder.py">1.
+索引构建模块（core/indexing/builder.py）</h3>
+<h4 id="indexbuilder类">IndexBuilder类</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">IndexBuilder</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, settings: AppSettings</span>):</span><br><span class="line">        <span class="comment"># 初始化依赖链</span></span><br><span class="line">        self.settings = settings</span><br><span class="line">        self.registry = ModelRegistry(settings.model_registry_path)</span><br><span class="line">        self.embedder = self.registry.build_embedding()</span><br><span class="line">        self.vector_store = QdrantVectorStoreAdapter(</span><br><span class="line">            url=settings.qdrant_url,</span><br><span class="line">            api_key=settings.qdrant_api_key,</span><br><span class="line">            text_collection=settings.text_collection,</span><br><span class="line">            image_collection=settings.image_collection,</span><br><span class="line">            parent_collection=settings.parent_collection,</span><br><span class="line">            text_dim=self.registry.embeddings[<span class="string">&quot;text&quot;</span>].get(<span class="string">&quot;dimensions&quot;</span>, <span class="number">512</span>),</span><br><span class="line">            image_dim=self.registry.embeddings[<span class="string">&quot;image&quot;</span>].get(<span class="string">&quot;dimensions&quot;</span>, <span class="number">512</span>)</span><br><span class="line">        )</span><br><span class="line">        self.bm25 = BM25Indexer(settings.bm25_index_file)</span><br><span class="line">        self.graph_engine = LightRAGGraphEngine(</span><br><span class="line">            settings.neo4j_uri,</span><br><span class="line">            settings.neo4j_user,</span><br><span class="line">            settings.neo4j_password</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<p><strong>依赖注入</strong>：通过构造函数传入依赖，而不是在内部创建，方便测试。</p>
+<h4 id="build方法">build方法</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build</span>(<span class="params">self, incremental: <span class="built_in">bool</span> = <span class="literal">True</span></span>) -&gt; IndexManifest:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;完整构建流程&quot;&quot;&quot;</span></span><br><span class="line">    logger.info(<span class="string">&quot;Index build started&quot;</span>, extra=&#123;<span class="string">&quot;incremental&quot;</span>: incremental&#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 1: 加载已有清单</span></span><br><span class="line">    manifest = load_manifest(self.settings.manifest_path)</span><br><span class="line">    logger.info(<span class="string">f&quot;Loaded manifest with <span class="subst">&#123;<span class="built_in">len</span>(manifest.docs)&#125;</span> docs&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 2: 扫描知识源</span></span><br><span class="line">    text_docs, image_docs = load_raw_documents(self.settings.source_dir)</span><br><span class="line">    logger.info(<span class="string">f&quot;Found <span class="subst">&#123;<span class="built_in">len</span>(text_docs)&#125;</span> text docs, <span class="subst">&#123;<span class="built_in">len</span>(image_docs)&#125;</span> images&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 3: 增量过滤</span></span><br><span class="line">    <span class="keyword">if</span> incremental:</span><br><span class="line">        text_docs = self._incremental_filter(text_docs, manifest)</span><br><span class="line">        image_docs = self._incremental_filter(image_docs, manifest)</span><br><span class="line">        logger.info(<span class="string">f&quot;After incremental filter: <span class="subst">&#123;<span class="built_in">len</span>(text_docs)&#125;</span> text docs to process&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 4: 父子分块</span></span><br><span class="line">    chunks, parent_map = split_parent_child(text_docs)</span><br><span class="line">    logger.info(<span class="string">f&quot;Split into <span class="subst">&#123;<span class="built_in">len</span>(chunks)&#125;</span> chunks, <span class="subst">&#123;<span class="built_in">len</span>(parent_map)&#125;</span> parents&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 5: 向量化并写入Qdrant</span></span><br><span class="line">    <span class="keyword">if</span> chunks:</span><br><span class="line">        chunk_vectors = self.embedder.embed_text([c.chunk_text <span class="keyword">for</span> c <span class="keyword">in</span> chunks])</span><br><span class="line">        self.vector_store.upsert_text_chunks(chunks, chunk_vectors)</span><br><span class="line">        logger.info(<span class="string">f&quot;Upserted <span class="subst">&#123;<span class="built_in">len</span>(chunks)&#125;</span> text chunks&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 6: 父块向量化和写入</span></span><br><span class="line">    <span class="keyword">if</span> parent_map:</span><br><span class="line">        parent_texts = <span class="built_in">list</span>(parent_map.values())</span><br><span class="line">        parent_vectors = self.embedder.embed_text(parent_texts)</span><br><span class="line">        self.vector_store.upsert_parent_docs(parent_map, parent_vectors)</span><br><span class="line">        logger.info(<span class="string">f&quot;Upserted <span class="subst">&#123;<span class="built_in">len</span>(parent_map)&#125;</span> parent docs&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 7: BM25索引构建</span></span><br><span class="line">    <span class="keyword">if</span> chunks:</span><br><span class="line">        self.bm25.build(chunks)</span><br><span class="line">        self.bm25.save()</span><br><span class="line">        logger.info(<span class="string">&quot;BM25 index built and saved&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 8: 图片向量化并写入</span></span><br><span class="line">    <span class="keyword">if</span> image_docs:</span><br><span class="line">        image_paths = [d.source_path <span class="keyword">for</span> d <span class="keyword">in</span> image_docs]</span><br><span class="line">        image_vectors = self.embedder.embed_image_paths(image_paths)</span><br><span class="line">        self.vector_store.upsert_image_assets(image_docs, image_vectors)</span><br><span class="line">        logger.info(<span class="string">f&quot;Upserted <span class="subst">&#123;<span class="built_in">len</span>(image_docs)&#125;</span> images&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 9: 图谱更新（如果可用）</span></span><br><span class="line">    <span class="keyword">if</span> self.graph_engine.health() <span class="keyword">and</span> parent_map:</span><br><span class="line">        self.graph_engine.upsert_from_parent_docs(parent_map)</span><br><span class="line">        logger.info(<span class="string">&quot;Graph updated&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Step 10: 更新清单</span></span><br><span class="line">    self._update_manifest(manifest, text_docs, image_docs)</span><br><span class="line">    save_manifest(self.settings.manifest_path, manifest)</span><br><span class="line">    logger.info(<span class="string">&quot;Manifest saved&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> manifest</span><br></pre></td></tr></table></figure>
+<p><strong>踩坑记录</strong>：</p>
+<ol type="1">
+<li><p><strong>内存问题</strong>：一次性向量化所有文档会OOM
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 解决：分批处理</span></span><br><span class="line">batch_size = <span class="number">64</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(chunks), batch_size):</span><br><span class="line">    batch = chunks[i:i+batch_size]</span><br><span class="line">    vectors = self.embedder.embed_text([c.chunk_text <span class="keyword">for</span> c <span class="keyword">in</span> batch])</span><br><span class="line">    self.vector_store.upsert(batch, vectors)</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>Neo4j连接失败</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加重试机制</span></span><br><span class="line"><span class="keyword">for</span> attempt <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        self.graph_engine.upsert_from_parent_docs(parent_map)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.warning(<span class="string">f&quot;Graph upsert failed (attempt <span class="subst">&#123;attempt+<span class="number">1</span>&#125;</span>/3): <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        time.sleep(<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>ID生成冲突</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment"># 使用确定性ID</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_id_from_path</span>(<span class="params">path: Path</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">str</span>(uuid.uuid5(uuid.NAMESPACE_URL, <span class="built_in">str</span>(path.resolve())))</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="检索编排模块coreorchestrationpipeline.py">2.
+检索编排模块（core/orchestration/pipeline.py）</h3>
+<h4 id="retrievalorchestrator类">RetrievalOrchestrator类</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">RetrievalOrchestrator</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, settings, registry, vector_store, bm25, graph_engine</span>):</span><br><span class="line">        self.settings = settings</span><br><span class="line">        self.embedder = registry.build_embedding()</span><br><span class="line">        self.vector_store = vector_store</span><br><span class="line">        self.bm25 = bm25</span><br><span class="line">        self.graph_engine = graph_engine</span><br><span class="line">        self.weights = settings.retrieval_weights</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">retrieve</span>(<span class="params">self, req: RetrieverRequest</span>) -&gt; RetrieverResult:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;执行多路检索&quot;&quot;&quot;</span></span><br><span class="line">        start = time.perf_counter()</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 1. 查询向量化（一次计算，多次使用）</span></span><br><span class="line">        query_vec = self.embedder.embed_query(req.query)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 四路并行检索</span></span><br><span class="line">        dense_items = self._dense_retrieval(query_vec, req)</span><br><span class="line">        bm25_items = self._bm25_retrieval(req.query, req)</span><br><span class="line">        graph_items, graph_evidence = self._graph_retrieval(req.query, req)</span><br><span class="line">        image_items = self._image_retrieval(query_vec, req)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 两阶段融合</span></span><br><span class="line">        merged_items, merged_scores = self._fuse_results(</span><br><span class="line">            dense_items, bm25_items, graph_items, image_items, req</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 构建返回结果</span></span><br><span class="line">        <span class="keyword">return</span> RetrieverResult(</span><br><span class="line">            items=merged_items,</span><br><span class="line">            scores=merged_scores,</span><br><span class="line">            sources=<span class="built_in">sorted</span>(&#123;item.source <span class="keyword">for</span> item <span class="keyword">in</span> merged_items&#125;),</span><br><span class="line">            graph_evidence=graph_evidence,</span><br><span class="line">            latency_ms=<span class="built_in">round</span>((time.perf_counter() - start) * <span class="number">1000</span>, <span class="number">2</span>),</span><br><span class="line">            debug_info=self._build_debug_info(req, dense_items, bm25_items, graph_items, image_items)</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<h4 id="并行检索优化">并行检索优化</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_dense_retrieval</span>(<span class="params">self, query_vec, req</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;向量检索&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 超额检索（至少20条）</span></span><br><span class="line">    top_k = <span class="built_in">max</span>(req.top_k * <span class="number">3</span>, <span class="number">20</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 有图片输入时使用图片向量</span></span><br><span class="line">    <span class="keyword">if</span> req.image_inputs:</span><br><span class="line">        image_vectors = self.embedder.embed_image_paths(req.image_inputs)</span><br><span class="line">        items = self.vector_store.search(</span><br><span class="line">            collection=<span class="string">&quot;kb_image_assets&quot;</span>,</span><br><span class="line">            vector=image_vectors[<span class="number">0</span>],</span><br><span class="line">            top_k=top_k</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        items = self.vector_store.search(</span><br><span class="line">            collection=<span class="string">&quot;kb_text_chunks&quot;</span>,</span><br><span class="line">            vector=query_vec,</span><br><span class="line">            top_k=top_k</span><br><span class="line">        )</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> items</span><br></pre></td></tr></table></figure>
+<p><strong>踩坑记录</strong>：</p>
+<ol type="1">
+<li><p><strong>检索结果不足</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 问题：top_k=10，融合后可能只剩5条</span></span><br><span class="line"><span class="comment"># 解决：超额检索</span></span><br><span class="line">top_k = <span class="built_in">max</span>(req.top_k * <span class="number">3</span>, <span class="number">20</span>)  <span class="comment"># 至少20条</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>图片检索全零向量</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查CLIP是否可用</span></span><br><span class="line"><span class="keyword">if</span> self.embedder.text_provider != <span class="string">&quot;clip&quot;</span>:</span><br><span class="line">    logger.warning(<span class="string">&quot;CLIP not available, image search disabled&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> []  <span class="comment"># 返回空列表而不是零向量</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>图谱检索超时</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment"># 添加超时控制</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">with</span> timeout(<span class="number">2.0</span>):  <span class="comment"># 2秒超时</span></span><br><span class="line">        graph_items, evidence = self.graph_engine.search(req.query, top_k=<span class="number">12</span>)</span><br><span class="line"><span class="keyword">except</span> TimeoutError:</span><br><span class="line">    logger.warning(<span class="string">&quot;Graph search timed out, returning empty results&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> [], []</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="流式生成模块coregenerationprompting.py">3.
+流式生成模块（core/generation/prompting.py）</h3>
+<h4 id="查询改写">查询改写</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build_rewrite_messages</span>(<span class="params">query: <span class="built_in">str</span>, chat_history: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">str</span>, <span class="built_in">str</span>]]</span>) -&gt; <span class="type">List</span>[<span class="built_in">dict</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;构建查询改写提示&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 只保留最近8轮对话</span></span><br><span class="line">    recent_history = chat_history[-<span class="number">8</span>:]</span><br><span class="line">    </span><br><span class="line">    history_str = <span class="string">&quot;\n&quot;</span>.join([</span><br><span class="line">        <span class="string">f&quot;<span class="subst">&#123;role&#125;</span>: <span class="subst">&#123;text&#125;</span>&quot;</span> <span class="keyword">for</span> role, text <span class="keyword">in</span> recent_history</span><br><span class="line">    ])</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你是查询优化器。将用户问题改写为适合检索的单句，不要回答问题本身。&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;&quot;&quot;历史对话:</span></span><br><span class="line"><span class="string"><span class="subst">&#123;history_str&#125;</span></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">当前问题:</span></span><br><span class="line"><span class="string"><span class="subst">&#123;query&#125;</span></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">改写后的查询:&quot;&quot;&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+<p><strong>踩坑记录</strong>：</p>
+<ol type="1">
+<li><p><strong>提示太长</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制历史轮数</span></span><br><span class="line">recent_history = chat_history[-<span class="number">8</span>:]  <span class="comment"># 只保留8轮</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>改写失败</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 失败时回退到原始查询</span></span><br><span class="line">rewritten = llm.generate(messages)</span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> rewritten <span class="keyword">or</span> <span class="built_in">len</span>(rewritten) &lt; <span class="number">5</span>:</span><br><span class="line">    <span class="keyword">return</span> query  <span class="comment"># 回退</span></span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h4 id="上下文构建">上下文构建</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build_context</span>(<span class="params">items: <span class="type">List</span>[<span class="built_in">dict</span>], max_chars: <span class="built_in">int</span> = <span class="number">9000</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;构建上下文&quot;&quot;&quot;</span></span><br><span class="line">    chunks = []</span><br><span class="line">    total = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> items:</span><br><span class="line">        <span class="comment"># 每个片段包含来源标记</span></span><br><span class="line">        piece = <span class="string">f&quot;[source:<span class="subst">&#123;item.get(<span class="string">&#x27;source&#x27;</span>,<span class="string">&#x27;&#x27;</span>)&#125;</span>] <span class="subst">&#123;item.get(<span class="string">&#x27;content&#x27;</span>,<span class="string">&#x27;&#x27;</span>)&#125;</span>&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 硬截断</span></span><br><span class="line">        <span class="keyword">if</span> total + <span class="built_in">len</span>(piece) &gt; max_chars:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        </span><br><span class="line">        chunks.append(piece)</span><br><span class="line">        total += <span class="built_in">len</span>(piece)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n\n&quot;</span>.join(chunks)</span><br></pre></td></tr></table></figure>
+<p><strong>优化</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按相关性排序后截断</span></span><br><span class="line">items = <span class="built_in">sorted</span>(items, key=<span class="keyword">lambda</span> x: x[<span class="string">&#x27;score&#x27;</span>], reverse=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 预留来源标记的长度</span></span><br><span class="line">max_content_len = max_chars - <span class="built_in">len</span>(<span class="string">f&quot;[source:<span class="subst">&#123;item[<span class="string">&#x27;source&#x27;</span>]&#125;</span>]&quot;</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="数据契约coretypes.py">4. 数据契约（core/types.py）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RetrieverItem</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;检索结果项&quot;&quot;&quot;</span></span><br><span class="line">    item_id: <span class="built_in">str</span>              <span class="comment"># 唯一ID</span></span><br><span class="line">    content: <span class="built_in">str</span>              <span class="comment"># 内容</span></span><br><span class="line">    source: <span class="built_in">str</span>               <span class="comment"># 来源文件</span></span><br><span class="line">    score: <span class="built_in">float</span>              <span class="comment"># 融合分数</span></span><br><span class="line">    metadata: <span class="type">Dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>]  <span class="comment"># 元数据</span></span><br><span class="line">    </span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">is_image</span>(<span class="params">self</span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;判断是否为图片&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> self.source.lower().endswith((<span class="string">&#x27;.png&#x27;</span>, <span class="string">&#x27;.jpg&#x27;</span>, <span class="string">&#x27;.jpeg&#x27;</span>, <span class="string">&#x27;.webp&#x27;</span>))</span><br><span class="line">    </span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">source_name</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;获取文件名&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> Path(self.source).name</span><br></pre></td></tr></table></figure>
+<p><strong>好处</strong>： - 类型安全 - IDE自动补全 -
+避免字典键名拼写错误 - 可添加辅助方法</p>
+<h3 id="web服务webappmain.py">5. Web服务（webapp/main.py）</h3>
+<h4 id="sse流式接口">SSE流式接口</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/api/chat/stream&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">chat_stream</span>(<span class="params"></span></span><br><span class="line"><span class="params">    query: <span class="built_in">str</span> = Form(<span class="params">...</span>),</span></span><br><span class="line"><span class="params">    mode: <span class="built_in">str</span> = Form(<span class="params"><span class="string">&quot;hybrid&quot;</span></span>),</span></span><br><span class="line"><span class="params">    top_k: <span class="built_in">int</span> = Form(<span class="params"><span class="number">10</span></span>),</span></span><br><span class="line"><span class="params">    debug: <span class="built_in">bool</span> = Form(<span class="params"><span class="literal">False</span></span>),</span></span><br><span class="line"><span class="params">    chat_history: <span class="built_in">str</span> = Form(<span class="params"><span class="string">&quot;[]&quot;</span></span>),</span></span><br><span class="line"><span class="params">    image: UploadFile = File(<span class="params"><span class="literal">None</span></span>)</span></span><br><span class="line"><span class="params"></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;SSE流式对话接口&quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">event_stream</span>():</span><br><span class="line">        <span class="comment"># 1. 发送元信息</span></span><br><span class="line">        <span class="keyword">yield</span> _sse(<span class="string">&quot;meta&quot;</span>, &#123;</span><br><span class="line">            <span class="string">&quot;rewritten_query&quot;</span>: rewritten_query,</span><br><span class="line">            <span class="string">&quot;uploaded_images&quot;</span>: uploaded_images</span><br><span class="line">        &#125;)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 流式发送token</span></span><br><span class="line">        answer_parts = []</span><br><span class="line">        <span class="keyword">for</span> delta <span class="keyword">in</span> stream:</span><br><span class="line">            answer_parts.append(delta)</span><br><span class="line">            <span class="keyword">yield</span> _sse(<span class="string">&quot;token&quot;</span>, &#123;<span class="string">&quot;delta&quot;</span>: delta&#125;)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 发送完成信息</span></span><br><span class="line">        <span class="keyword">yield</span> _sse(<span class="string">&quot;done&quot;</span>, &#123;</span><br><span class="line">            <span class="string">&quot;answer&quot;</span>: <span class="string">&quot;&quot;</span>.join(answer_parts),</span><br><span class="line">            <span class="string">&quot;retrieval&quot;</span>: serialized_result</span><br><span class="line">        &#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> StreamingResponse(</span><br><span class="line">        event_stream(),</span><br><span class="line">        media_type=<span class="string">&quot;text/event-stream&quot;</span>,</span><br><span class="line">        headers=&#123;</span><br><span class="line">            <span class="string">&quot;Cache-Control&quot;</span>: <span class="string">&quot;no-cache&quot;</span>,</span><br><span class="line">            <span class="string">&quot;Connection&quot;</span>: <span class="string">&quot;keep-alive&quot;</span>,</span><br><span class="line">            <span class="string">&quot;X-Accel-Buffering&quot;</span>: <span class="string">&quot;no&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p><strong>SSE格式</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">event: meta</span><br><span class="line">data: &#123;&quot;rewritten_query&quot;: &quot;知识库架构&quot;, &quot;uploaded_images&quot;: []&#125;</span><br><span class="line"></span><br><span class="line">event: token</span><br><span class="line">data: &#123;&quot;delta&quot;: &quot;KB&quot;&#125;</span><br><span class="line"></span><br><span class="line">event: token  </span><br><span class="line">data: &#123;&quot;delta&quot;: &quot; Assistant&quot;&#125;</span><br><span class="line"></span><br><span class="line">event: done</span><br><span class="line">data: &#123;&quot;answer&quot;: &quot;KB Assistant是一个...&quot;, &quot;retrieval&quot;: &#123;...&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>踩坑记录</strong>：</p>
+<ol type="1">
+<li><p><strong>Nginx缓冲</strong>： <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 必须禁用Nginx缓冲</span></span><br><span class="line"><span class="attribute">proxy_buffering</span> <span class="literal">off</span>;</span><br><span class="line"><span class="attribute">proxy_cache</span> <span class="literal">off</span>;</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>浏览器缓存</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加响应头禁用缓存</span></span><br><span class="line">headers=&#123;</span><br><span class="line">    <span class="string">&quot;Cache-Control&quot;</span>: <span class="string">&quot;no-cache&quot;</span>,</span><br><span class="line">    <span class="string">&quot;X-Accel-Buffering&quot;</span>: <span class="string">&quot;no&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>连接中断</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加心跳保持连接</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">heartbeat</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">yield</span> _sse(<span class="string">&quot;ping&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="keyword">await</span> asyncio.sleep(<span class="number">30</span>)</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h4 id="安全机制">安全机制</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_save_upload</span>(<span class="params">file: UploadFile</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;安全保存上传文件&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 过滤文件名</span></span><br><span class="line">    safe_filename = secure_filename(file.filename)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 生成随机ID</span></span><br><span class="line">    file_id = <span class="built_in">str</span>(uuid.uuid4())[:<span class="number">8</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 保存路径限制在工作区内</span></span><br><span class="line">    save_path = settings.runtime_dir / <span class="string">&quot;uploads&quot;</span> / <span class="string">f&quot;<span class="subst">&#123;file_id&#125;</span>_<span class="subst">&#123;safe_filename&#125;</span>&quot;</span></span><br><span class="line">    save_path.parent.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 保存文件</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(save_path, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        shutil.copyfileobj(file.file, f)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">str</span>(save_path)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_ensure_workspace_file</span>(<span class="params">path: <span class="built_in">str</span></span>) -&gt; Path:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;确保文件在工作区内&quot;&quot;&quot;</span></span><br><span class="line">    requested = Path(path).resolve()</span><br><span class="line">    root = Path.cwd().resolve()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 检查是否在根目录下</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        requested.relative_to(root)</span><br><span class="line">        <span class="keyword">return</span> requested</span><br><span class="line">    <span class="keyword">except</span> ValueError:</span><br><span class="line">        <span class="keyword">raise</span> HTTPException(status_code=<span class="number">403</span>, detail=<span class="string">&quot;Access denied&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="遇到的bug">遇到的Bug</h2>
+<h3 id="bug-1-异步函数阻塞">Bug 1: 异步函数阻塞</h3>
+<p><strong>现象</strong>：SSE流式输出卡顿</p>
+<p><strong>原因</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误：在异步函数中调用同步IO</span></span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> resp:  <span class="comment"># 同步迭代</span></span><br><span class="line">    <span class="keyword">yield</span> chunk</span><br></pre></td></tr></table></figure></p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用异步生成器</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">for</span> chunk <span class="keyword">in</span> resp:  <span class="comment"># 异步迭代</span></span><br><span class="line">    <span class="keyword">yield</span> chunk</span><br></pre></td></tr></table></figure></p>
+<h3 id="bug-2-文件句柄泄漏">Bug 2: 文件句柄泄漏</h3>
+<p><strong>现象</strong>：长时间运行后打开文件数过多</p>
+<p><strong>原因</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误：没有关闭文件</span></span><br><span class="line">file = <span class="built_in">open</span>(path, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">content = file.read()</span><br><span class="line"><span class="comment"># 忘记关闭</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用上下文管理器</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    content = f.read()</span><br><span class="line"><span class="comment"># 自动关闭</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 或使用try-finally</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    f = <span class="built_in">open</span>(path, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    content = f.read()</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    f.close()</span><br></pre></td></tr></table></figure></p>
+<h3 id="bug-3-类型转换错误">Bug 3: 类型转换错误</h3>
+<p><strong>现象</strong>：Pydantic校验失败</p>
+<p><strong>原因</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误：前端传的是字符串</span></span><br><span class="line">top_k: <span class="built_in">int</span> = Form(<span class="number">10</span>)  <span class="comment"># 但实际收到&quot;10&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 正确：Pydantic会自动转换</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ChatRequest</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    top_k: <span class="built_in">int</span> = Field(default=<span class="number">10</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="bug-4-时区问题">Bug 4: 时区问题</h3>
+<p><strong>现象</strong>：日志时间不对</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timezone</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用UTC时间</span></span><br><span class="line">timestamp = datetime.now(timezone.utc).isoformat()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或设置时区环境变量</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&#x27;TZ&#x27;</span>] = <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="测试">测试</h2>
+<h3 id="单元测试">单元测试</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tests/test_retrieval.py</span></span><br><span class="line"><span class="keyword">import</span> pytest</span><br><span class="line"><span class="keyword">from</span> core.orchestration.pipeline <span class="keyword">import</span> RetrievalOrchestrator</span><br><span class="line"></span><br><span class="line"><span class="meta">@pytest.mark.asyncio</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">test_retrieve</span>():</span><br><span class="line">    orchestrator = RetrievalOrchestrator(...)</span><br><span class="line">    req = RetrieverRequest(query=<span class="string">&quot;什么是RAG？&quot;</span>, top_k=<span class="number">10</span>)</span><br><span class="line">    result = <span class="keyword">await</span> orchestrator.retrieve(req)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">len</span>(result.items) &lt;= <span class="number">10</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">all</span>(item.score &gt; <span class="number">0</span> <span class="keyword">for</span> item <span class="keyword">in</span> result.items)</span><br><span class="line">    <span class="keyword">assert</span> result.latency_ms &gt; <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="集成测试">集成测试</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tests/test_api.py</span></span><br><span class="line"><span class="keyword">from</span> fastapi.testclient <span class="keyword">import</span> TestClient</span><br><span class="line"><span class="keyword">from</span> webapp.main <span class="keyword">import</span> app</span><br><span class="line"></span><br><span class="line">client = TestClient(app)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test_chat_stream</span>():</span><br><span class="line">    response = client.post(<span class="string">&quot;/api/chat/stream&quot;</span>, data=&#123;<span class="string">&quot;query&quot;</span>: <span class="string">&quot;什么是RAG？&quot;</span>&#125;)</span><br><span class="line">    <span class="keyword">assert</span> response.status_code == <span class="number">200</span></span><br><span class="line">    </span><br><span class="line">    events = []</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> response.iter_lines():</span><br><span class="line">        <span class="keyword">if</span> line.startswith(<span class="string">&quot;event: &quot;</span>):</span><br><span class="line">            events.append(line)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">assert</span> <span class="string">&quot;event: meta&quot;</span> <span class="keyword">in</span> events</span><br><span class="line">    <span class="keyword">assert</span> <span class="string">&quot;event: done&quot;</span> <span class="keyword">in</span> events</span><br></pre></td></tr></table></figure>
+<h3 id="性能测试">性能测试</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tests/benchmark.py</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">benchmark_retrieval</span>():</span><br><span class="line">    queries = [<span class="string">&quot;RAG原理&quot;</span>, <span class="string">&quot;机器学习&quot;</span>, <span class="string">&quot;Python异步&quot;</span>]</span><br><span class="line">    </span><br><span class="line">    start = time.perf_counter()</span><br><span class="line">    tasks = [orchestrator.retrieve(RetrieverRequest(query=q)) <span class="keyword">for</span> q <span class="keyword">in</span> queries]</span><br><span class="line">    results = <span class="keyword">await</span> asyncio.gather(*tasks)</span><br><span class="line">    elapsed = time.perf_counter() - start</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;平均延迟: <span class="subst">&#123;<span class="built_in">sum</span>(r.latency_ms <span class="keyword">for</span> r <span class="keyword">in</span> results) / <span class="built_in">len</span>(results):<span class="number">.2</span>f&#125;</span>ms&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;吞吐量: <span class="subst">&#123;<span class="built_in">len</span>(queries) / elapsed:<span class="number">.2</span>f&#125;</span> qps&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="性能优化">性能优化</h2>
+<h3 id="模型缓存">1. 模型缓存</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> lru_cache</span><br><span class="line"></span><br><span class="line"><span class="meta">@lru_cache(<span class="params">maxsize=<span class="number">1</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_embedding_model</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;缓存Embedding模型&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> SentenceTransformer(<span class="string">&quot;CLIP-ViT-B-32-multilingual-v1&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="数据库连接池">2. 数据库连接池</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># QdrantClient默认有连接池</span></span><br><span class="line"><span class="comment"># Neo4j需要配置</span></span><br><span class="line">self.neo4j_driver = GraphDatabase.driver(</span><br><span class="line">    uri,</span><br><span class="line">    max_connection_pool_size=<span class="number">50</span>,</span><br><span class="line">    max_connection_lifetime=<span class="number">30</span> * <span class="number">60</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h3 id="批处理">3. 批处理</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 批量向量化</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">embed_text</span>(<span class="params">self, texts: <span class="type">List</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">float</span>]]:</span><br><span class="line">    batch_size = <span class="number">32</span></span><br><span class="line">    vectors = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(texts), batch_size):</span><br><span class="line">        batch = texts[i:i+batch_size]</span><br><span class="line">        batch_vectors = self.model.encode(batch)</span><br><span class="line">        vectors.extend(batch_vectors)</span><br><span class="line">    <span class="keyword">return</span> vectors</span><br></pre></td></tr></table></figure>
+<h3 id="异步io">4. 异步IO</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 并行检索</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">parallel_retrieve</span>():</span><br><span class="line">    results = <span class="keyword">await</span> asyncio.gather(</span><br><span class="line">        vector_search(query),</span><br><span class="line">        bm25_search(query),</span><br><span class="line">        graph_search(query)</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> results</span><br></pre></td></tr></table></figure>
+<h2 id="性能数据">性能数据</h2>
+<table>
+<thead>
+<tr class="header">
+<th>模块</th>
+<th>耗时</th>
+<th>占比</th>
+<th>优化前</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>查询向量化</td>
+<td>50ms</td>
+<td>30%</td>
+<td>50ms</td>
+</tr>
+<tr class="even">
+<td>Dense检索</td>
+<td>40ms</td>
+<td>25%</td>
+<td>60ms</td>
+</tr>
+<tr class="odd">
+<td>BM25检索</td>
+<td>20ms</td>
+<td>12%</td>
+<td>30ms</td>
+</tr>
+<tr class="even">
+<td>Graph检索</td>
+<td>30ms</td>
+<td>18%</td>
+<td>100ms</td>
+</tr>
+<tr class="odd">
+<td>融合排序</td>
+<td>10ms</td>
+<td>6%</td>
+<td>20ms</td>
+</tr>
+<tr class="even">
+<td>答案生成</td>
+<td>1500ms</td>
+<td>-</td>
+<td>1500ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>优化效果</strong>： - 检索阶段总耗时从260ms降到150ms -
+图谱检索通过并行化从100ms降到30ms</p>
+<h2 id="经验总结">经验总结</h2>
+<h3 id="类型安全很重要">1. 类型安全很重要</h3>
+<p>使用<code>@dataclass</code>和类型提示，避免运行时才发现错误。</p>
+<h3 id="日志要详细">2. 日志要详细</h3>
+<p>记录关键步骤的输入输出，方便排查问题。</p>
+<h3 id="异常处理要完善">3. 异常处理要完善</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    result = risky_operation()</span><br><span class="line"><span class="keyword">except</span> SpecificError <span class="keyword">as</span> e:</span><br><span class="line">    logger.error(<span class="string">f&quot;Specific error: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> fallback_result</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    logger.exception(<span class="string">f&quot;Unexpected error: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+<h3 id="测试覆盖关键路径">4. 测试覆盖关键路径</h3>
+<p>特别是检索和生成逻辑，需要充分测试。</p>
+<h3 id="性能监控">5. 性能监控</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录关键指标</span></span><br><span class="line">logger.info(<span class="string">&quot;Operation completed&quot;</span>, extra=&#123;</span><br><span class="line">    <span class="string">&quot;extra_data&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;latency_ms&quot;</span>: latency,</span><br><span class="line">        <span class="string">&quot;num_items&quot;</span>: <span class="built_in">len</span>(items),</span><br><span class="line">        <span class="string">&quot;memory_mb&quot;</span>: get_memory_usage()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="下一步计划">下一步计划</h2>
+<ol type="1">
+<li><strong>增加单元测试覆盖率</strong>（目前60%，目标80%）</li>
+<li><strong>性能剖析</strong>：使用cProfile找出瓶颈</li>
+<li><strong>代码重构</strong>：提取公共函数，减少重复</li>
+<li><strong>类型检查</strong>：使用mypy进行静态类型检查</li>
+<li><strong>文档完善</strong>：添加模块级文档字符串</li>
+</ol>
+<div data-align="center">
+<p><img src="/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/kb-assistant-3.png" height="360"></p>
+</div>
+<blockquote>
+<p>实现过程中最大的体会是：细节决定成败。很多bug都出在小地方（如异步/同步、文件关闭、类型转换），需要仔细处理。</p>
+</blockquote>
+<p><strong>核心代码行数统计</strong>： - webapp/: ~800行 - core/:
+~3500行 - scripts/: ~600行 - 总计: ~4900行</p>
+<p><strong>参考资料</strong>： - FastAPI官方文档 - PyTorch最佳实践 -
+pytest测试指南 - Python日志最佳实践</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82/" rel="tag"><i class="fa fa-tag"></i> 实现细节</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/" rel="prev" title="kb-assistant开发记录-架构篇">
+                  <i class="fa fa-angle-left"></i> kb-assistant开发记录-架构篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/11/28/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E8%AF%84%E4%BC%B0%E7%AF%87/" rel="next" title="kb-assistant开发记录-评估篇">
+                  kb-assistant开发记录-评估篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

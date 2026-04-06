@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="虚幻引擎核心概念入门：蓝图、Actor、Pawn、GameMode、PlayerController等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚幻引擎基础概念">
+<meta property="og:url" content="https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="虚幻引擎核心概念入门：蓝图、Actor、Pawn、GameMode、PlayerController等">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E-1.png">
+<meta property="article:published_time" content="2024-05-09T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T15:06:15.149Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="Unreal Engine">
+<meta property="article:tag" content="游戏开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E-1.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/","path":"2024/05/09/虚幻引擎基础概念/","title":"虚幻引擎基础概念"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>虚幻引擎基础概念 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">虚幻引擎概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">核心概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#actor"><span class="nav-number">2.1.</span> <span class="nav-text">1. Actor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pawn"><span class="nav-number">2.2.</span> <span class="nav-text">2. Pawn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#character"><span class="nav-number">2.3.</span> <span class="nav-text">3. Character</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#controller"><span class="nav-number">2.4.</span> <span class="nav-text">4. Controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gamemode"><span class="nav-number">2.5.</span> <span class="nav-text">5. GameMode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gamestate"><span class="nav-number">2.6.</span> <span class="nav-text">6. GameState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#playerstate"><span class="nav-number">2.7.</span> <span class="nav-text">7. PlayerState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#level"><span class="nav-number">2.8.</span> <span class="nav-text">8. Level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#world"><span class="nav-number">2.9.</span> <span class="nav-text">9. World</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%93%9D%E5%9B%BE%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">蓝图系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%93%9D%E5%9B%BE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">蓝图类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E8%8A%82%E7%82%B9"><span class="nav-number">3.2.</span> <span class="nav-text">常用节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%E8%93%9D%E5%9B%BE%E6%8E%A7%E5%88%B6%E8%A7%92%E8%89%B2%E7%A7%BB%E5%8A%A8"><span class="nav-number">3.3.</span> <span class="nav-text">示例：蓝图控制角色移动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6component"><span class="nav-number">4.</span> <span class="nav-text">组件（Component）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%BB%84%E4%BB%B6"><span class="nav-number">4.1.</span> <span class="nav-text">常见组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%84%E4%BB%B6"><span class="nav-number">4.2.</span> <span class="nav-text">自定义组件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">输入系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E6%98%A0%E5%B0%84"><span class="nav-number">5.1.</span> <span class="nav-text">输入映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E8%BE%93%E5%85%A5"><span class="nav-number">5.2.</span> <span class="nav-text">处理输入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%90%8C%E6%AD%A5"><span class="nav-number">6.</span> <span class="nav-text">网络同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">6.1.</span> <span class="nav-text">网络模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E5%BC%8F"><span class="nav-number">6.2.</span> <span class="nav-text">同步方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B8%B8%E6%88%8F%E6%A1%86%E6%9E%B6"><span class="nav-number">7.</span> <span class="nav-text">游戏框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%B8%E6%88%8F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">7.1.</span> <span class="nav-text">游戏启动流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%B8%E6%88%8F%E5%BE%AA%E7%8E%AF"><span class="nav-number">7.2.</span> <span class="nav-text">游戏循环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="nav-number">8.</span> <span class="nav-text">实用技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%8E%9F%E5%9E%8B%E5%BC%80%E5%8F%91"><span class="nav-number">8.1.</span> <span class="nav-text">1. 快速原型开发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7"><span class="nav-number">8.2.</span> <span class="nav-text">2. 调试技巧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">8.3.</span> <span class="nav-text">3. 性能优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86"><span class="nav-number">8.4.</span> <span class="nav-text">4. 资源管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="虚幻引擎基础概念 | L's Blog">
+      <meta itemprop="description" content="虚幻引擎核心概念入门：蓝图、Actor、Pawn、GameMode、PlayerController等">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          虚幻引擎基础概念
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-05-09 20:00:00" itemprop="dateCreated datePublished" datetime="2024-05-09T20:00:00+08:00">2024-05-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 23:06:15" itemprop="dateModified" datetime="2026-04-06T23:06:15+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E/" itemprop="url" rel="index"><span itemprop="name">游戏引擎</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">虚幻引擎核心概念入门：蓝图、Actor、Pawn、GameMode、PlayerController等</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>记录学习虚幻引擎过程中的一些核心概念，主要是为了方便自己回顾。从蓝图开始，逐步深入到C++编程。</p>
+</blockquote>
+<hr>
+<h2 id="虚幻引擎概述">虚幻引擎概述</h2>
+<p>虚幻引擎（Unreal Engine，简称UE）是Epic
+Games开发的游戏引擎，目前已发展到UE5。主要特点： -
+强大的渲染能力（Nanite虚拟几何体、Lumen全局光照） - 蓝图可视化编程 -
+跨平台支持（PC、主机、移动设备） - 开源（C++源码可获取）</p>
+<h2 id="核心概念">核心概念</h2>
+<h3 id="actor">1. Actor</h3>
+<p>Actor是虚幻引擎中最基本的对象，可以放置在关卡中。特点： -
+有位置、旋转、缩放（Transform） - 可以被蓝图或C++创建和销毁 -
+可以附加组件（Component）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++中创建Actor</span></span><br><span class="line">APlayerStart* PlayerStart = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">SpawnActor</span>&lt;APlayerStart&gt;(APlayerStart::<span class="built_in">StaticClass</span>(), Location, Rotation);</span><br></pre></td></tr></table></figure>
+<p><strong>Actor的生命周期</strong>： 1. 构造函数（Constructor） 2.
+PostInitializeComponents() 3. BeginPlay() 4. Tick()（每帧调用） 5.
+EndPlay() 6. 析构函数</p>
+<h3 id="pawn">2. Pawn</h3>
+<p>Pawn是Actor的子类，可以被Controller控制。用于表示玩家或AI控制的角色。</p>
+<p><strong>Pawn vs Actor</strong>： - Pawn可以被Controller控制 -
+Pawn可以接收输入 - Pawn有MovementComponent用于移动</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义Pawn</span></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MYGAME_API</span> AMyPawn : <span class="keyword">public</span> APawn</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">AMyPawn</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">BeginPlay</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Tick</span><span class="params">(<span class="type">float</span> DeltaTime)</span> <span class="keyword">override</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">SetupPlayerInputComponent</span><span class="params">(UInputComponent* PlayerInputComponent)</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">UPROPERTY</span>(VisibleAnywhere)</span><br><span class="line">    USphereComponent* SphereComponent;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UPROPERTY</span>(VisibleAnywhere)</span><br><span class="line">    UStaticMeshComponent* MeshComponent;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="character">3. Character</h3>
+<p>Character是Pawn的子类，专门用于表示人形角色。内置： -
+CharacterMovementComponent - CapsuleComponent（碰撞） -
+SkeletalMeshComponent（骨骼网格）</p>
+<p><strong>常用功能</strong>： - 行走、奔跑、跳跃 - 蹲伏、游泳、飞行 -
+网络同步</p>
+<h3 id="controller">4. Controller</h3>
+<p>Controller负责控制Pawn的行为。分为两种：</p>
+<p><strong>PlayerController</strong>：玩家控制 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取PlayerController</span></span><br><span class="line">APlayerController* PC = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">GetFirstPlayerController</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 控制Pawn</span></span><br><span class="line">APawn* MyPawn = PC-&gt;<span class="built_in">GetPawn</span>();</span><br></pre></td></tr></table></figure></p>
+<p><strong>AIController</strong>：AI控制 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在蓝图中使用行为树（Behavior Tree）</span></span><br><span class="line"><span class="comment">// 在C++中使用AIA Perception、Blackboard</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="gamemode">5. GameMode</h3>
+<p>GameMode定义游戏规则，包括： - 玩家数量和类型 - 游戏开始、结束条件 -
+胜负判定</p>
+<p><strong>重要函数</strong>： - <code>InitGame()</code>：游戏初始化 -
+<code>BeginPlay()</code>：游戏开始 - <code>Tick()</code>：每帧更新 -
+<code>EndPlay()</code>：游戏结束</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MYGAME_API</span> AMyGameMode : <span class="keyword">public</span> AGameModeBase</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">AMyGameMode</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">BeginPlay</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Tick</span><span class="params">(<span class="type">float</span> DeltaTime)</span> <span class="keyword">override</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UPROPERTY</span>(EditDefaultsOnly, BlueprintReadWrite)</span><br><span class="line">    int32 MaxPlayers = <span class="number">4</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UPROPERTY</span>(EditDefaultsOnly, BlueprintReadWrite)</span><br><span class="line">    <span class="type">float</span> MatchDuration = <span class="number">300.0f</span>;  <span class="comment">// 5分钟</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="gamestate">6. GameState</h3>
+<p>GameState存储游戏状态信息，会同步给所有客户端（多人游戏）。</p>
+<p><strong>包含信息</strong>： - 游戏进行时间 - 当前回合/关卡 - 团队分数
+- 玩家列表</p>
+<h3 id="playerstate">7. PlayerState</h3>
+<p>PlayerState存储玩家状态，每个玩家一个。</p>
+<p><strong>包含信息</strong>： - 玩家名称 - 分数、击杀数、死亡数 -
+Ping值 - 当前Pawn</p>
+<h3 id="level">8. Level</h3>
+<p>Level（关卡）是游戏世界的容器，包含： - 地形、静态网格 - Actor、Pawn
+- 光照、雾 - 体积（Volume）</p>
+<h3 id="world">9. World</h3>
+<p>World是最高级别的容器，包含一个或多个Level。</p>
+<p><strong>World类型</strong>： - Game World：游戏世界 - Editor
+World：编辑器世界 - PIE World（Play In
+Editor）：编辑器中运行的游戏世界</p>
+<h2 id="蓝图系统">蓝图系统</h2>
+<p>蓝图是虚幻引擎的可视化编程系统。</p>
+<h3 id="蓝图类型">蓝图类型</h3>
+<ol type="1">
+<li><strong>Blueprint Class</strong>：继承自C++类的蓝图</li>
+<li><strong>Blueprint Function Library</strong>：函数库</li>
+<li><strong>Blueprint Interface</strong>：接口</li>
+<li><strong>Blueprint Macro Library</strong>：宏库</li>
+</ol>
+<h3 id="常用节点">常用节点</h3>
+<p><strong>事件节点</strong>： - Event BeginPlay - Event Tick - Event
+ActorBeginOverlap - Event KeyPressed</p>
+<p><strong>执行流节点</strong>： - Branch（if-else） - ForLoop -
+Sequence（顺序执行） - Delay</p>
+<p><strong>变量节点</strong>： - Get/Set - Cast To（类型转换）</p>
+<p><strong>函数节点</strong>： - PrintString - SpawnActor -
+DestroyActor</p>
+<h3 id="示例蓝图控制角色移动">示例：蓝图控制角色移动</h3>
+<ol type="1">
+<li>创建Character蓝图</li>
+<li>添加输入映射（Project Settings -&gt; Input）</li>
+<li>在蓝图中处理输入</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Event Tick -&gt; Get Input Axis Value &quot;MoveForward&quot; -&gt; Add Movement Input</span><br><span class="line">Event Tick -&gt; Get Input Axis Value &quot;MoveRight&quot; -&gt; Add Movement Input</span><br><span class="line">Event Tick -&gt; Get Input Axis Value &quot;Turn&quot; -&gt; Add Controller Yaw Input</span><br></pre></td></tr></table></figure>
+<h2 id="组件component">组件（Component）</h2>
+<p>组件可以附加到Actor上，提供特定功能。</p>
+<h3 id="常见组件">常见组件</h3>
+<p><strong>Scene Component</strong>： - 有Transform -
+可以附加到其他Scene Component -
+如：StaticMeshComponent、CameraComponent</p>
+<p><strong>Actor Component</strong>： - 没有Transform - 提供逻辑功能 -
+如：InputComponent、ActorComponent</p>
+<h3 id="自定义组件">自定义组件</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MYGAME_API</span> UMyComponent : <span class="keyword">public</span> UActorComponent</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">UMyComponent</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">BeginPlay</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">TickComponent</span><span class="params">(<span class="type">float</span> DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">UPROPERTY</span>(EditAnywhere, BlueprintReadWrite)</span><br><span class="line">    <span class="type">float</span> Health = <span class="number">100.0f</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UFUNCTION</span>(BlueprintCallable)</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">TakeDamage</span><span class="params">(<span class="type">float</span> Damage)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UFUNCTION</span>(BlueprintImplementableEvent)</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">OnHealthChanged</span><span class="params">(<span class="type">float</span> NewHealth)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="输入系统">输入系统</h2>
+<h3 id="输入映射">输入映射</h3>
+<p>在Project Settings -&gt; Input中设置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Axis Mappings:</span><br><span class="line">  - MoveForward: W/S (Scale 1.0/-1.0)</span><br><span class="line">  - MoveRight: A/D (Scale -1.0/1.0)</span><br><span class="line">  - Turn: Mouse X (Scale 1.0)</span><br><span class="line">  - LookUp: Mouse Y (Scale -1.0)</span><br><span class="line"></span><br><span class="line">Action Mappings:</span><br><span class="line">  - Jump: Space Bar</span><br><span class="line">  - Fire: Left Mouse Button</span><br></pre></td></tr></table></figure>
+<h3 id="处理输入">处理输入</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AMyCharacter::SetupPlayerInputComponent</span><span class="params">(UInputComponent* PlayerInputComponent)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Super::<span class="built_in">SetupPlayerInputComponent</span>(PlayerInputComponent);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 绑定轴输入</span></span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAxis</span>(<span class="string">&quot;MoveForward&quot;</span>, <span class="keyword">this</span>, &amp;AMyCharacter::MoveForward);</span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAxis</span>(<span class="string">&quot;MoveRight&quot;</span>, <span class="keyword">this</span>, &amp;AMyCharacter::MoveRight);</span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAxis</span>(<span class="string">&quot;Turn&quot;</span>, <span class="keyword">this</span>, &amp;AMyCharacter::Turn);</span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAxis</span>(<span class="string">&quot;LookUp&quot;</span>, <span class="keyword">this</span>, &amp;AMyCharacter::LookUp);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 绑定动作输入</span></span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAction</span>(<span class="string">&quot;Jump&quot;</span>, IE_Pressed, <span class="keyword">this</span>, &amp;ACharacter::Jump);</span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAction</span>(<span class="string">&quot;Jump&quot;</span>, IE_Released, <span class="keyword">this</span>, &amp;ACharacter::StopJumping);</span><br><span class="line">    PlayerInputComponent-&gt;<span class="built_in">BindAction</span>(<span class="string">&quot;Fire&quot;</span>, IE_Pressed, <span class="keyword">this</span>, &amp;AMyCharacter::Fire);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AMyCharacter::MoveForward</span><span class="params">(<span class="type">float</span> Value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (Value != <span class="number">0.0f</span> &amp;&amp; Controller)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">const</span> FRotator Rotation = Controller-&gt;<span class="built_in">GetControlRotation</span>();</span><br><span class="line">        <span class="function"><span class="type">const</span> FRotator <span class="title">YawRotation</span><span class="params">(<span class="number">0</span>, Rotation.Yaw, <span class="number">0</span>)</span></span>;</span><br><span class="line">        <span class="type">const</span> FVector Direction = <span class="built_in">FRotationMatrix</span>(YawRotation).<span class="built_in">GetUnitAxis</span>(EAxis::X);</span><br><span class="line">        <span class="built_in">AddMovementInput</span>(Direction, Value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="网络同步">网络同步</h2>
+<h3 id="网络模式">网络模式</h3>
+<p><strong>Standalone</strong>：单人游戏</p>
+<p><strong>Listen Server</strong>：主机同时是服务器和客户端</p>
+<p><strong>Dedicated Server</strong>：专用服务器</p>
+<h3 id="同步方式">同步方式</h3>
+<p><strong>Replicate</strong>：在蓝图中设置Replicate</p>
+<p><strong>RPC（Remote Procedure Call）</strong>： - Server
+RPC（客户端调用，服务器执行） - Client RPC（服务器调用，客户端执行） -
+Multicast RPC（服务器调用，所有客户端执行）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UFUNCTION</span>(Server, Reliable, WithValidation)</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ServerFire</span><span class="params">(FVector_NetQuantize Location)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AMyCharacter::ServerFire_Implementation</span><span class="params">(FVector_NetQuantize Location)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 服务器端执行</span></span><br><span class="line">    <span class="built_in">MulticastFireEffects</span>(Location);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">AMyCharacter::ServerFire_Validate</span><span class="params">(FVector_NetQuantize Location)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 验证参数</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">UFUNCTION</span>(NetMulticast, Reliable)</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">MulticastFireEffects</span><span class="params">(FVector_NetQuantize Location)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AMyCharacter::MulticastFireEffects_Implementation</span><span class="params">(FVector_NetQuantize Location)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 所有客户端执行</span></span><br><span class="line">    <span class="built_in">PlayFireEffects</span>(Location);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="游戏框架">游戏框架</h2>
+<h3 id="游戏启动流程">游戏启动流程</h3>
+<ol type="1">
+<li>引擎初始化</li>
+<li>加载World</li>
+<li>初始化GameMode</li>
+<li>初始化PlayerController</li>
+<li>创建/加载Pawn</li>
+<li>BeginPlay</li>
+</ol>
+<h3 id="游戏循环">游戏循环</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Tick</span><br><span class="line">  - Update World</span><br><span class="line">    - Update Actors</span><br><span class="line">      - Tick Components</span><br><span class="line">      - Update Physics</span><br><span class="line">      - Update AI</span><br><span class="line">      - Update Animation</span><br><span class="line">      - Render</span><br></pre></td></tr></table></figure>
+<h2 id="实用技巧">实用技巧</h2>
+<h3 id="快速原型开发">1. 快速原型开发</h3>
+<p>使用蓝图快速验证想法，确认后再用C++实现性能关键部分。</p>
+<h3 id="调试技巧">2. 调试技巧</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 打印日志</span></span><br><span class="line"><span class="built_in">UE_LOG</span>(LogTemp, Warning, <span class="built_in">TEXT</span>(<span class="string">&quot;Health: %f&quot;</span>), Health);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 屏幕打印</span></span><br><span class="line">GEngine-&gt;<span class="built_in">AddOnScreenDebugMessage</span>(<span class="number">-1</span>, <span class="number">5.0f</span>, FColor::Red, <span class="built_in">TEXT</span>(<span class="string">&quot;Player Damaged!&quot;</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 断点</span></span><br><span class="line"><span class="built_in">ensureMsgfalse</span>(Health &gt; <span class="number">0</span>, <span class="built_in">TEXT</span>(<span class="string">&quot;Health should not be negative!&quot;</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查看变量</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditAnywhere, Category=<span class="string">&quot;Debug&quot;</span>)</span><br><span class="line"><span class="type">bool</span> bDebugMode = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (bDebugMode)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">DrawDebugSphere</span>(<span class="built_in">GetWorld</span>(), <span class="built_in">GetActorLocation</span>(), <span class="number">100.0f</span>, <span class="number">32</span>, FColor::Green);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="性能优化">3. 性能优化</h3>
+<p><strong>Stat命令</strong>： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stat FPS        # 显示帧率</span><br><span class="line">Stat Unit       # 显示帧时间</span><br><span class="line">Stat Game       # 显示游戏线程时间</span><br><span class="line">Stat Render     # 显示渲染线程时间</span><br></pre></td></tr></table></figure></p>
+<p><strong>优化建议</strong>： - 减少Tick的使用 - 使用事件驱动代替轮询 -
+合理使用Component - 注意网络同步开销</p>
+<h3 id="资源管理">4. 资源管理</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 加载资源</span></span><br><span class="line"><span class="function"><span class="type">static</span> ConstructorHelpers::FObjectFinder&lt;UStaticMesh&gt; <span class="title">MeshAsset</span><span class="params">(TEXT(<span class="string">&quot;/Game/Meshes/MyMesh.MyMesh&quot;</span>))</span></span>;</span><br><span class="line"><span class="keyword">if</span> (MeshAsset.<span class="built_in">Succeeded</span>())</span><br><span class="line">&#123;</span><br><span class="line">    MeshComponent-&gt;<span class="built_in">SetStaticMesh</span>(MeshAsset.Object);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 软引用（异步加载）</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditAnywhere, meta = (MetaClass = <span class="string">&quot;Blueprint&quot;</span>))</span><br><span class="line">FSoftClassPath MyBlueprintClass;</span><br></pre></td></tr></table></figure>
+<h2 id="总结">总结</h2>
+<p>虚幻引擎的核心概念构成了游戏开发的基础： -
+<strong>Actor</strong>：世界中的对象 -
+<strong>Pawn</strong>：可控制的角色 -
+<strong>Controller</strong>：控制逻辑 -
+<strong>GameMode</strong>：游戏规则 -
+<strong>Component</strong>：功能模块 -
+<strong>Blueprint</strong>：可视化编程</p>
+<div data-align="center">
+<p><img src="/2024/05/09/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/虚幻引擎-1.png" height="360"></p>
+</div>
+<blockquote>
+<p>学习虚幻引擎的过程中，最大的体会是：要理解框架的设计思想，而不是死记硬背API。蓝图很适合快速原型，但复杂逻辑还是用C++更清晰。</p>
+</blockquote>
+<p><strong>下一步计划</strong>： - 深入学习UE5的新特性（Nanite、Lumen）
+- 学习Gameplay Ability System - 研究网络同步优化 -
+探索C++与蓝图的最佳实践</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Unreal-Engine/" rel="tag"><i class="fa fa-tag"></i> Unreal Engine</a>
+              <a href="/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/" rel="tag"><i class="fa fa-tag"></i> 游戏开发</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/03/21/AirSim%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7%E4%B8%8E%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/" rel="prev" title="AirSim实用技巧与开发流程">
+                  <i class="fa fa-angle-left"></i> AirSim实用技巧与开发流程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/13/%E6%8C%87%E9%92%88/" rel="next" title="指针">
+                  指针 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

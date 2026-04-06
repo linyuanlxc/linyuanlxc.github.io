@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记录kb-assistant混合检索架构设计思路与技术选型过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kb-assistant开发记录-架构篇">
+<meta property="og:url" content="https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="记录kb-assistant混合检索架构设计思路与技术选型过程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/kb-assistant-2.png">
+<meta property="article:published_time" content="2025-09-19T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T15:10:16.859Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/kb-assistant-2.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/","path":"2025/09/19/kb-assistant开发记录-架构篇/","title":"kb-assistant开发记录-架构篇"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>kb-assistant开发记录-架构篇 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B"><span class="nav-number">1.</span> <span class="nav-text">架构演进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%88%9D%E7%9A%84%E6%83%B3%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">最初的想法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E9%87%8D%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">第一次重构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AC%A1%E9%87%8D%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">第二次重构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">技术选型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89fastapi"><span class="nav-number">2.1.</span> <span class="nav-text">为什么选FastAPI？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89qdrant"><span class="nav-number">2.2.</span> <span class="nav-text">为什么选Qdrant？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89neo4j"><span class="nav-number">2.3.</span> <span class="nav-text">为什么选Neo4j？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8clip%E8%80%8C%E4%B8%8D%E6%98%AF%E7%BA%AF%E6%96%87%E6%9C%ACembedding"><span class="nav-number">2.4.</span> <span class="nav-text">为什么用CLIP而不是纯文本Embedding？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">整体架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A1%E5%86%B3%E7%AD%96"><span class="nav-number">3.2.</span> <span class="nav-text">关键设计决策</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%88%B6%E5%AD%90%E5%88%86%E5%9D%97%E7%AD%96%E7%95%A5"><span class="nav-number">3.2.1.</span> <span class="nav-text">1. 父子分块策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E9%98%B6%E6%AE%B5%E8%9E%8D%E5%90%88"><span class="nav-number">3.2.2.</span> <span class="nav-text">2. 两阶段融合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E7%B4%A2%E5%BC%95"><span class="nav-number">3.2.3.</span> <span class="nav-text">3. 增量索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E9%99%8D%E7%BA%A7"><span class="nav-number">3.2.4.</span> <span class="nav-text">4. 错误降级</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.3.</span> <span class="nav-text">配置文件设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E7%BA%A7%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.1.</span> <span class="nav-text">三级配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE%E5%88%86%E7%A6%BB"><span class="nav-number">3.3.2.</span> <span class="nav-text">模型配置分离</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F"><span class="nav-number">4.</span> <span class="nav-text">性能考量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E6%80%A7%E8%83%BD"><span class="nav-number">4.1.</span> <span class="nav-text">检索性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">内存优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E5%A4%84%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">并发处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%91%E6%8E%A7%E4%B8%8E%E6%97%A5%E5%BF%97"><span class="nav-number">5.</span> <span class="nav-text">监控与日志</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E6%97%A5%E5%BF%97"><span class="nav-number">5.1.</span> <span class="nav-text">结构化日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7"><span class="nav-number">5.2.</span> <span class="nav-text">性能监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%9E%B6%E6%9E%84"><span class="nav-number">6.</span> <span class="nav-text">部署架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="nav-number">6.1.</span> <span class="nav-text">开发环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83"><span class="nav-number">6.2.</span> <span class="nav-text">生产环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95"><span class="nav-number">7.</span> <span class="nav-text">踩坑记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%AF%BC%E5%85%A5"><span class="nav-number">7.1.</span> <span class="nav-text">1. 循环导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%83%AD%E6%9B%B4%E6%96%B0"><span class="nav-number">7.2.</span> <span class="nav-text">2. 配置热更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">7.3.</span> <span class="nav-text">3. 数据库连接池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">7.4.</span> <span class="nav-text">4. 内存泄漏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">8.</span> <span class="nav-text">性能数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5%E4%BC%98%E5%8C%96"><span class="nav-number">9.</span> <span class="nav-text">下一步优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="kb-assistant开发记录-架构篇 | L's Blog">
+      <meta itemprop="description" content="记录kb-assistant混合检索架构设计思路与技术选型过程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kb-assistant开发记录-架构篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-09-19 20:00:00" itemprop="dateCreated datePublished" datetime="2025-09-19T20:00:00+08:00">2025-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 23:10:16" itemprop="dateModified" datetime="2026-04-06T23:10:16+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">记录kb-assistant混合检索架构设计思路与技术选型过程</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇记录kb-assistant的架构设计过程，包括为什么采用FastAPI+Qdrant+Neo4j的技术栈，以及混合检索架构的设计思路。这些都是开发过程中的真实思考。</p>
+</blockquote>
+<hr>
+<h2 id="架构演进">架构演进</h2>
+<h3 id="最初的想法">最初的想法</h3>
+<p>最开始想做一个简单的知识库问答系统： - 用Flask做后端 -
+用FAISS做向量检索 - 用OpenAI的Embedding API</p>
+<p><strong>问题</strong>： - Flask没有自动文档 - FAISS不支持增量更新 -
+OpenAI API有调用限制</p>
+<h3 id="第一次重构">第一次重构</h3>
+<p>改用： - FastAPI：自动生成文档，异步支持好 -
+Qdrant：支持增量更新，RESTful API - 本地CLIP模型：不受API限制</p>
+<p><strong>效果</strong>： - 部署方便了 - 支持增量索引 -
+检索速度提升</p>
+<h3 id="第二次重构">第二次重构</h3>
+<p>发现单纯向量检索效果不够好，于是加入了： - BM25关键词检索 -
+Neo4j图谱检索 - 多路融合排序</p>
+<p><strong>效果</strong>： - 检索准确率提升30% - 能够回答关系型问题 -
+Bad Case减少</p>
+<h2 id="技术选型">技术选型</h2>
+<h3 id="为什么选fastapi">为什么选FastAPI？</h3>
+<p><strong>备选方案</strong>： - Flask：简单但功能少 -
+Django：太重，不适合API服务 - Tornado：异步但文档少</p>
+<p><strong>选择FastAPI的理由</strong>：</p>
+<ol type="1">
+<li><p><strong>类型安全</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/api/chat&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">chat_stream</span>(<span class="params">query: <span class="built_in">str</span> = Form(<span class="params">...</span>), top_k: <span class="built_in">int</span> = Form(<span class="params"><span class="number">10</span></span>)</span>):</span><br><span class="line">    <span class="comment"># 自动校验类型，query必须是str，top_k必须是int</span></span><br><span class="line">    <span class="comment"># 错误输入返回422</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>自动文档</strong> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">访问 /docs 自动生成Swagger文档</span><br><span class="line">访问 /redoc 生成ReDoc文档</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>异步支持</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">retrieve_documents</span>(<span class="params">query: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="comment"># 可以同时处理多个请求</span></span><br><span class="line">    results = <span class="keyword">await</span> asyncio.gather(</span><br><span class="line">        vector_search(query),</span><br><span class="line">        bm25_search(query),</span><br><span class="line">        graph_search(query)</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> results</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>Pydantic模型</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ChatRequest</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    query: <span class="built_in">str</span></span><br><span class="line">    mode: SearchMode = SearchMode.HYBRID</span><br><span class="line">    top_k: <span class="built_in">int</span> = Field(default=<span class="number">10</span>, ge=<span class="number">1</span>, le=<span class="number">50</span>)</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="为什么选qdrant">为什么选Qdrant？</h3>
+<p><strong>备选方案</strong>： - FAISS：Facebook开源，性能好但功能少 -
+Milvus：功能强大但部署复杂 - Pinecone：云服务，有费用</p>
+<p><strong>选择Qdrant的理由</strong>：</p>
+<ol type="1">
+<li><p><strong>RESTful API</strong> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建集合</span></span><br><span class="line">curl -X POST <span class="string">&quot;http://localhost:6333/collections/create&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;name&quot;: &quot;kb_text_chunks&quot;,</span></span><br><span class="line"><span class="string">    &quot;vectors&quot;: &#123;</span></span><br><span class="line"><span class="string">      &quot;size&quot;: 512,</span></span><br><span class="line"><span class="string">      &quot;distance&quot;: &quot;Cosine&quot;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>混合检索支持</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向量检索 + 关键词过滤</span></span><br><span class="line">client.search(</span><br><span class="line">    collection_name=<span class="string">&quot;kb_text_chunks&quot;</span>,</span><br><span class="line">    query_vector=query_vec,</span><br><span class="line">    query_filter=models.Filter(</span><br><span class="line">        must=[</span><br><span class="line">            models.FieldCondition(</span><br><span class="line">                key=<span class="string">&quot;source_type&quot;</span>,</span><br><span class="line">                <span class="keyword">match</span>=models.MatchValue(value=<span class="string">&quot;.md&quot;</span>)</span><br><span class="line">            )</span><br><span class="line">        ]</span><br><span class="line">    )</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>增量更新</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只更新变更的文档</span></span><br><span class="line"><span class="keyword">if</span> doc.checksum != old_checksum:</span><br><span class="line">    vector_store.update(doc)  <span class="comment"># 不是全量重建</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>性能足够</strong></p></li>
+</ol>
+<ul>
+<li>索引10000个文档 &lt; 1秒</li>
+<li>检索延迟 &lt; 100ms</li>
+<li>内存占用合理</li>
+</ul>
+<h3 id="为什么选neo4j">为什么选Neo4j？</h3>
+<p><strong>备选方案</strong>： - 不用图数据库：放弃关系检索 -
+SQLite：不是图数据库，查询复杂 - ArangoDB：多模型，但社区小</p>
+<p><strong>选择Neo4j的理由</strong>：</p>
+<ol type="1">
+<li><p><strong>Cypher查询语言直观</strong> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 查找提到RAG的所有文档</span><br><span class="line">MATCH (e:Entity &#123;name: &#x27;RAG&#x27;&#125;)&lt;-[:MENTIONS]-(d:Doc)</span><br><span class="line">RETURN d</span><br><span class="line"></span><br><span class="line">// 查找相关实体</span><br><span class="line">MATCH (e1:Entity &#123;name: &#x27;RAG&#x27;&#125;)-[:RELATED]-&gt;(e2:Entity)</span><br><span class="line">RETURN e2</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>可视化好</strong> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在Neo4j Browser中可以直接看到节点和关系</span><br><span class="line">方便调试和理解数据结构</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>Python驱动成熟</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> neo4j <span class="keyword">import</span> GraphDatabase</span><br><span class="line"></span><br><span class="line">driver = GraphDatabase.driver(<span class="string">&quot;bolt://localhost:7687&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> driver.session() <span class="keyword">as</span> session:</span><br><span class="line">    result = session.run(</span><br><span class="line">        <span class="string">&quot;MATCH (d:Doc)-[:MENTIONS]-&gt;(e:Entity) WHERE e.name = $name RETURN d&quot;</span>,</span><br><span class="line">        name=<span class="string">&quot;RAG&quot;</span></span><br><span class="line">    )</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>适合知识图谱</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自动从文档提取实体</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">extract_entities</span>(<span class="params">text: <span class="built_in">str</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">str</span>]:</span><br><span class="line">    <span class="keyword">return</span> [w <span class="keyword">for</span> w <span class="keyword">in</span> jieba.analyse.extract_tags(text, topK=<span class="number">8</span>) <span class="keyword">if</span> <span class="built_in">len</span>(w) &gt;= <span class="number">2</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新图谱</span></span><br><span class="line">graph_engine.upsert_from_parent_docs(parent_map)</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="为什么用clip而不是纯文本embedding">为什么用CLIP而不是纯文本Embedding？</h3>
+<p><strong>备选方案</strong>： - OpenAI
+text-embedding-3：效果好，但需要API - BERT：只能文本 -
+SentenceTransformer：多模型可选</p>
+<p><strong>选择CLIP的理由</strong>：</p>
+<ol type="1">
+<li><p><strong>跨模态</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文本和图片在同一空间</span></span><br><span class="line">query_vec = embedder.embed_query(<span class="string">&quot;查找代码截图&quot;</span>)</span><br><span class="line">image_results = vector_store.search(<span class="string">&quot;kb_image_assets&quot;</span>, query_vec)</span><br><span class="line"><span class="comment"># 可以用文本搜图片！</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>本地运行</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不需要API Key</span></span><br><span class="line"><span class="comment"># 不受网络限制</span></span><br><span class="line"><span class="comment"># 无调用费用</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>多语言支持</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 支持中文、英文</span></span><br><span class="line"><span class="comment"># 适合个人知识库</span></span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<p><strong>代价</strong>： - 模型较大（~300MB） -
+需要GPU加速（否则速度慢） - 精度略低于专用文本模型</p>
+<h2 id="架构设计">架构设计</h2>
+<h3 id="整体架构">整体架构</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│              Web Layer                  │</span><br><span class="line">│  FastAPI + Jinja2 Templates + SSE      │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│          Orchestration Layer            │</span><br><span class="line">│      RAGPipeline + RetrievalOrchestrator│</span><br><span class="line">├──────────┬──────────┬──────────┬────────┤</span><br><span class="line">│  Retrieval│ Indexing │ Generation│Providers│</span><br><span class="line">│   融合排序  向量存储   提示词     模型封装  │</span><br><span class="line">├──────────┴──────────┴──────────┴────────┤</span><br><span class="line">│          Data Ingestion Layer           │</span><br><span class="line">│      多格式加载 + 父子分块 + Checksum   │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│       Infrastructure Layer              │</span><br><span class="line">│      配置管理 + 日志 + 监控             │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h3 id="关键设计决策">关键设计决策</h3>
+<h4 id="父子分块策略">1. 父子分块策略</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">split_parent_child</span>(<span class="params">docs, parent_chunk_size=<span class="number">1500</span>, child_chunk_size=<span class="number">380</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    父块：1500字符，用于上下文补充</span></span><br><span class="line"><span class="string">    子块：380字符，用于精确检索</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 先用1500字符分块（父块）</span></span><br><span class="line">    parent_chunks = split(docs, chunk_size=<span class="number">1500</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 每个父块再分380字符（子块）</span></span><br><span class="line">    <span class="keyword">for</span> parent <span class="keyword">in</span> parent_chunks:</span><br><span class="line">        child_chunks = split(parent, chunk_size=<span class="number">380</span>)</span><br><span class="line">        <span class="keyword">for</span> child <span class="keyword">in</span> child_chunks:</span><br><span class="line">            child.parent_id = parent.<span class="built_in">id</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> child_chunks, parent_chunks</span><br></pre></td></tr></table></figure>
+<p><strong>为什么这样设计？</strong></p>
+<ul>
+<li>子块小：检索更精确</li>
+<li>父块大：提供更多上下文</li>
+<li>关系明确：知道子块属于哪个父块</li>
+</ul>
+<p><strong>效果</strong>：回答的完整性和准确性都提升了。</p>
+<h4 id="两阶段融合">2. 两阶段融合</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 阶段1：加权合并</span></span><br><span class="line">merged_scores = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> dense_items:</span><br><span class="line">    merged_scores[item.item_id] = item.score * weights[<span class="string">&quot;text_dense&quot;</span>]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> bm25_items:</span><br><span class="line">    merged_scores[item.item_id] += item.score * weights[<span class="string">&quot;bm25&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 阶段2：RRF补偿</span></span><br><span class="line">rrf_scores = reciprocal_rank_fusion([dense_items, bm25_items, graph_items, image_items])</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> merged_items:</span><br><span class="line">    item.score += rrf_scores.get(item.item_id, <span class="number">0.0</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>为什么两阶段？</strong></p>
+<ul>
+<li>加权合并：体现业务优先级（向量检索最重要）</li>
+<li>RRF补偿：保证公平性（BM25排名靠前的也能得分）</li>
+<li>互补：既考虑分数，也考虑排名</li>
+</ul>
+<h4 id="增量索引">3. 增量索引</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build</span>(<span class="params">incremental=<span class="literal">True</span></span>):</span><br><span class="line">    <span class="comment"># 加载清单</span></span><br><span class="line">    manifest = load_manifest()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 扫描文档</span></span><br><span class="line">    docs = load_raw_documents()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 过滤未变更</span></span><br><span class="line">    changed_docs = []</span><br><span class="line">    <span class="keyword">for</span> doc <span class="keyword">in</span> docs:</span><br><span class="line">        prev = manifest.docs.get(doc.doc_id)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> prev <span class="keyword">or</span> prev[<span class="string">&quot;checksum&quot;</span>] != doc.checksum:</span><br><span class="line">            changed_docs.append(doc)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 只处理变更的</span></span><br><span class="line">    chunks = split(changed_docs)</span><br><span class="line">    embed_and_upsert(chunks)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 更新清单</span></span><br><span class="line">    update_manifest(manifest, changed_docs)</span><br></pre></td></tr></table></figure>
+<p><strong>优势</strong>： - 增量更新快（100个文档更新只需几秒） -
+全量重建慢（10000个文档需要几分钟） - 节省计算资源</p>
+<h4 id="错误降级">4. 错误降级</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 图谱服务不可用时不影响其他功能</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve</span>(<span class="params">req: RetrieverRequest</span>):</span><br><span class="line">    dense_items = vector_store.search(...)  <span class="comment"># 必须成功</span></span><br><span class="line">    bm25_items = bm25.search(...)          <span class="comment"># 必须成功</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        graph_items, evidence = graph_engine.search(...)  <span class="comment"># 可选</span></span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        graph_items = []</span><br><span class="line">        evidence = []</span><br><span class="line">        logger.warning(<span class="string">&quot;Graph retrieval failed, using fallback&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> merge_results(dense_items, bm25_items, graph_items)</span><br></pre></td></tr></table></figure>
+<p><strong>设计原则</strong>： - 核心功能必须可用（向量、BM25） -
+增强功能可以降级（图谱、图片） - 记录日志方便排查</p>
+<h3 id="配置文件设计">配置文件设计</h3>
+<h4 id="三级配置">三级配置</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. Python默认值（settings.py）</span></span><br><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AppSettings</span>:</span><br><span class="line">    source_dir: Path = Path(<span class="string">&quot;kb_source&quot;</span>)</span><br><span class="line">    qdrant_url: <span class="built_in">str</span> = <span class="string">&quot;http://localhost:6333&quot;</span></span><br><span class="line">    retrieval_weights: <span class="built_in">dict</span> = field(default_factory=<span class="keyword">lambda</span>: &#123;</span><br><span class="line">        <span class="string">&quot;text_dense&quot;</span>: <span class="number">0.35</span>,</span><br><span class="line">        <span class="string">&quot;bm25&quot;</span>: <span class="number">0.20</span>,</span><br><span class="line">        <span class="string">&quot;graph&quot;</span>: <span class="number">0.25</span>,</span><br><span class="line">        <span class="string">&quot;image_clip&quot;</span>: <span class="number">0.20</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. YAML覆盖（default.yaml）</span></span><br><span class="line">source_dir: kb_source</span><br><span class="line">qdrant_url: http://localhost:<span class="number">6333</span></span><br><span class="line">retrieval_weights:</span><br><span class="line">  text_dense: <span class="number">0.35</span></span><br><span class="line">  bm25: <span class="number">0.20</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 环境变量覆盖</span></span><br><span class="line">export QDRANT_URL=<span class="string">&quot;http://remote-server:6333&quot;</span></span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>： - 灵活：开发用默认值，部署用环境变量 -
+清晰：优先级明确 - 安全：敏感信息放环境变量</p>
+<h4 id="模型配置分离">模型配置分离</h4>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># model_registry.yaml</span></span><br><span class="line"><span class="attr">providers:</span></span><br><span class="line">  <span class="attr">fast_model:</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">glm-4-flash</span></span><br><span class="line">    <span class="attr">base_url:</span> <span class="string">https://open.bigmodel.cn/api/paas/v4/</span></span><br><span class="line">    <span class="attr">api_key_env:</span> <span class="string">ZHIPUAI_API_KEY</span></span><br><span class="line">    <span class="attr">supports_stream:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">supports_json:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">max_context_tokens:</span> <span class="number">32000</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">quality_model:</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">glm-4-flash</span></span><br><span class="line">    <span class="attr">base_url:</span> <span class="string">https://open.bigmodel.cn/api/paas/v4/</span></span><br><span class="line">    <span class="attr">api_key_env:</span> <span class="string">ZHIPUAI_API_KEY</span></span><br><span class="line">    <span class="attr">supports_stream:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">supports_json:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">embeddings:</span></span><br><span class="line">  <span class="attr">text:</span></span><br><span class="line">    <span class="attr">provider:</span> <span class="string">clip</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">CLIP-ViT-B-32-multilingual-v1</span></span><br><span class="line">    <span class="attr">dimensions:</span> <span class="number">512</span></span><br><span class="line">    </span><br><span class="line">  <span class="attr">image:</span></span><br><span class="line">    <span class="attr">provider:</span> <span class="string">clip</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">CLIP-ViT-B-32-multilingual-v1</span></span><br></pre></td></tr></table></figure>
+<p><strong>好处</strong>： - 模型配置集中管理 - 更换模型只需改配置文件 -
+支持多模型切换</p>
+<h2 id="性能考量">性能考量</h2>
+<h3 id="检索性能">检索性能</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 并行检索</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parallel_retrieve</span>(<span class="params">query</span>):</span><br><span class="line">    <span class="keyword">with</span> ThreadPoolExecutor(max_workers=<span class="number">4</span>) <span class="keyword">as</span> executor:</span><br><span class="line">        future_dense = executor.submit(vector_search, query)</span><br><span class="line">        future_bm25 = executor.submit(bm25_search, query)</span><br><span class="line">        future_graph = executor.submit(graph_search, query)</span><br><span class="line">        </span><br><span class="line">        dense_results = future_dense.result()</span><br><span class="line">        bm25_results = future_bm25.result()</span><br><span class="line">        graph_results = future_graph.result()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> merge_results(dense_results, bm25_results, graph_results)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 性能数据</span></span><br><span class="line"><span class="comment"># 并行检索：~150ms</span></span><br><span class="line"><span class="comment"># 串行检索：~400ms</span></span><br></pre></td></tr></table></figure>
+<h3 id="内存优化">内存优化</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 流式生成，避免大字符串占用内存</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">generate_stream</span>(<span class="params">prompt</span>):</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">for</span> chunk <span class="keyword">in</span> llm.stream(prompt):</span><br><span class="line">        <span class="keyword">yield</span> chunk  <span class="comment"># 一次只处理一个chunk</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量处理，减少数据库交互</span></span><br><span class="line">batch_size = <span class="number">64</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(chunks), batch_size):</span><br><span class="line">    batch = chunks[i:i+batch_size]</span><br><span class="line">    vectors = embedder.embed_text(batch)</span><br><span class="line">    vector_store.upsert(batch, vectors)</span><br></pre></td></tr></table></figure>
+<h3 id="并发处理">并发处理</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># FastAPI的并发</span></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/api/chat/stream&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">chat_stream</span>(<span class="params">req: ChatRequest</span>):</span><br><span class="line">    <span class="comment"># 异步处理多个请求</span></span><br><span class="line">    stream = <span class="keyword">await</span> pipeline.answer_stream(req)</span><br><span class="line">    <span class="keyword">return</span> StreamingResponse(stream)</span><br><span class="line"></span><br><span class="line"><span class="comment"># uvicorn多进程</span></span><br><span class="line"><span class="comment"># uvicorn webapp.main:app --workers 4</span></span><br></pre></td></tr></table></figure>
+<h2 id="监控与日志">监控与日志</h2>
+<h3 id="结构化日志">结构化日志</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">JsonFormatter</span>(logging.Formatter):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">format</span>(<span class="params">self, record</span>):</span><br><span class="line">        <span class="keyword">return</span> json.dumps(&#123;</span><br><span class="line">            <span class="string">&quot;ts&quot;</span>: datetime.now().isoformat(),</span><br><span class="line">            <span class="string">&quot;level&quot;</span>: record.levelname,</span><br><span class="line">            <span class="string">&quot;msg&quot;</span>: record.getMessage(),</span><br><span class="line">            <span class="string">&quot;trace_id&quot;</span>: <span class="built_in">getattr</span>(record, <span class="string">&quot;trace_id&quot;</span>, <span class="literal">None</span>),</span><br><span class="line">            <span class="string">&quot;extra_data&quot;</span>: <span class="built_in">getattr</span>(record, <span class="string">&quot;extra_data&quot;</span>, <span class="literal">None</span>)</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用</span></span><br><span class="line">logger.info(<span class="string">&quot;Retrieval started&quot;</span>, extra=&#123;<span class="string">&quot;trace_id&quot;</span>: <span class="string">&quot;abc123&quot;</span>, <span class="string">&quot;extra_data&quot;</span>: &#123;<span class="string">&quot;top_k&quot;</span>: <span class="number">10</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="性能监控">性能监控</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录各阶段耗时</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">answer_stream</span>(<span class="params">req: RetrieverRequest</span>):</span><br><span class="line">    start = time.perf_counter()</span><br><span class="line">    </span><br><span class="line">    retrieval_result = <span class="keyword">await</span> orchestrator.retrieve(req)</span><br><span class="line">    retrieval_ms = (time.perf_counter() - start) * <span class="number">1000</span></span><br><span class="line">    </span><br><span class="line">    stream = <span class="keyword">await</span> llm.generate(req.query, retrieval_result.context)</span><br><span class="line">    </span><br><span class="line">    logger.info(<span class="string">&quot;Request completed&quot;</span>, extra=&#123;</span><br><span class="line">        <span class="string">&quot;extra_data&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;retrieval_ms&quot;</span>: retrieval_ms,</span><br><span class="line">            <span class="string">&quot;generation_ms&quot;</span>: generation_ms,</span><br><span class="line">            <span class="string">&quot;total_ms&quot;</span>: total_ms</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="部署架构">部署架构</h2>
+<h3 id="开发环境">开发环境</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">本地开发机器</span><br><span class="line">├── Qdrant (Docker)</span><br><span class="line">├── Neo4j (Docker)</span><br><span class="line">├── kb-assistant (Python)</span><br><span class="line">└── 知识库目录</span><br></pre></td></tr></table></figure>
+<h3 id="生产环境">生产环境</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">服务器</span><br><span class="line">├── Nginx (反向代理)</span><br><span class="line">├── kb-assistant (4 workers)</span><br><span class="line">├── Qdrant (单机/集群)</span><br><span class="line">├── Neo4j (单机/集群)</span><br><span class="line">└── 知识库 (NFS挂载)</span><br></pre></td></tr></table></figure>
+<p><strong>部署命令</strong>： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动依赖</span></span><br><span class="line">docker-compose up -d qdrant neo4j</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动应用</span></span><br><span class="line">uvicorn webapp.main:app --host 0.0.0.0 --port 8000 --workers 4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或使用gunicorn</span></span><br><span class="line">gunicorn webapp.main:app -w 4 -k uvicorn.workers.UvicornWorker</span><br></pre></td></tr></table></figure></p>
+<h2 id="踩坑记录">踩坑记录</h2>
+<h3 id="循环导入">1. 循环导入</h3>
+<p><strong>问题</strong>：core模块间相互导入</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 延迟导入</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_pipeline</span>():</span><br><span class="line">    <span class="keyword">from</span> core.orchestration.pipeline <span class="keyword">import</span> RAGPipeline</span><br><span class="line">    <span class="keyword">return</span> RAGPipeline()</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置热更新">2. 配置热更新</h3>
+<p><strong>问题</strong>：修改配置需要重启服务</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监听配置文件变化</span></span><br><span class="line"><span class="keyword">from</span> watchdog.observers <span class="keyword">import</span> Observer</span><br><span class="line"><span class="keyword">from</span> watchdog.events <span class="keyword">import</span> FileSystemEventHandler</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ConfigHandler</span>(<span class="title class_ inherited__">FileSystemEventHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_modified</span>(<span class="params">self, event</span>):</span><br><span class="line">        <span class="keyword">if</span> event.src_path.endswith(<span class="string">&quot;eval_config.yaml&quot;</span>):</span><br><span class="line">            reload_config()</span><br><span class="line"></span><br><span class="line">observer = Observer()</span><br><span class="line">observer.schedule(ConfigHandler(), path=<span class="string">&#x27;./configs&#x27;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line">observer.start()</span><br></pre></td></tr></table></figure></p>
+<h3 id="数据库连接池">3. 数据库连接池</h3>
+<p><strong>问题</strong>：并发高时数据库连接耗尽</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Qdrant默认有连接池</span></span><br><span class="line"><span class="comment"># Neo4j需要配置</span></span><br><span class="line"><span class="keyword">from</span> neo4j <span class="keyword">import</span> GraphDatabase</span><br><span class="line"></span><br><span class="line">driver = GraphDatabase.driver(</span><br><span class="line">    uri,</span><br><span class="line">    auth=(user, password),</span><br><span class="line">    max_connection_pool_size=<span class="number">50</span>,</span><br><span class="line">    max_connection_lifetime=<span class="number">30</span> * <span class="number">60</span>  <span class="comment"># 30分钟</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<h3 id="内存泄漏">4. 内存泄漏</h3>
+<p><strong>问题</strong>：长时间运行后内存占用持续增长</p>
+<p><strong>解决</strong>： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定期清理缓存</span></span><br><span class="line"><span class="keyword">import</span> gc</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">periodic_cleanup</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">await</span> asyncio.sleep(<span class="number">3600</span>)  <span class="comment"># 每小时一次</span></span><br><span class="line">        gc.collect()</span><br><span class="line">        torch.cuda.empty_cache()</span><br></pre></td></tr></table></figure></p>
+<h2 id="性能数据">性能数据</h2>
+<table>
+<thead>
+<tr class="header">
+<th>指标</th>
+<th>数值</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>启动时间</td>
+<td>~5s</td>
+<td>加载模型和索引</td>
+</tr>
+<tr class="even">
+<td>检索延迟</td>
+<td>80-150ms</td>
+<td>混合检索</td>
+</tr>
+<tr class="odd">
+<td>生成延迟</td>
+<td>1-3s</td>
+<td>流式输出</td>
+</tr>
+<tr class="even">
+<td>内存占用</td>
+<td>~2GB</td>
+<td>模型+索引</td>
+</tr>
+<tr class="odd">
+<td>并发量</td>
+<td>10-20</td>
+<td>4 workers</td>
+</tr>
+</tbody>
+</table>
+<h2 id="下一步优化">下一步优化</h2>
+<ol type="1">
+<li><strong>缓存优化</strong>：
+<ul>
+<li>Redis缓存检索结果</li>
+<li>LRU缓存Embedding向量</li>
+</ul></li>
+<li><strong>查询优化</strong>：
+<ul>
+<li>查询改写缓存</li>
+<li>热门问题缓存</li>
+</ul></li>
+<li><strong>索引优化</strong>：
+<ul>
+<li>Qdrant索引参数调优</li>
+<li>BM25索引压缩</li>
+</ul></li>
+<li><strong>水平扩展</strong>：
+<ul>
+<li>Qdrant集群</li>
+<li>应用无状态化</li>
+</ul></li>
+</ol>
+<h2 id="总结">总结</h2>
+<p>架构设计的关键决策： - FastAPI：现代、异步、自动文档 -
+Qdrant：轻量、RESTful、增量更新 - Neo4j：图查询直观、可视化好 -
+混合检索：四路融合，效果好 - 错误降级：核心功能必须可用</p>
+<p>架构演进的原则： - 从简单开始，逐步优化 - 监控驱动架构改进 -
+保持模块低耦合 - 文档和代码同等重要</p>
+<div data-align="center">
+<p><img src="/2025/09/19/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%9E%B6%E6%9E%84%E7%AF%87/kb-assistant-2.png" height="360"></p>
+</div>
+<blockquote>
+<p>架构设计没有银弹，只有适合自己项目的才是最好的。kb-assistant的架构还在持续演进中，根据使用反馈不断调整优化。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i> 架构设计</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/08/15/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E6%A6%82%E5%BF%B5%E7%AF%87/" rel="prev" title="kb-assistant开发记录-概念篇">
+                  <i class="fa fa-angle-left"></i> kb-assistant开发记录-概念篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/10/24/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E5%AE%9E%E7%8E%B0%E7%AF%87/" rel="next" title="kb-assistant开发记录-实现篇">
+                  kb-assistant开发记录-实现篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="南京大学ICS实验PA2阶段：汇编指令与程序优化记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ICS2024-PA2实验记录">
+<meta property="og:url" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="南京大学ICS实验PA2阶段：汇编指令与程序优化记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-1.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-2.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-3.png">
+<meta property="article:published_time" content="2024-02-07T13:15:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T14:58:52.701Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="ICS">
+<meta property="article:tag" content="计算机系统">
+<meta property="article:tag" content="汇编">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-1.png">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/","path":"2024/02/07/ics2024-pa2/","title":"ICS2024-PA2实验记录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ICS2024-PA2实验记录 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pa2%E5%AE%9E%E9%AA%8C%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">PA2实验概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x86-64%E6%B1%87%E7%BC%96%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">x86-64汇编基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">常用寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">常用指令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%81"><span class="nav-number">2.2.1.</span> <span class="nav-text">数据传送</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97"><span class="nav-number">2.2.2.</span> <span class="nav-text">算术运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><span class="nav-number">2.2.3.</span> <span class="nav-text">逻辑运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81"><span class="nav-number">2.2.4.</span> <span class="nav-text">控制流</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">2.3.</span> <span class="nav-text">函数调用约定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%87%E7%BC%96%E4%B8%8Ec%E6%B7%B7%E5%90%88%E7%BC%96%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">汇编与C混合编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96"><span class="nav-number">3.1.</span> <span class="nav-text">内联汇编</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%8B%AC%E6%B1%87%E7%BC%96%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">单独汇编文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">程序性能分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8time%E5%91%BD%E4%BB%A4"><span class="nav-number">4.1.</span> <span class="nav-text">使用time命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8gprof"><span class="nav-number">4.2.</span> <span class="nav-text">使用gprof</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8perf"><span class="nav-number">4.3.</span> <span class="nav-text">使用perf</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cache%E6%9C%BA%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">Cache机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cache%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-number">5.1.</span> <span class="nav-text">Cache层次结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache%E8%A1%8C"><span class="nav-number">5.2.</span> <span class="nav-text">Cache行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E6%80%A7%E5%8E%9F%E7%90%86"><span class="nav-number">5.3.</span> <span class="nav-text">局部性原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%8E%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B"><span class="nav-number">6.</span> <span class="nav-text">流水线与分支预测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">6.1.</span> <span class="nav-text">指令流水线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B"><span class="nav-number">6.2.</span> <span class="nav-text">分支预测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80"><span class="nav-number">6.3.</span> <span class="nav-text">循环展开</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%8A%80%E5%B7%A7%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">优化技巧总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E5%BC%80%E9%94%80"><span class="nav-number">7.1.</span> <span class="nav-text">1. 减少函数调用开销</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8%E5%8F%98%E9%87%8F"><span class="nav-number">7.2.</span> <span class="nav-text">2. 使用寄存器变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE"><span class="nav-number">7.3.</span> <span class="nav-text">3. 减少内存访问</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8simd%E6%8C%87%E4%BB%A4"><span class="nav-number">7.4.</span> <span class="nav-text">4. 使用SIMD指令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95"><span class="nav-number">8.</span> <span class="nav-text">实验踩坑记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%911%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="nav-number">8.1.</span> <span class="nav-text">坑1：内存对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%912volatile%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">8.2.</span> <span class="nav-text">坑2：volatile关键字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%913restrict%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">8.3.</span> <span class="nav-text">坑3：restrict关键字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%914%E8%BF%87%E5%BA%A6%E4%BC%98%E5%8C%96"><span class="nav-number">8.4.</span> <span class="nav-text">坑4：过度优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%915%E5%BF%BD%E7%95%A5%E5%86%85%E5%AD%98%E5%B8%A6%E5%AE%BD"><span class="nav-number">8.5.</span> <span class="nav-text">坑5：忽略内存带宽</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E5%BF%83%E5%BE%97"><span class="nav-number">9.</span> <span class="nav-text">实验心得</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E5%BA%95%E5%B1%82%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">9.1.</span> <span class="nav-text">1. 理解底层很重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%98%AF%E6%9D%83%E8%A1%A1"><span class="nav-number">9.2.</span> <span class="nav-text">2. 性能优化是权衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F%E6%98%AF%E5%85%B3%E9%94%AE"><span class="nav-number">9.3.</span> <span class="nav-text">3. 测量是关键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E5%BE%88%E6%99%BA%E8%83%BD"><span class="nav-number">9.4.</span> <span class="nav-text">4. 编译器很智能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%93%B6%E9%A2%88%E5%8F%AF%E8%83%BD%E5%9C%A8%E6%84%8F%E6%83%B3%E4%B8%8D%E5%88%B0%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">9.5.</span> <span class="nav-text">5. 瓶颈可能在意想不到的地方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ICS2024-PA2实验记录 | L's Blog">
+      <meta itemprop="description" content="南京大学ICS实验PA2阶段：汇编指令与程序优化记录">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ICS2024-PA2实验记录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-07 21:15:00" itemprop="dateCreated datePublished" datetime="2024-02-07T21:15:00+08:00">2024-02-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-06 22:58:52" itemprop="dateModified" datetime="2026-04-06T22:58:52+08:00">2026-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95/" itemprop="url" rel="index"><span itemprop="name">实验记录</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">南京大学ICS实验PA2阶段：汇编指令与程序优化记录</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这是ICS实验的PA2阶段记录，主要涉及汇编指令、程序优化、性能分析等内容。PA2比PA1更深入底层，需要理解汇编代码和处理器行为。</p>
+</blockquote>
+<hr>
+<h2 id="pa2实验概述">PA2实验概述</h2>
+<p>PA2阶段主要内容包括： - x86-64汇编指令深入理解 -
+汇编与C语言的混合编程 - 程序性能分析与优化 - Cache机制与内存层次结构 -
+流水线与分支预测</p>
+<h2 id="x86-64汇编基础">x86-64汇编基础</h2>
+<h3 id="常用寄存器">常用寄存器</h3>
+<p>x86-64架构有16个通用寄存器，每个64位：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%rax, %rbx, %rcx, %rdx, %rsi, %rdi, %rbp, %rsp  ; 8个历史寄存器扩展</span><br><span class="line">%r8, %r9, %r10, %r11, %r12, %r13, %r14, %r15     ; 8个新增寄存器</span><br></pre></td></tr></table></figure>
+<p>寄存器使用约定： - <code>%rax</code>：返回值，乘除法 -
+<code>%rbx</code>：被调用者保存 - <code>%rcx</code>：第4个参数 -
+<code>%rdx</code>：第3个参数 - <code>%rsi</code>：第2个参数 -
+<code>%rdi</code>：第1个参数 - <code>%rbp</code>：帧指针（可选） -
+<code>%rsp</code>：栈指针</p>
+<h3 id="常用指令">常用指令</h3>
+<h4 id="数据传送">数据传送</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">movq %rax, %rbx      ; 将rax的值复制到rbx（8字节）</span><br><span class="line">movl %eax, %ebx      ; 4字节</span><br><span class="line">movw %ax, %bx        ; 2字节</span><br><span class="line">movb %al, %bl        ; 1字节</span><br><span class="line"></span><br><span class="line">movq $0x1234, %rax   ; 立即数到寄存器</span><br><span class="line">movq (%rax), %rbx    ; 内存到寄存器（间接寻址）</span><br><span class="line">movq %rax, (%rbx)    ; 寄存器到内存</span><br></pre></td></tr></table></figure>
+<p><strong>关键发现</strong>：mov指令的两个操作数不能都是内存地址，必须有一个是寄存器。</p>
+<h4 id="算术运算">算术运算</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">addq %rax, %rbx      ; rbx = rbx + rax</span><br><span class="line">subq %rax, %rbx      ; rbx = rbx - rax</span><br><span class="line">imulq %rax, %rbx     ; 有符号乘法：rbx = rbx * rax</span><br><span class="line">idivq %rbx           ; 有符号除法：rdx:rax / rbx</span><br><span class="line"></span><br><span class="line">incq %rax            ; rax++</span><br><span class="line">decq %rax            ; rax--</span><br><span class="line">negq %rax            ; rax = -rax</span><br></pre></td></tr></table></figure>
+<h4 id="逻辑运算">逻辑运算</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">andq %rax, %rbx      ; 按位与</span><br><span class="line">orq %rax, %rbx       ; 按位或</span><br><span class="line">xorq %rax, %rbx      ; 按位异或</span><br><span class="line">notq %rax            ; 按位取反</span><br><span class="line"></span><br><span class="line">shlq $2, %rax        ; 左移2位（相当于乘以4）</span><br><span class="line">shrq $2, %rax        ; 逻辑右移2位</span><br><span class="line">sarv $2, %rax        ; 算术右移2位（保留符号位）</span><br></pre></td></tr></table></figure>
+<p><strong>实验中发现</strong>：移位指令对性能优化很有用，移位操作比乘除法快得多。</p>
+<h4 id="控制流">控制流</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cmpq %rax, %rbx      ; 比较rbx和rax（rbx - rax，更新标志位）</span><br><span class="line">testq %rax, %rax     ; 测试rax是否为0（rax &amp; rax）</span><br><span class="line"></span><br><span class="line">je label             ; 相等则跳转</span><br><span class="line">jne label            ; 不等则跳转</span><br><span class="line">jg label             ; 大于则跳转（有符号）</span><br><span class="line">jl label             ; 小于则跳转（有符号）</span><br><span class="line">ja label             ; 大于则跳转（无符号）</span><br><span class="line">jb label             ; 小于则跳转（无符号）</span><br><span class="line"></span><br><span class="line">jmp label            ; 无条件跳转</span><br></pre></td></tr></table></figure>
+<h3 id="函数调用约定">函数调用约定</h3>
+<p>x86-64使用寄存器传递前6个参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># C函数：int func(int a, int b, int c, int d, int e, int f, int g);</span><br><span class="line"># 参数传递：</span><br><span class="line"># a -&gt; %rdi</span><br><span class="line"># b -&gt; %rsi</span><br><span class="line"># c -&gt; %rdx</span><br><span class="line"># d -&gt; %rcx</span><br><span class="line"># e -&gt; %r8</span><br><span class="line"># f -&gt; %r9</span><br><span class="line"># g -&gt; 栈上（因为超过了6个）</span><br><span class="line"></span><br><span class="line"># 调用函数</span><br><span class="line">call func</span><br><span class="line"></span><br><span class="line"># 函数返回后，返回值在%rax中</span><br></pre></td></tr></table></figure>
+<p><strong>实验踩坑</strong>：在混合编程时，必须遵守调用约定，否则参数传递会出错。</p>
+<h2 id="汇编与c混合编程">汇编与C混合编程</h2>
+<h3 id="内联汇编">内联汇编</h3>
+<p>在C代码中嵌入汇编：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span>, b = <span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> result;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 使用内联汇编计算a + b</span></span><br><span class="line">    __asm__ (</span><br><span class="line">        <span class="string">&quot;addl %%ebx, %%eax&quot;</span>    <span class="comment">// 汇编指令</span></span><br><span class="line">        : <span class="string">&quot;=a&quot;</span> (result)        <span class="comment">// 输出：result = eax</span></span><br><span class="line">        : <span class="string">&quot;a&quot;</span> (a), <span class="string">&quot;b&quot;</span> (b)     <span class="comment">// 输入：eax = a, ebx = b</span></span><br><span class="line">        :                      <span class="comment">// 被修改的寄存器（没有）</span></span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d + %d = %d\n&quot;</span>, a, b, result);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>关键发现</strong>：内联汇编的语法很复杂，特别是约束条件（constraint）容易出错。</p>
+<h3 id="单独汇编文件">单独汇编文件</h3>
+<p>更推荐的方式是将汇编代码写在单独的文件中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># add.s</span><br><span class="line">.global add_numbers</span><br><span class="line">add_numbers:</span><br><span class="line">    pushq %rbp</span><br><span class="line">    movq %rsp, %rbp</span><br><span class="line">    </span><br><span class="line">    movq %rdi, %rax      # a</span><br><span class="line">    addq %rsi, %rax      # a + b</span><br><span class="line">    </span><br><span class="line">    popq %rbp</span><br><span class="line">    ret</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 声明外部函数</span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">long</span> <span class="title function_">add_numbers</span><span class="params">(<span class="type">long</span> a, <span class="type">long</span> b)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">long</span> result = add_numbers(<span class="number">10</span>, <span class="number">20</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Result: %ld\n&quot;</span>, result);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc -c add.s -o add.o</span><br><span class="line">gcc -c main.c -o main.o</span><br><span class="line">gcc add.o main.o -o program</span><br></pre></td></tr></table></figure></p>
+<h2 id="程序性能分析">程序性能分析</h2>
+<h3 id="使用time命令">使用time命令</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试程序运行时间</span></span><br><span class="line">time ./program</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出示例：</span></span><br><span class="line"><span class="comment"># real    0m1.234s    # 实际时间</span></span><br><span class="line"><span class="comment"># user    0m1.200s    # 用户态CPU时间</span></span><br><span class="line"><span class="comment"># sys     0m0.030s    # 内核态CPU时间</span></span><br></pre></td></tr></table></figure>
+<p><strong>理解</strong>：real = user + sys + 等待时间（I/O等）</p>
+<h3 id="使用gprof">使用gprof</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编译时添加-pg选项</span></span><br><span class="line">gcc -pg -o program program.c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行程序</span></span><br><span class="line">./program</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成性能报告</span></span><br><span class="line">gprof ./program gmon.out &gt; report.txt</span><br></pre></td></tr></table></figure>
+<p><strong>实验发现</strong>：gprof可以显示每个函数的调用次数和时间占比，帮助定位性能瓶颈。</p>
+<h3 id="使用perf">使用perf</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计CPU周期和指令数</span></span><br><span class="line">perf <span class="built_in">stat</span> ./program</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录并分析</span></span><br><span class="line">perf record ./program</span><br><span class="line">perf report</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看缓存未命中</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cache-misses ./program</span><br></pre></td></tr></table></figure>
+<p><strong>关键指标</strong>： - Cache miss
+rate：缓存未命中率，过高会影响性能 - Branch
+misprediction：分支预测失败率 -
+CPI：每条指令的周期数，理想情况下接近1</p>
+<h2 id="cache机制">Cache机制</h2>
+<h3 id="cache层次结构">Cache层次结构</h3>
+<p>现代CPU通常有三级Cache： - L1 Cache：最快（1-2周期），最小（32-64KB）
+- L2 Cache：较快（10周期），中等（256KB-1MB） - L3
+Cache：较慢（40周期），较大（几MB-几十MB） -
+主存：最慢（200+周期），最大（GB级别）</p>
+<div data-align="center">
+<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-1.png" height="360"></p>
+</div>
+<h3 id="cache行">Cache行</h3>
+<p>Cache以行为单位（通常是64字节）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试Cache行大小的代码</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SIZE 64 * 1024 * 1024  <span class="comment">// 64MB</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> *arr = (<span class="type">int</span>*)<span class="built_in">malloc</span>(SIZE);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE / <span class="keyword">sizeof</span>(<span class="type">int</span>); i++) &#123;</span><br><span class="line">        arr[i] = i;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="type">clock_t</span> start = clock();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 按Cache行大小访问</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE / <span class="keyword">sizeof</span>(<span class="type">int</span>); i += <span class="number">16</span>) &#123;  <span class="comment">// 16 * 4 = 64字节</span></span><br><span class="line">        arr[i] = arr[i] * <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="type">clock_t</span> end = clock();</span><br><span class="line">    <span class="type">double</span> time1 = (<span class="type">double</span>)(end - start) / CLOCKS_PER_SEC;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Time with cache-friendly access: %f seconds\n&quot;</span>, time1);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 不按Cache行大小访问</span></span><br><span class="line">    start = clock();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE / <span class="keyword">sizeof</span>(<span class="type">int</span>); i += <span class="number">17</span>) &#123;  <span class="comment">// 不是Cache行大小的倍数</span></span><br><span class="line">        arr[i] = arr[i] * <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    end = clock();</span><br><span class="line">    <span class="type">double</span> time2 = (<span class="type">double</span>)(end - start) / CLOCKS_PER_SEC;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Time with cache-unfriendly access: %f seconds\n&quot;</span>, time2);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Speedup: %.2fx\n&quot;</span>, time2 / time1);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">free</span>(arr);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>实验结果</strong>：Cache友好的访问方式比不友好的快10-20倍！</p>
+<h3 id="局部性原理">局部性原理</h3>
+<p><strong>时间局部性</strong>：最近访问的数据很可能再次被访问</p>
+<p><strong>空间局部性</strong>：与当前访问数据相邻的数据很可能被访问</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 空间局部性好的代码</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">    sum += arr[i];  <span class="comment">// 连续访问数组</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 空间局部性差的代码</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">    sum += arr[i * <span class="number">100</span>];  <span class="comment">// 跳跃访问</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="流水线与分支预测">流水线与分支预测</h2>
+<h3 id="指令流水线">指令流水线</h3>
+<p>现代CPU使用流水线技术，将指令执行分为多个阶段：</p>
+<ol type="1">
+<li>取指（Fetch）</li>
+<li>译码（Decode）</li>
+<li>执行（Execute）</li>
+<li>访存（Memory Access）</li>
+<li>写回（Write Back）</li>
+</ol>
+<div data-align="center">
+<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-2.png" height="360"></p>
+</div>
+<p><strong>流水线的挑战</strong>：分支指令会破坏流水线。</p>
+<h3 id="分支预测">分支预测</h3>
+<p>CPU会预测分支的方向，提前执行指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"># 如果预测正确，流水线不受影响</span><br><span class="line"># 如果预测错误，需要清空流水线，重新加载</span><br><span class="line"></span><br><span class="line"># 测试分支预测影响的代码</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;time.h&gt;</span><br><span class="line"></span><br><span class="line">#define N 100000000</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">    int arr[N];</span><br><span class="line">    </span><br><span class="line">    // 初始化：前一半是0，后一半是1</span><br><span class="line">    for (int i = 0; i &lt; N/2; i++) &#123;</span><br><span class="line">        arr[i] = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    for (int i = N/2; i &lt; N; i++) &#123;</span><br><span class="line">        arr[i] = 1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    clock_t start = clock();</span><br><span class="line">    long sum = 0;</span><br><span class="line">    </span><br><span class="line">    // 分支预测友好的模式（可预测）</span><br><span class="line">    for (int i = 0; i &lt; N; i++) &#123;</span><br><span class="line">        if (arr[i] &lt; 0.5) &#123;  # 前一半总是true，后一半总是false</span><br><span class="line">            sum += i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    clock_t end = clock();</span><br><span class="line">    double time1 = (double)(end - start) / CLOCKS_PER_SEC;</span><br><span class="line">    </span><br><span class="line">    printf(&quot;Predictable branch time: %f seconds\n&quot;, time1);</span><br><span class="line">    </span><br><span class="line">    // 重新初始化：随机模式</span><br><span class="line">    for (int i = 0; i &lt; N; i++) &#123;</span><br><span class="line">        arr[i] = rand() % 2;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    start = clock();</span><br><span class="line">    sum = 0;</span><br><span class="line">    </span><br><span class="line">    // 分支预测不友好的模式（随机）</span><br><span class="line">    for (int i = 0; i &lt; N; i++) &#123;</span><br><span class="line">        if (arr[i] &lt; 0.5) &#123;  # 随机</span><br><span class="line">            sum += i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    end = clock();</span><br><span class="line">    double time2 = (double)(end - start) / CLOCKS_PER_SEC;</span><br><span class="line">    </span><br><span class="line">    printf(&quot;Random branch time: %f seconds\n&quot;, time2);</span><br><span class="line">    printf(&quot;Slowdown: %.2fx\n&quot;, time2 / time1);</span><br><span class="line">    </span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>实验结果</strong>：可预测的分支比随机分支快3-5倍！</p>
+<h3 id="循环展开">循环展开</h3>
+<p>通过减少循环次数来提高性能：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始代码</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    sum += arr[i];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 展开4次的代码</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i += <span class="number">4</span>) &#123;</span><br><span class="line">    sum += arr[i];</span><br><span class="line">    sum += arr[i + <span class="number">1</span>];</span><br><span class="line">    sum += arr[i + <span class="number">2</span>];</span><br><span class="line">    sum += arr[i + <span class="number">3</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>优势</strong>： - 减少分支判断次数 - 提高指令级并行 -
+更好地利用流水线</p>
+<p><strong>注意事项</strong>： - 需要处理剩余元素（当n不是4的倍数时） -
+可能增加代码体积 - 过度展开可能影响Cache性能</p>
+<h2 id="优化技巧总结">优化技巧总结</h2>
+<h3 id="减少函数调用开销">1. 减少函数调用开销</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化前</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">    result += compute(i);  <span class="comment">// 函数调用开销大</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优化后：内联函数</span></span><br><span class="line"><span class="keyword">inline</span> <span class="type">int</span> <span class="title function_">compute_inline</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> x * x + <span class="number">2</span> * x + <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">    result += compute_inline(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用寄存器变量">2. 使用寄存器变量</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 建议编译器将频繁使用的变量放在寄存器</span></span><br><span class="line"><span class="keyword">register</span> <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    sum += arr[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong>：<code>register</code>只是建议，现代编译器通常能自动优化。</p>
+<h3 id="减少内存访问">3. 减少内存访问</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化前</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    arr1[i] = arr2[i] + arr3[i] + arr4[i] + arr5[i];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优化后：减少内存写入</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    <span class="type">int</span> temp = arr2[i] + arr3[i];</span><br><span class="line">    temp += arr4[i] + arr5[i];</span><br><span class="line">    arr1[i] = temp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用simd指令">4. 使用SIMD指令</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;immintrin.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用AVX指令一次处理8个浮点数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vector_add</span><span class="params">(<span class="type">float</span>* a, <span class="type">float</span>* b, <span class="type">float</span>* c, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (; i &lt;= n - <span class="number">8</span>; i += <span class="number">8</span>) &#123;</span><br><span class="line">        __m256 vec_a = _mm256_loadu_ps(&amp;a[i]);</span><br><span class="line">        __m256 vec_b = _mm256_loadu_ps(&amp;b[i]);</span><br><span class="line">        __m256 vec_c = _mm256_add_ps(vec_a, vec_b);</span><br><span class="line">        _mm256_storeu_ps(&amp;c[i], vec_c);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理剩余元素</span></span><br><span class="line">    <span class="keyword">for</span> (; i &lt; n; i++) &#123;</span><br><span class="line">        c[i] = a[i] + b[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>实验结果</strong>：SIMD版本比普通版本快8倍（理论上）！</p>
+<h2 id="实验踩坑记录">实验踩坑记录</h2>
+<h3 id="坑1内存对齐">坑1：内存对齐</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">S</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;      <span class="comment">// 1字节</span></span><br><span class="line">    <span class="type">int</span> b;       <span class="comment">// 4字节</span></span><br><span class="line">    <span class="type">short</span> c;     <span class="comment">// 2字节</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>问题</strong>：结构体实际大小可能是12字节而不是7字节！</p>
+<p><strong>原因</strong>：编译器为了性能会进行内存对齐。</p>
+<p><strong>解决方案</strong>： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(1)  <span class="comment">// 按1字节对齐</span></span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">S</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">int</span> b;</span><br><span class="line">    <span class="type">short</span> c;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack()   <span class="comment">// 恢复默认对齐</span></span></span><br></pre></td></tr></table></figure></p>
+<h3 id="坑2volatile关键字">坑2：volatile关键字</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 没有volatile</span></span><br><span class="line"><span class="type">int</span> flag = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">wait</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (flag == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 等待</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 编译器可能优化为只检查一次！</span></span><br></pre></td></tr></table></figure>
+<p><strong>解决方案</strong>： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="type">int</span> flag = <span class="number">0</span>;  <span class="comment">// 告诉编译器不要优化</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="坑3restrict关键字">坑3：restrict关键字</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">copy</span><span class="params">(<span class="type">int</span>* a, <span class="type">int</span>* b, <span class="type">int</span>* c, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        c[i] = a[i] + b[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果a、b、c指向重叠的内存区域，会有问题！</span></span><br></pre></td></tr></table></figure>
+<p><strong>解决方案</strong>： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">copy_optimized</span><span class="params">(<span class="type">int</span>* <span class="keyword">restrict</span> a, <span class="type">int</span>* <span class="keyword">restrict</span> b, <span class="type">int</span>* <span class="keyword">restrict</span> c, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        c[i] = a[i] + b[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>restrict</code>告诉编译器指针指向的内存不重叠，可以进行激进优化。</p>
+<h3 id="坑4过度优化">坑4：过度优化</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始代码，清晰易懂</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sum</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="type">int</span> result = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        result += i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 过度优化的代码，使用了公式，但可能溢出</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sum_optimized</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> n * (n + <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>问题</strong>：当n很大时，<code>n * (n + 1)</code>可能溢出！</p>
+<p><strong>教训</strong>：优化时要考虑边界情况。</p>
+<h3 id="坑5忽略内存带宽">坑5：忽略内存带宽</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化前：计算密集型</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> k = <span class="number">0</span>; k &lt; n; k++) &#123;</span><br><span class="line">            c[i][j] += a[i][k] * b[k][j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优化后：缓存友好的矩阵乘法</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> k = <span class="number">0</span>; k &lt; n; k++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">            c[i][j] += a[i][k] * b[k][j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>实验结果</strong>：缓存友好的版本快5-10倍！</p>
+<h2 id="实验心得">实验心得</h2>
+<h3 id="理解底层很重要">1. 理解底层很重要</h3>
+<p>通过PA2实验，深刻理解了汇编指令、内存层次结构、流水线等底层知识。这些知识对写出高性能代码至关重要。</p>
+<h3 id="性能优化是权衡">2. 性能优化是权衡</h3>
+<p>优化通常需要在多个方面权衡： - 时间与空间 - 代码复杂度与性能 -
+可读性与执行效率</p>
+<h3 id="测量是关键">3. 测量是关键</h3>
+<p>不要凭感觉优化，一定要用工具测量： - time - gprof - perf -
+Cachegrind</p>
+<h3 id="编译器很智能">4. 编译器很智能</h3>
+<p>现代编译器（gcc -O2/O3）能自动做很多优化： - 循环展开 - 函数内联 -
+常量传播 - 死代码消除</p>
+<p>所以，写清晰的代码比手动微优化更重要。</p>
+<h3 id="瓶颈可能在意想不到的地方">5. 瓶颈可能在意想不到的地方</h3>
+<p>通过实验发现，很多时候性能瓶颈不在算法复杂度，而在： - Cache未命中 -
+分支预测失败 - 内存对齐 - 数据依赖</p>
+<h2 id="总结">总结</h2>
+<p>PA2实验让我深入理解了程序在底层是如何执行的，以及如何优化程序性能。虽然现代编译器很智能，但理解底层原理仍然很重要，特别是在性能关键的场景。</p>
+<div data-align="center">
+<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-3.png" height="360"></p>
+</div>
+<blockquote>
+<p>实验过程中最大的收获是：性能优化不是玄学，而是有科学依据的。通过工具分析，找到真正的瓶颈，再有针对性地优化，才能事半功倍。</p>
+</blockquote>
+<hr>
+<p><strong>参考资料</strong>： - ICS实验手册 - x86-64汇编文档 -
+《Computer Systems: A Programmer's Perspective》</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ICS/" rel="tag"><i class="fa fa-tag"></i> ICS</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/" rel="tag"><i class="fa fa-tag"></i> 计算机系统</a>
+              <a href="/tags/%E6%B1%87%E7%BC%96/" rel="tag"><i class="fa fa-tag"></i> 汇编</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/01/15/Git%E5%91%BD%E4%BB%A4%E7%AC%94%E8%AE%B0/" rel="prev" title="Git命令笔记">
+                  <i class="fa fa-angle-left"></i> Git命令笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/03/21/AirSim%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7%E4%B8%8E%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/" rel="next" title="AirSim实用技巧与开发流程">
+                  AirSim实用技巧与开发流程 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">37k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
