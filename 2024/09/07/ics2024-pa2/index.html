@@ -23,27 +23,27 @@
     <meta name="description" content="南京大学ICS实验PA2阶段：汇编指令与程序优化记录">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ICS2024-PA2实验记录">
-<meta property="og:url" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/index.html">
+<meta property="og:url" content="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/index.html">
 <meta property="og:site_name" content="L&#39;s Blog">
 <meta property="og:description" content="南京大学ICS实验PA2阶段：汇编指令与程序优化记录">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-1.png">
-<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-2.png">
-<meta property="og:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-3.png">
-<meta property="article:published_time" content="2024-02-07T13:15:00.000Z">
-<meta property="article:modified_time" content="2026-04-06T14:58:52.701Z">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/ics2024-pa2-1.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/ics2024-pa2-2.png">
+<meta property="og:image" content="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/ics2024-pa2-3.png">
+<meta property="article:published_time" content="2024-09-07T13:15:00.000Z">
+<meta property="article:modified_time" content="2026-04-06T16:48:50.880Z">
 <meta property="article:author" content="LJL">
 <meta property="article:tag" content="ICS">
 <meta property="article:tag" content="计算机系统">
 <meta property="article:tag" content="汇编">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/ics2024-pa2-1.png">
+<meta name="twitter:image" content="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/ics2024-pa2-1.png">
 
 
-<link rel="canonical" href="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/">
+<link rel="canonical" href="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/","path":"2024/02/07/ics2024-pa2/","title":"ICS2024-PA2实验记录"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/","path":"2024/09/07/ics2024-pa2/","title":"ICS2024-PA2实验记录"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>ICS2024-PA2实验记录 | L's Blog</title>
@@ -203,7 +203,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2024/02/07/ics2024-pa2/">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2024/09/07/ics2024-pa2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -232,7 +232,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-02-07 21:15:00" itemprop="dateCreated datePublished" datetime="2024-02-07T21:15:00+08:00">2024-02-07</time>
+      <time title="创建时间：2024-09-07 21:15:00" itemprop="dateCreated datePublished" datetime="2024-09-07T21:15:00+08:00">2024-09-07</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -331,7 +331,7 @@ CPI：每条指令的周期数，理想情况下接近1</p>
 Cache：较慢（40周期），较大（几MB-几十MB） -
 主存：最慢（200+周期），最大（GB级别）</p>
 <div data-align="center">
-<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-1.png" height="360"></p>
+<p><img src="/2024/09/07/ics2024-pa2/ics2024-pa2-1.png" height="360"></p>
 </div>
 <h3 id="cache行">Cache行</h3>
 <p>Cache以行为单位（通常是64字节）：</p>
@@ -352,7 +352,7 @@ Cache：较慢（40周期），较大（几MB-几十MB） -
 <li>写回（Write Back）</li>
 </ol>
 <div data-align="center">
-<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-2.png" height="360"></p>
+<p><img src="/2024/09/07/ics2024-pa2/ics2024-pa2-2.png" height="360"></p>
 </div>
 <p><strong>流水线的挑战</strong>：分支指令会破坏流水线。</p>
 <h3 id="分支预测">分支预测</h3>
@@ -416,7 +416,7 @@ Cachegrind</p>
 <h2 id="总结">总结</h2>
 <p>PA2实验让我深入理解了程序在底层是如何执行的，以及如何优化程序性能。虽然现代编译器很智能，但理解底层原理仍然很重要，特别是在性能关键的场景。</p>
 <div data-align="center">
-<p><img src="/2024/02/07/ics2024-pa2/ics2024-pa2-3.png" height="360"></p>
+<p><img src="/2024/09/07/ics2024-pa2/ics2024-pa2-3.png" height="360"></p>
 </div>
 <blockquote>
 <p>实验过程中最大的收获是：性能优化不是玄学，而是有科学依据的。通过工具分析，找到真正的瓶颈，再有针对性地优化，才能事半功倍。</p>
@@ -442,13 +442,13 @@ Cachegrind</p>
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/01/15/Git%E5%91%BD%E4%BB%A4%E7%AC%94%E8%AE%B0/" rel="prev" title="Git命令笔记">
-                  <i class="fa fa-angle-left"></i> Git命令笔记
+                <a href="/2024/09/02/FreeRTOS-2/" rel="prev" title="FreeRTOS-2">
+                  <i class="fa fa-angle-left"></i> FreeRTOS-2
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/03/21/AirSim%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7%E4%B8%8E%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/" rel="next" title="AirSim实用技巧与开发流程">
-                  AirSim实用技巧与开发流程 <i class="fa fa-angle-right"></i>
+                <a href="/2024/10/13/%E6%8C%87%E9%92%88/" rel="next" title="指针">
+                  指针 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
