@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="从IEEE 754表示、魔数推导到牛顿迭代，系统拆解Quake III中著名的快速倒平方根算法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="雷神之锤3倒平方根算法详解">
+<meta property="og:url" content="https://linyuanlxc.github.io/2026/03/25/%E9%9B%B7%E7%A5%9E%E4%B9%8B%E9%94%A43%E5%80%92%E5%B9%B3%E6%96%B9%E6%A0%B9%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="从IEEE 754表示、魔数推导到牛顿迭代，系统拆解Quake III中著名的快速倒平方根算法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-24T17:23:29.000Z">
+<meta property="article:modified_time" content="2026-05-10T06:12:11.016Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="C语言">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="浮点数">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2026/03/25/%E9%9B%B7%E7%A5%9E%E4%B9%8B%E9%94%A43%E5%80%92%E5%B9%B3%E6%96%B9%E6%A0%B9%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2026/03/25/%E9%9B%B7%E7%A5%9E%E4%B9%8B%E9%94%A43%E5%80%92%E5%B9%B3%E6%96%B9%E6%A0%B9%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/","path":"2026/03/25/雷神之锤3倒平方根算法详解/","title":"雷神之锤3倒平方根算法详解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>雷神之锤3倒平方根算法详解 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E5%A7%8B%E4%BB%A3%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">原始代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E8%AF%B4%E7%BB%93%E8%AE%BA%E8%BF%99%E4%B8%AA%E7%AE%97%E6%B3%95%E5%88%B0%E5%BA%95%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">2.</span> <span class="nav-text">先说结论：这个算法到底做了什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E8%A1%A5%E4%B8%80%E7%82%B9-ieee-754-%E8%83%8C%E6%99%AF"><span class="nav-number">3.</span> <span class="nav-text">先补一点 IEEE 754 背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E8%A7%86%E8%A7%92"><span class="nav-number">3.1.</span> <span class="nav-text">数值视角</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E6%95%B0%E8%A7%86%E8%A7%92"><span class="nav-number">3.2.</span> <span class="nav-text">整数视角</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%8A-float-%E5%BD%93-int-%E7%9C%8B"><span class="nav-number">4.</span> <span class="nav-text">“把 float 当 int 看”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E-x-%E6%8E%A8%E5%88%B0-1sqrtx"><span class="nav-number">5.</span> <span class="nav-text">从 \(x\) 推到
+\(1&#x2F;sqrt(x)\)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%B3%E7%A7%BB%E4%B8%80%E4%BD%8D"><span class="nav-number">6.</span> <span class="nav-text">为什么是右移一位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E4%B8%80%E4%B8%AA%E5%85%B7%E4%BD%93%E4%BE%8B%E5%AD%90%E8%B5%B0%E4%B8%80%E9%81%8D"><span class="nav-number">7.</span> <span class="nav-text">用一个具体例子走一遍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%9B%E9%A1%BF%E8%BF%AD%E4%BB%A3"><span class="nav-number">8.</span> <span class="nav-text">牛顿迭代</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E4%B8%AA%E9%AD%94%E6%95%B0%E5%88%B0%E5%BA%95%E6%98%AF%E4%B8%8D%E6%98%AF%E6%9C%80%E4%BC%98%E7%9A%84"><span class="nav-number">9.</span> <span class="nav-text">这个魔数到底是不是最优的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%8B%9B%E5%9C%A8%E5%BD%93%E5%B9%B4%E5%BE%88%E5%BF%AB"><span class="nav-number">10.</span> <span class="nav-text">为什么这招在当年很快</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%86%E6%94%BE%E5%88%B0%E4%BB%8A%E5%A4%A9%E8%BF%98%E8%AF%A5%E4%B8%8D%E8%AF%A5%E8%BF%99%E4%B9%88%E5%86%99"><span class="nav-number">11.</span> <span class="nav-text">但放到今天，还该不该这么写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%A7%8B%E5%86%99%E6%B3%95%E6%9C%89%E6%9C%AA%E5%AE%9A%E4%B9%89%E8%A1%8C%E4%B8%BA%E9%A3%8E%E9%99%A9"><span class="nav-number">11.1.</span> <span class="nav-text">1. 原始写法有未定义行为风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3-cpu-%E5%B7%B2%E7%BB%8F%E6%9C%89%E6%9B%B4%E5%BC%BA%E7%9A%84%E7%A1%AC%E4%BB%B6%E6%8C%87%E4%BB%A4"><span class="nav-number">11.2.</span> <span class="nav-text">2. 现代 CPU
+已经有更强的硬件指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%BA%93%E5%92%8C%E7%BC%96%E8%AF%91%E5%99%A8%E4%BC%98%E5%8C%96%E9%80%9A%E5%B8%B8%E6%9B%B4%E5%8F%AF%E9%9D%A0"><span class="nav-number">11.3.</span> <span class="nav-text">3.
+标准库和编译器优化通常更可靠</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%BB%8A%E5%A4%A9%E8%BF%98%E6%83%B3%E5%AE%9E%E7%8E%B0%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%86%99"><span class="nav-number">12.</span> <span class="nav-text">如果今天还想实现，应该怎么写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%8D%E5%9B%9E%E5%A4%B4%E7%9C%8B%E8%BF%99%E4%B8%AA%E7%AE%97%E6%B3%95%E5%88%B0%E5%BA%95%E5%B7%A7%E5%A6%99%E5%9C%A8%E5%93%AA"><span class="nav-number">13.</span> <span class="nav-text">再回头看，这个算法到底巧妙在哪</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">14.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">15.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2026/03/25/%E9%9B%B7%E7%A5%9E%E4%B9%8B%E9%94%A43%E5%80%92%E5%B9%B3%E6%96%B9%E6%A0%B9%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="雷神之锤3倒平方根算法详解 | L's Blog">
+      <meta itemprop="description" content="从IEEE 754表示、魔数推导到牛顿迭代，系统拆解Quake III中著名的快速倒平方根算法。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          雷神之锤3倒平方根算法详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-03-25 01:23:29" itemprop="dateCreated datePublished" datetime="2026-03-25T01:23:29+08:00">2026-03-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">从IEEE 754表示、魔数推导到牛顿迭代，系统拆解Quake III中著名的快速倒平方根算法。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇文章主要讲 <code>Quake III Arena</code>
+里非常有名的快速倒平方根（Fast Inverse Square Root）算法，也就是那个包含
+<code>0x5f3759df</code> 的经典实现。</p>
+</blockquote>
+<h2 id="原始代码">原始代码</h2>
+<p>先把最经典的版本摆出来：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> <span class="title function_">Q_rsqrt</span><span class="params">(<span class="type">float</span> number)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">long</span> i;</span><br><span class="line">    <span class="type">float</span> x2, y;</span><br><span class="line">    <span class="type">const</span> <span class="type">float</span> threehalfs = <span class="number">1.5F</span>;</span><br><span class="line"></span><br><span class="line">    x2 = number * <span class="number">0.5F</span>;</span><br><span class="line">    y = number;</span><br><span class="line">    i = *(<span class="type">long</span> *)&amp;y;</span><br><span class="line">    i = <span class="number">0x5f3759df</span> - (i &gt;&gt; <span class="number">1</span>);</span><br><span class="line">    y = *(<span class="type">float</span> *)&amp;i;</span><br><span class="line">    y = y * (threehalfs - (x2 * y * y));</span><br><span class="line">    <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>少了那个注释感觉少了点韵味😋</p>
+<p>它要算的是：</p>
+<p><span class="math display">\[
+\frac{1}{\sqrt{x}}
+\]</span></p>
+<p>下面的推导默认讨论的是<strong>正的、规格化的单精度浮点数</strong>。如果输入是
+<code>0</code>、负数、非规格化数、<code>NaN</code> 或
+<code>Inf</code>，这个经典版本都不该直接照搬。</p>
+<p>这个量在 3D 图形里很常见。比如要把向量归一化：</p>
+<p><span class="math display">\[
+\hat{v}=\frac{v}{\|v\|}=\frac{v}{\sqrt{x^2+y^2+z^2}}
+\]</span></p>
+<p>如果先求出</p>
+<p><span class="math display">\[
+\frac{1}{\sqrt{x^2+y^2+z^2}}
+\]</span></p>
+<p>再去乘向量三个分量，就能少做一次除法。在那个年代，浮点开方和除法都不便宜，所以这个技巧非常值钱。</p>
+<h2 id="先说结论这个算法到底做了什么">先说结论：这个算法到底做了什么</h2>
+<p>这段代码可以分成 4 步：</p>
+<ol type="1">
+<li>把 <code>float</code> 的二进制位模式直接当成 <code>int</code>
+看。</li>
+<li>对这个整数做一次线性变换：<code>i = 0x5f3759df - (i &gt;&gt; 1)</code>。</li>
+<li>再把结果当回 <code>float</code> 看，得到一个粗略近似值。</li>
+<li>用一次牛顿迭代把这个近似值快速修正。</li>
+</ol>
+<p>真正最神的地方不是牛顿迭代，而是第 2
+步。因为它看起来像是在乱来，但实际上它利用了 IEEE 754
+单精度浮点数的编码结构，让“整数上的线性操作”近似等价于“对数空间里的线性操作”。</p>
+<h2 id="先补一点-ieee-754-背景">先补一点 IEEE 754 背景</h2>
+<p>单精度 <code>float</code> 一共 32 位：</p>
+<ul>
+<li>1 位符号位 <code>S</code></li>
+<li>8 位指数位 <code>E</code></li>
+<li>23 位尾数位 <code>M</code></li>
+</ul>
+<p>对一个正的规格化浮点数，可以写成：</p>
+<p><span class="math display">\[
+x=(1+m)\cdot 2^e
+\]</span></p>
+<p>其中：</p>
+<p><span class="math display">\[
+m=\frac{M}{2^{23}},\quad e=E-127
+\]</span></p>
+<p>所以，浮点数的真实值和它的位表示之间有两套视角：</p>
+<h3 id="数值视角">数值视角</h3>
+<p><span class="math display">\[
+x=(1+m)\cdot 2^e
+\]</span></p>
+<h3 id="整数视角">整数视角</h3>
+<p>如果忽略符号位（这里只讨论正数），把整个位串当成一个 32
+位整数，那么它的值近似是：</p>
+<p><span class="math display">\[
+I_x=E\cdot 2^{23}+M
+\]</span></p>
+<p>这两个式子是后面全部推导的起点。</p>
+<h2 id="把-float-当-int-看">“把 float 当 int 看”</h2>
+<p>关键观察是：<code>float</code> 的位模式其实和 <span class="math inline">\(log_2(x)\)</span> 很接近。</p>
+<p>先对</p>
+<p><span class="math display">\[
+x=(1+m)\cdot 2^e
+\]</span></p>
+<p>取以 2 为底的对数：</p>
+<p><span class="math display">\[
+\log_2 x=e+\log_2(1+m)
+\]</span></p>
+<p>其中 <span class="math inline">\(m\)</span> 落在 <span class="math inline">\([0,1)\)</span> 之间，而在这个区间里，函数</p>
+<p><span class="math display">\[
+\log_2(1+m)
+\]</span></p>
+<p>虽然不是直线，但和一条直线已经很像了。于是我们用一个线性近似：</p>
+<p><span class="math display">\[
+\log_2(1+m)\approx m+\sigma
+\]</span></p>
+<p>这里的 <span class="math inline">\(\sigma\)</span>
+是一个调节常数，可以理解为“拿一条直线去逼近对数曲线时的偏移量”。</p>
+<p>代进去：</p>
+<p><span class="math display">\[
+\log_2 x \approx e+m+\sigma
+\]</span></p>
+<p>再把 <span class="math inline">\(e=E-127\)</span> 和 <span class="math inline">\(m=\frac{M}{2^{23}}\)</span> 代入：</p>
+<p><span class="math display">\[
+\log_2 x \approx (E-127)+\frac{M}{2^{23}}+\sigma
+\]</span></p>
+<p>整理一下：</p>
+<p><span class="math display">\[
+\log_2 x \approx \frac{E\cdot 2^{23}+M}{2^{23}}-127+\sigma
+\]</span></p>
+<p>注意分子那一坨正好就是整数视角里的 <span class="math inline">\(I_x\)</span>，于是：</p>
+<p><span class="math display">\[
+\log_2 x \approx \frac{I_x}{2^{23}}-127+\sigma
+\]</span></p>
+<p>也可以改写成：</p>
+<p><span class="math display">\[
+I_x \approx 2^{23}\left(\log_2 x+127-\sigma\right)
+\]</span></p>
+<p>这个式子非常重要，因为它说明了一件事：</p>
+<blockquote>
+<p>把一个正的单精度浮点数按位解释成整数后，得到的整数值，本质上是 <span class="math inline">\(log_2(x)\)</span> 的一个仿射近似。</p>
+</blockquote>
+<p>这就是为什么“位级黑魔法”不是纯玄学，它背后其实是浮点表示和对数之间的对应关系。</p>
+<h2 id="从-x-推到-1sqrtx">从 <span class="math inline">\(x\)</span> 推到
+<span class="math inline">\(1/sqrt(x)\)</span></h2>
+<p>现在我们要求的是：</p>
+<p><span class="math display">\[
+y=\frac{1}{\sqrt{x}}=x^{-\frac{1}{2}}
+\]</span></p>
+<p>两边取对数：</p>
+<p><span class="math display">\[
+\log_2 y=-\frac{1}{2}\log_2 x
+\]</span></p>
+<p>既然 <span class="math inline">\(I_x\)</span> 近似对应 <span class="math inline">\(\log_2 x\)</span>，那 <span class="math inline">\(I_y\)</span> 当然也近似对应 <span class="math inline">\(\log_2 y\)</span>。根据上面的关系：</p>
+<p><span class="math display">\[
+I_y \approx 2^{23}\left(\log_2 y+127-\sigma\right)
+\]</span></p>
+<p>再把 <span class="math inline">\(\log_2 y=-\frac{1}{2}\log_2
+x\)</span> 代进去，并用 <span class="math inline">\(I_x\)</span>
+的表达式消掉 <span class="math inline">\(\log_2
+x\)</span>，整理后可以得到：</p>
+<p><span class="math display">\[
+I_y \approx \frac{3}{2}\cdot 2^{23}\cdot (127-\sigma)-\frac{1}{2}I_x
+\]</span></p>
+<p>这就是那句代码真正对应的数学形式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i = K - (i &gt;&gt; <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<p><span class="math display">\[
+K\approx \frac{3}{2}\cdot 2^{23}\cdot (127-\sigma)
+\]</span></p>
+<p>当 <span class="math inline">\(\sigma\)</span>
+取一个经验上比较好的值时，算出来的整数就是：</p>
+<p><span class="math display">\[
+K=1597463007=0x5f3759df
+\]</span></p>
+<p>于是魔数出现了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">0x5f3759df</span> - (i &gt;&gt; <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>所以这行代码其实是一个明确的近似公式。不过确实很牛逼了，单从理解这个算法上来看，就很考验读者对底层浮点数、整数，还有对数学的推导能力。这个作者真的太强了。</p>
+<h2 id="为什么是右移一位">为什么是右移一位</h2>
+<p>很多人第一次看到这里，会误以为 <code>i &gt;&gt; 1</code>
+是在“给原数开平方”。</p>
+<p>其实不是。</p>
+<p>右移一位是在整数空间里把 <span class="math inline">\(I_x\)</span>
+变成 <span class="math inline">\(I_x/2\)</span>。而 <span class="math inline">\(I_x\)</span> 又近似表示 <span class="math inline">\(\log_2 x\)</span> 的线性变换，所以“除以
+2”本质上对应的是：</p>
+<p><span class="math display">\[
+\log_2 x \mapsto \frac{1}{2}\log_2 x
+\]</span></p>
+<p>也就是：</p>
+<p><span class="math display">\[
+x \mapsto \sqrt{x}
+\]</span></p>
+<p>而前面的负号和常数项，则把它从 <span class="math inline">\(\sqrt{x}\)</span> 调整成了 <span class="math inline">\(1/\sqrt{x}\)</span> 的近似编码。</p>
+<p>所以更准确地说：</p>
+<blockquote>
+<p>右移一位并不是直接在数值空间里除以
+2，而是在“近似对数空间”里把指数缩放为一半。</p>
+</blockquote>
+<p>这正是它最巧妙的地方。</p>
+<h2 id="用一个具体例子走一遍">用一个具体例子走一遍</h2>
+<p>拿一个常见例子：</p>
+<p><span class="math display">\[
+x=0.15625
+\]</span></p>
+<p>它的真实值是：</p>
+<p><span class="math display">\[
+\frac{1}{\sqrt{0.15625}}\approx 2.52982
+\]</span></p>
+<p><code>0.15625</code> 的单精度位模式是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">00111110001000000000000000000000</span><br></pre></td></tr></table></figure>
+<p>也就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x3e200000</span><br></pre></td></tr></table></figure>
+<p>先右移一位：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x1f100000</span><br></pre></td></tr></table></figure>
+<p>再做魔数减法：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x5f3759df - 0x1f100000 = 0x402759df</span><br></pre></td></tr></table></figure>
+<p>把 <code>0x402759df</code> 当回 <code>float</code>
+看，得到近似值：</p>
+<p><span class="math display">\[
+y_0\approx 2.61486
+\]</span></p>
+<p>这个时候误差大概是 3.4%，还不算特别准，但已经离目标不远了。</p>
+<h2 id="牛顿迭代">牛顿迭代</h2>
+<p>我们现在已经有了一个近似值 <span class="math inline">\(y_0\)</span>，接下来想把它修正成更准确的 <span class="math inline">\(1/\sqrt{x}\)</span>。</p>
+<p>设</p>
+<p><span class="math display">\[
+f(y)=\frac{1}{y^2}-x
+\]</span></p>
+<p>我们要求的是 <span class="math inline">\(f(y)=0\)</span>
+的根。因为：</p>
+<p><span class="math display">\[
+\frac{1}{y^2}-x=0
+\Rightarrow y=\frac{1}{\sqrt{x}}
+\]</span></p>
+<p>对 <span class="math inline">\(f(y)\)</span> 使用牛顿迭代：</p>
+<p><span class="math display">\[
+y_{n+1}=y_n-\frac{f(y_n)}{f&#39;(y_n)}
+\]</span></p>
+<p>先求导：</p>
+<p><span class="math display">\[
+f&#39;(y)=-\frac{2}{y^3}
+\]</span></p>
+<p>代回去：</p>
+<p><span class="math display">\[
+y_{n+1}=y_n-\frac{\frac{1}{y_n^2}-x}{-\frac{2}{y_n^3}}
+\]</span></p>
+<p>整理一下：</p>
+<p><span class="math display">\[
+y_{n+1}=y_n+\frac{y_n}{2}(1-xy_n^2)
+\]</span></p>
+<p>继续整理：</p>
+<p><span class="math display">\[
+y_{n+1}=y_n\left(1.5-0.5xy_n^2\right)
+\]</span></p>
+<p>这正好就是代码里的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">y = y * (<span class="number">1.5F</span> - <span class="number">0.5F</span> * x * y * y);</span><br></pre></td></tr></table></figure>
+<p>而原代码把 <code>0.5F * x</code> 预先存成了 <code>x2</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x2 = number * <span class="number">0.5F</span>;</span><br><span class="line">y = y * (threehalfs - (x2 * y * y));</span><br></pre></td></tr></table></figure>
+<p>经过这一轮修正，上面那个例子的结果会变成：</p>
+<p><span class="math display">\[
+y_1\approx 2.52549
+\]</span></p>
+<p>误差大约只有 0.17%，已经相当不错了。</p>
+<p>如果再做一次牛顿迭代，精度还能继续上去，不过速度会再慢一点。Quake III
+的实现里把第二次迭代注释掉了，说明一轮就已经足够实用。</p>
+<h2 id="这个魔数到底是不是最优的">这个魔数到底是不是最优的</h2>
+<p>严格来说，<code>0x5f3759df</code> 不是某种数学上唯一正确的答案。</p>
+<p>原因有两个：</p>
+<ol type="1">
+<li><code>\log_2(1+m)\approx m+\sigma</code> 本身就是近似，不同的
+<code>\sigma</code> 会给出不同的常数。</li>
+<li>后面还接了一次牛顿迭代，所以“初值误差最小”的常数，不一定等于“最终一轮迭代后误差最小”的常数。</li>
+</ol>
+<p>这也是为什么你会在别的文章或者代码里看到一些相近但不完全一样的魔数，例如
+<code>0x5f375a86</code>。它们通常对应不同的误差优化目标。</p>
+<p>但无论常数怎么微调，核心思想都不会变：</p>
+<p><span class="math display">\[
+I_y \approx K-\frac{1}{2}I_x
+\]</span></p>
+<h2 id="为什么这招在当年很快">为什么这招在当年很快</h2>
+<p>因为在 90 年代到 2000 年前后的硬件环境里：</p>
+<ul>
+<li>整数位运算很便宜</li>
+<li>浮点开方和除法很贵</li>
+<li>查表方案也未必比这个更划算</li>
+</ul>
+<p>所以“位级近似 + 一次牛顿迭代”是一个非常漂亮的速度/精度折中。</p>
+<p>而且它的输入输出都还是普通
+<code>float</code>，很容易直接嵌进图形代码里。</p>
+<h2 id="但放到今天还该不该这么写">但放到今天，还该不该这么写</h2>
+<p>大多数情况下，不该。</p>
+<h3 id="原始写法有未定义行为风险">1. 原始写法有未定义行为风险</h3>
+<p>这两句：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">i = *(<span class="type">long</span> *)&amp;y;</span><br><span class="line">y = *(<span class="type">float</span> *)&amp;i;</span><br></pre></td></tr></table></figure>
+<p>依赖的是把一种类型的对象内存直接按另一种类型解释。这会碰到严格别名（strict
+aliasing）和类型重解释的问题，在现代 C/C++ 里并不稳妥。</p>
+<p>另外，<code>Quake III</code> 代码里用的是
+<code>long</code>，它默认假设 <code>long</code> 和 <code>float</code>
+都是 32 位。但在很多 64 位平台上，<code>long</code> 是 64
+位，这就更危险了。</p>
+<h3 id="现代-cpu-已经有更强的硬件指令">2. 现代 CPU
+已经有更强的硬件指令</h3>
+<p>现在很多平台都有专门的开方、倒平方根或者 SIMD
+指令，编译器也更擅长做优化。和这些现代硬件支持相比，这个经典黑魔法通常已经不占优势了。</p>
+<h3 id="标准库和编译器优化通常更可靠">3.
+标准库和编译器优化通常更可靠</h3>
+<p>如果你的目标不是“研究这段历史代码”，而是“写今天的工程代码”，那标准库、向量化内建、平台指令封装，通常都比手搓
+<code>0x5f3759df</code> 更合适。</p>
+<h2 id="如果今天还想实现应该怎么写">如果今天还想实现，应该怎么写</h2>
+<p>如果只是为了学习这个算法，至少应该把未定义行为问题避开。比如在 C++20
+里可以写成：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bit&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdint&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">fast_rsqrt</span><span class="params">(<span class="type">float</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">float</span> x2 = x * <span class="number">0.5f</span>;</span><br><span class="line">    <span class="type">float</span> y = x;</span><br><span class="line"></span><br><span class="line">    std::<span class="type">uint32_t</span> i = std::<span class="built_in">bit_cast</span>&lt;std::<span class="type">uint32_t</span>&gt;(y);</span><br><span class="line">    i = <span class="number">0x5f3759df</span>u - (i &gt;&gt; <span class="number">1</span>);</span><br><span class="line">    y = std::<span class="built_in">bit_cast</span>&lt;<span class="type">float</span>&gt;(i);</span><br><span class="line"></span><br><span class="line">    y = y * (<span class="number">1.5f</span> - x2 * y * y);</span><br><span class="line">    <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里至少解决了两个问题：</p>
+<ul>
+<li>用 <code>std::uint32_t</code> 明确保证是 32 位整数</li>
+<li>用 <code>std::bit_cast</code> 做安全的位重解释</li>
+</ul>
+<p>当然，这依然只是一个“有历史价值和教学价值”的实现，不是今天性能工程里的默认选择。</p>
+<h2 id="再回头看这个算法到底巧妙在哪">再回头看，这个算法到底巧妙在哪</h2>
+<p>我觉得它最漂亮的点有三个：</p>
+<ol type="1">
+<li>它没有直接逼近平方根，而是先把浮点编码当成对数的近似。</li>
+<li>它把 <code>x^&#123;-1/2&#125;</code>
+这种幂运算，转成了整数空间里的线性变换。</li>
+<li>它再用一次牛顿迭代，把一个“很聪明的粗近似”迅速修成“很好用的结果”。</li>
+</ol>
+<p>换句话说，这个算法的精髓不是某个神秘常数，而是：</p>
+<blockquote>
+<p>利用数据表示本身的结构，把一个本来昂贵的数学运算，改写成廉价的近似操作，再用一次局部数值方法补精度。</p>
+</blockquote>
+<p>这其实是非常典型的系统编程思路。</p>
+<h2 id="总结">总结</h2>
+<p>快速倒平方根算法之所以经典，不是因为它“看起来像黑魔法”，而是因为它把IEEE
+754
+浮点编码、对数近似、牛顿迭代研究的非常透彻吧，至少这个作者是有自己的思考而且非常有创新的。</p>
+<p>那句最出名的代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">0x5f3759df</span> - (i &gt;&gt; <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>本质上是在近似计算 <code>1/\sqrt&#123;x&#125;</code>
+的位模式初值；后面那句牛顿迭代，则负责把这个初值迅速拉回到足够准确的范围。</p>
+<p>今天它已经不再是最实用的工程方案，但依然是理解“数值方法 + 位级表示 +
+性能优化”这三件事如何结合的一个绝佳例子。</p>
+<h2 id="参考链接">参考链接</h2>
+<ul>
+<li>原始 Quake III 源码中的 <code>Q_rsqrt</code>：<a target="_blank" rel="noopener" href="https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/q_math.c" class="uri">https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/q_math.c</a></li>
+<li>Christian Plesner Hansen 对 <code>0x5f3759df</code> 的详细推导：<a target="_blank" rel="noopener" href="https://h14s.p5r.org/2012/09/0x5f3759df.html" class="uri">https://h14s.p5r.org/2012/09/0x5f3759df.html</a></li>
+<li>Wikipedia: Fast inverse square root：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Fast_inverse_square_root" class="uri">https://en.wikipedia.org/wiki/Fast_inverse_square_root</a></li>
+<li>知乎<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/415245234" class="uri">https://zhuanlan.zhihu.com/p/415245234</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag"><i class="fa fa-tag"></i> C语言</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 算法</a>
+              <a href="/tags/%E6%B5%AE%E7%82%B9%E6%95%B0/" rel="tag"><i class="fa fa-tag"></i> 浮点数</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/01/23/kb-assistant%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95-%E4%BC%98%E5%8C%96%E7%AF%87/" rel="prev" title="kb-assistant开发记录-优化篇">
+                  <i class="fa fa-angle-left"></i> kb-assistant开发记录-优化篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:35</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
