@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="从dense、BM25、graph、image四路召回出发，讨论为什么固定权重融合不够，以及更合理的查询自适应融合方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG多路召回里的动态权重问题">
+<meta property="og:url" content="https://linyuanlxc.github.io/2026/04/04/RAG%E5%A4%9A%E8%B7%AF%E5%8F%AC%E5%9B%9E%E9%87%8C%E7%9A%84%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="从dense、BM25、graph、image四路召回出发，讨论为什么固定权重融合不够，以及更合理的查询自适应融合方案。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-04T15:20:12.000Z">
+<meta property="article:modified_time" content="2026-05-10T07:48:00.562Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="检索">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2026/04/04/RAG%E5%A4%9A%E8%B7%AF%E5%8F%AC%E5%9B%9E%E9%87%8C%E7%9A%84%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E9%97%AE%E9%A2%98/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2026/04/04/RAG%E5%A4%9A%E8%B7%AF%E5%8F%AC%E5%9B%9E%E9%87%8C%E7%9A%84%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E9%97%AE%E9%A2%98/","path":"2026/04/04/RAG多路召回里的动态权重问题/","title":"RAG多路召回里的动态权重问题"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>RAG多路召回里的动态权重问题 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BA%E5%AE%9A%E6%9D%83%E9%87%8D%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="nav-number">1.</span> <span class="nav-text">固定权重的缺陷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E4%BB%B6%E4%BA%8B%E5%9C%A8%E8%BF%91%E4%B8%A4%E5%B9%B4%E7%9A%84%E5%81%9A%E6%B3%95%E9%87%8C%E6%98%AF%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">这件事在近两年的做法里是怎么处理的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E5%81%9A-query-routing%E5%86%8D%E5%81%9A%E8%9E%8D%E5%90%88"><span class="nav-number">2.1.</span> <span class="nav-text">1. 先做 query routing，再做融合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8-query-%E6%9C%AC%E8%BA%AB%E9%A2%84%E6%B5%8B%E8%9E%8D%E5%90%88%E6%9D%83%E9%87%8D"><span class="nav-number">2.2.</span> <span class="nav-text">2. 用 query 本身预测融合权重</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AA%E7%9C%8B-query%E8%BF%98%E8%A6%81%E7%9C%8B%E6%AF%8F%E4%B8%80%E8%B7%AF%E6%A3%80%E7%B4%A2%E7%BB%93%E6%9E%9C%E6%9C%AC%E8%BA%AB%E7%9A%84%E7%BD%AE%E4%BF%A1%E5%BA%A6"><span class="nav-number">2.3.</span> <span class="nav-text">3. 不只看
+query，还要看每一路检索结果本身的“置信度”。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%A4%9A%E6%A8%A1%E6%80%81%E5%9C%BA%E6%99%AF%E9%87%8C%E5%85%B3%E9%94%AE%E4%B8%8D%E6%98%AF%E6%8A%8A-image-%E4%B9%9F%E6%8E%A5%E4%B8%8A%E8%80%8C%E6%98%AF%E5%8F%AA%E5%9C%A8%E9%9C%80%E8%A6%81%E6%97%B6%E6%8E%A5%E4%B8%8A"><span class="nav-number">2.4.</span> <span class="nav-text">4.
+在多模态场景里，关键不是“把 image 也接上”，而是“只在需要时接上”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">重新设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%E5%85%88%E5%81%9A%E4%B8%80%E4%B8%AA%E8%BD%BB%E9%87%8F%E7%9A%84-query-router"><span class="nav-number">3.1.</span> <span class="nav-text">第一层：先做一个轻量的 query
+router</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E5%86%8D%E7%94%A8%E6%AF%8F%E4%B8%80%E8%B7%AF%E8%BF%94%E5%9B%9E%E7%BB%93%E6%9E%9C%E5%81%9A%E7%BD%AE%E4%BF%A1%E5%BA%A6%E4%BF%AE%E6%AD%A3"><span class="nav-number">3.2.</span> <span class="nav-text">第二层：再用每一路返回结果做置信度修正</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%E4%B8%8D%E8%A6%81%E8%AE%A9%E6%9D%83%E9%87%8D%E8%9E%8D%E5%90%88%E6%89%BF%E6%8B%85%E5%85%A8%E9%83%A8%E6%8E%92%E5%BA%8F%E8%B4%A3%E4%BB%BB"><span class="nav-number">3.3.</span> <span class="nav-text">第三层：不要让“权重融合”承担全部排序责任</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%90%BD%E5%9C%B0%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">落地顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">个人理解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2026/04/04/RAG%E5%A4%9A%E8%B7%AF%E5%8F%AC%E5%9B%9E%E9%87%8C%E7%9A%84%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="RAG多路召回里的动态权重问题 | L's Blog">
+      <meta itemprop="description" content="从dense、BM25、graph、image四路召回出发，讨论为什么固定权重融合不够，以及更合理的查询自适应融合方案。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RAG多路召回里的动态权重问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-04 23:20:12" itemprop="dateCreated datePublished" datetime="2026-04-04T23:20:12+08:00">2026-04-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">从dense、BM25、graph、image四路召回出发，讨论为什么固定权重融合不够，以及更合理的查询自适应融合方案。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>最近在 RAG
+系统时，我把召回拆成了四路：<code>dense</code>、<code>bm25</code>、<code>graph</code>、<code>image</code>。最开始的融合方式很直接，就是给四路结果设固定权重，然后线性加权。这个方案能跑，但是这样是有问题的。比如用户问的明确是文本，这就不需要或者说要减小image的权重了。又比如用户问的是某个术语的准确定义、某段文本里的原话、某个
+API 名称，这类查询显然更偏文本，<code>bm25</code> 和 <code>dense</code>
+应该占主导，<code>image</code>
+的权重通常应该很低。反过来，如果用户问“那张图里那个结构叫什么”或者“找一下包含某种界面的截图”，再把
+<code>image</code> 当成一个固定的小配角就不对了。<code>graph</code>
+也一样，它对关系型、多跳型、实体约束比较强的查询有价值，但不是每个 query
+都值得走高权重。</p>
+</blockquote>
+<p>固定权重的问题，本质上不是融合公式写得不够复杂，而是<strong>系统没有显式建模
+query 和检索器之间的匹配关系</strong>。</p>
+<h2 id="固定权重的缺陷">固定权重的缺陷</h2>
+<p>固定权重隐含了三个假设：</p>
+<ol type="1">
+<li>不同检索器对所有 query 的贡献是稳定的。</li>
+<li>不同模态、不同索引的分数经过归一化之后可以长期共用一套配比。</li>
+<li>检索器的失误是均匀分布的，而不是 query-dependent 的。</li>
+</ol>
+<p>这三个假设基本都站不住。</p>
+<p>在实际系统里，query 的差异很大：</p>
+<ul>
+<li>有的是<strong>关键词精确匹配</strong>，BM25 天然占优。</li>
+<li>有的是<strong>语义改写</strong>，dense 更稳。</li>
+<li>有的是<strong>关系查询</strong>，graph 才是主场。</li>
+<li>有的是<strong>视觉指代</strong>或者<strong>图文对齐</strong>，image
+才真正有用。</li>
+</ul>
+<p>再往下看，哪怕同样是文本问句，也会分成“短 query、长 query、实体
+query、组合约束 query、多跳 query、带视觉锚点 query”。这些 query
+的最优融合权重，本来就不可能一样。</p>
+<p>所以这里真正应该学的不是“怎么把四个分数加起来”，而是：</p>
+<blockquote>
+<p>对当前这个 query，哪一路更该被相信？</p>
+</blockquote>
+<h2 id="这件事在近两年的做法里是怎么处理的">这件事在近两年的做法里是怎么处理的</h2>
+<p>这类问题最近的思路已经比较清楚了，核心趋势不是继续调静态超参，而是把融合从“固定配方”改成“query-aware
+decision”。</p>
+<h3 id="先做-query-routing再做融合">1. 先做 query routing，再做融合</h3>
+<p>这一类方法会先判断 query
+属于什么类型，再决定该走哪些检索路径、每条路径大概给多少权重。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2409.09046">HyPA-RAG</a>
+里已经很明确地把 <strong>query complexity classifier</strong>
+放进检索环节，用复杂度分类来调 retrieval 参数，并在 hybrid retrieval
+里组合 dense、sparse 和 knowledge
+graph。到了更近的多模态文档问答场景，<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2603.05551">AutoThinkRAG</a> 进一步把
+<strong>Query Complexity Router</strong> 单独拿出来，根据 query
+的难度和结构选择不同的检索与推理路径。</p>
+<p>这类工作的共同点是：<strong>先承认 query 之间是异质的，再让系统按
+query 分流。</strong></p>
+<p>如果放到我这四路召回里，这一步至少应该回答两个问题：</p>
+<ul>
+<li>这个 query 主要是文本、关系、还是视觉驱动的？</li>
+<li>这个 query 是单跳检索，还是明显需要结构化约束和多跳扩展？</li>
+</ul>
+<p>只要这一步做对一半，固定权重方案里很多明显的误召回就会少掉。</p>
+<p>这一步的具体实现：<strong>让小模型判断查询意图，输出权重</strong>。这是
+2024-2025 年业界最普遍的做法（LangChain、LlamaIndex、Dify
+都有类似实现）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ROUTING_PROMPT = <span class="string">&quot;&quot;&quot;分析用户查询，输出各检索通道的权重（0-1之间的浮点数）。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">检索通道说明：</span></span><br><span class="line"><span class="string">- text_dense: 语义相似度匹配，适合开放性问答、概念解释</span></span><br><span class="line"><span class="string">- bm25: 关键词精确匹配，适合术语、代码、专有名词查询</span></span><br><span class="line"><span class="string">- graph: 知识图谱关系推理，适合比较、因果、关联类问题</span></span><br><span class="line"><span class="string">- image_clip: 跨模态图像检索，适合图片相关查询</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">用户查询：&#123;query&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">输出格式（纯JSON）：</span></span><br><span class="line"><span class="string">&#123;&#123;&quot;text_dense&quot;: 0.xx, &quot;bm25&quot;: 0.xx, &quot;graph&quot;: 0.xx, &quot;image_clip&quot;: 0.xx&#125;&#125;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">route_by_llm</span>(<span class="params">query: <span class="built_in">str</span>, fast_model</span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">    resp = fast_model.generate(</span><br><span class="line">        [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: ROUTING_PROMPT.<span class="built_in">format</span>(query=query)&#125;],</span><br><span class="line">        temperature=<span class="number">0.0</span>,</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> parse_json(resp)  <span class="comment"># → &#123;&quot;text_dense&quot;: 0.3, &quot;bm25&quot;: 0.1, &quot;graph&quot;: 0.5, ...&#125;</span></span><br></pre></td></tr></table></figure>
+<p>但是这种方法其实还是在把决定权交给llm。对于一些明确的问题效果应该不错，但是对于用户描述混乱、存在前后逻辑矛盾的问题，可能效果就要差一些。在这一步之前起码是要做一个query优化改写的，甚至还要加上一个多维度改写，然后合并召回结果。</p>
+<h3 id="用-query-本身预测融合权重">2. 用 query 本身预测融合权重</h3>
+<p>如果说 routing
+更像“先分路再检索”，那另一条更直接的路线就是：<strong>直接从 query
+表示预测融合权重</strong>。</p>
+<p>今年的 <a target="_blank" rel="noopener" href="https://www.mdpi.com/2504-4990/8/4/91">Query-Adaptive
+Hybrid Search</a> 就很典型。它的核心是一个 <strong>QDAP（Query-Driven
+Alpha Prediction）</strong> 模块，直接根据 query 的潜在表示去预测 dense
+/ sparse 的最优混合系数，而不是给所有 query 共用一个静态
+<code>alpha</code>。这类方法有个很实际的优点：延迟低，不需要在在线链路里再调用一个大模型做判断。</p>
+<p>这条思路对四路召回同样成立。只不过二路的 <code>alpha</code>
+会变成一个四维权重向量：</p>
+<p><span class="math display">\[
+w(q) = [w_{dense}, w_{bm25}, w_{graph}, w_{image}]
+\]</span></p>
+<p>并且满足：</p>
+<p><span class="math display">\[
+\sum_i w_i(q)=1
+\]</span></p>
+<p>这里的重点不是公式，而是权重应该由 query
+决定，而不是写死在配置里。</p>
+<h3 id="不只看-query还要看每一路检索结果本身的置信度">3. 不只看
+query，还要看每一路检索结果本身的“置信度”。</h3>
+<p>这个思路我觉得很有参考价值，而且很有新意。</p>
+<p>只看 query 还不够，因为有些 query
+从字面上看偏文本，但实际某一路的返回结果已经明显在“胡来”了。这时候更合理的做法是把<strong>检索结果分布本身</strong>也当成信号。</p>
+<p>[Entropy-Based Dynamic Hybrid Retrieval for Adaptive Query Weighting
+in RAG Pipelines]这篇工作走的就是这个方向：它不是只凭 query
+来定权重，而是根据 sparse 和 dense
+返回结果的熵、分布不确定性去做动态重加权。</p>
+<p>这个思路我觉得很值得借到多路召回里。因为对工程系统来说，下面这些信号往往比“某个原始分数高了一点”更可靠：</p>
+<ul>
+<li>top1 和 top2 的分差够不够大</li>
+<li>top-k 分数分布是不是太平</li>
+<li>这一条路返回的结果是否高度重复</li>
+<li>不同路之间有没有交集</li>
+<li>某一路是否只召回出边角料，缺少主证据</li>
+</ul>
+<p>如果 <code>image</code> 路的 top-k
+很散、熵很高，而且和文本路几乎没有交叉证据，那它就不该还拿着固定的 0.2
+权重硬往前挤。</p>
+<p>我印象比较深的是论文 "Entropy-Based Dynamic Hybrid
+Retrieval"。他是用“各检索通道得分分布的熵”动态计算每一路的置信度，自动分配权重。
+熵越低 → 结果越确定、越可信 → 权重越高。</p>
+<p><strong>熵（Entropy）</strong>：衡量结果分布的<strong>不确定性/混乱度</strong>
+- 低熵：得分差距大、排名很“肯定” → <strong>高置信</strong> -
+高熵：得分很平、谁都不突出 → <strong>低置信</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">entropy_based_weight</span>(<span class="params">dense_items, bm25_items, ...</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;各路检索结果分布的熵越低（越确定），该路权重越高。&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 遍历每一路检索通道（稠密、BM25等）</span></span><br><span class="line">    <span class="keyword">for</span> channel, items <span class="keyword">in</span> [(<span class="string">&quot;dense&quot;</span>, dense_items), (<span class="string">&quot;bm25&quot;</span>, bm25_items), ...]:</span><br><span class="line">        <span class="comment"># 1. 取出该路所有文档的score</span></span><br><span class="line">        scores = [i.score <span class="keyword">for</span> i <span class="keyword">in</span> items]</span><br><span class="line">        <span class="comment"># 2. Softmax → 概率分布</span></span><br><span class="line">        probs = softmax(scores)</span><br><span class="line">        <span class="comment"># 3. 计算信息熵 H = -Σ p log p</span></span><br><span class="line">        entropy = -<span class="built_in">sum</span>(p * log(p) <span class="keyword">for</span> p <span class="keyword">in</span> probs)</span><br><span class="line">        <span class="comment"># 4. 熵越小 → 置信度越高</span></span><br><span class="line">        confidence[channel] = <span class="number">1.0</span> - normalized(entropy)</span><br><span class="line">    <span class="comment"># 5. 按 confidence 动态分配权重</span></span><br><span class="line">    <span class="comment"># confidence 高的通道权重大</span></span><br></pre></td></tr></table></figure>
+<h3 id="在多模态场景里关键不是把-image-也接上而是只在需要时接上">4.
+在多模态场景里，关键不是“把 image 也接上”，而是“只在需要时接上”</h3>
+<p>多模态 RAG 的早期代表工作，比如 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2210.02928">MuRAG</a>，已经说明了图像和文本联合检索是有价值的。但更近一点的工作开始强调另一件更实际的事：<strong>视觉证据不是应该永远参加，而是应该按需参加。</strong></p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.11321">SAM-RAG</a>
+的表述就很直接：它会根据输入 query
+动态过滤相关文档，<strong>在需要时才引入 image
+captions</strong>。这和很多工程系统里“既然建了 image
+index，那每次都一起融”是两套思路。</p>
+<p>这点其实很重要。因为图像检索的问题不只是慢一点，还包括它非常容易带来一种“看起来相关，但对答案没帮助”的噪声。尤其在文本主导的问题上，图像召回经常能提供一些视觉相似的上下文，但这些东西并不能真正支持答案，反而会污染后续
+rerank 和生成。</p>
+<h2 id="重新设计">重新设计</h2>
+<p>我现在更倾向于把它拆成三层，而不是继续调一组全局常数。</p>
+<h3 id="第一层先做一个轻量的-query-router">第一层：先做一个轻量的 query
+router</h3>
+<p>这一层不需要很重，甚至一开始不一定要训练大模型。目标只有一个：输出一个<strong>检索先验</strong>。</p>
+<p>比如：</p>
+<ul>
+<li>文本精确匹配型：提高 <code>bm25</code></li>
+<li>语义改写型：提高 <code>dense</code></li>
+<li>实体关系 / 多跳型：提高 <code>graph</code></li>
+<li>明确视觉指代型：提高 <code>image</code></li>
+</ul>
+<p>这里可以先从规则和小分类器起步。像“图里、截图、界面、这张图、看起来像”这类触发词，本来就是很强的视觉信号；而“关系、依赖、谁连接谁、上下游、调用链”这类说法，对
+graph 也是明显加分项。</p>
+<h3 id="第二层再用每一路返回结果做置信度修正">第二层：再用每一路返回结果做置信度修正</h3>
+<p>这一步比第一层更像“在线校准”。</p>
+<p>我比较看重的不是原始 score，而是这些统计特征：</p>
+<ul>
+<li>top-k score entropy</li>
+<li>top1-top2 margin</li>
+<li>source diversity</li>
+<li>dense / bm25 / graph / image 之间的 overlap</li>
+<li>是否命中高价值字段，比如标题、实体名、caption、邻接关系</li>
+</ul>
+<p>然后把第一层的 query
+先验和第二层的检索置信度合起来，输出最终权重：</p>
+<p><span class="math display">\[
+w_i(q)=\text{softmax}(a \cdot p_i(q) + b \cdot c_i(q) - \lambda \cdot
+cost_i)
+\]</span></p>
+<p>其中 <code>p_i(q)</code> 是 query router
+给出的先验，<code>c_i(q)</code> 是检索结果置信度，<code>cost_i</code>
+可以顺手把高延迟路径也纳入考虑。</p>
+<p>这样做的好处是，系统既不会只凭 query
+硬猜，也不会只看召回分数拍脑袋。</p>
+<h3 id="第三层不要让权重融合承担全部排序责任">第三层：不要让“权重融合”承担全部排序责任</h3>
+<p>这一点非常重要。</p>
+<p>动态权重能解决的是“不同检索器该占多大比重”，但它解决不了最终文档级排序的全部问题。更稳的做法还是在融合之后再接一层
+reranker，最好是跨路统一排序。</p>
+<p>换句话说：</p>
+<ul>
+<li>动态权重负责<strong>决定谁更值得相信</strong></li>
+<li>reranker 负责<strong>决定具体哪些候选真该进上下文</strong></li>
+</ul>
+<p>如果没有这第三层，前两层就算做得不错，也很容易因为 chunk
+粒度、字段质量、图节点展开方式不同而留下排序噪声。</p>
+<h2 id="落地顺序">落地顺序</h2>
+<p>如果是工程落地，但我没做过工程落地，参考GPT大人的看法，不太建议一上来就追“端到端最优”。</p>
+<p>更现实的顺序大概是：</p>
+<ol type="1">
+<li>先做一个规则版 router，把明显不该高权重的 <code>image</code> 和
+<code>graph</code> 压下去。</li>
+<li>离线标注一批 query，统计每一路单独召回和不同融合策略下的 Recall@k /
+nDCG / answer support。</li>
+<li>用这些数据训练一个很轻的 gating 模型，比如 LightGBM / MLP，输入是
+query 特征和各路 top-k 统计，输出四路权重。</li>
+<li>最后再加统一 reranker。</li>
+</ol>
+<p>这里最关键的是第 2 步。没有按 query slice
+拆开的离线分析，动态权重很容易重新变成另一种拍脑袋。</p>
+<p>我觉得至少要单独看这些切片：</p>
+<ul>
+<li>精确文本问答</li>
+<li>语义改写问答</li>
+<li>多跳关系问答</li>
+<li>图文混合问答</li>
+<li>明确视觉问答</li>
+</ul>
+<p>只看 overall 平均分，很容易把问题看平。</p>
+<h2 id="个人理解">个人理解</h2>
+<p>多路召回的重点，从来都不是“路越多越好”，而是<strong>系统是否知道什么时候该信哪一路</strong>。</p>
+<p>固定权重融合的问题，不在于它太简单，而在于它把 query
+的差异抹平了。近两年的做法其实已经给了比较清楚的方向：要么显式做 query
+routing，要么直接学习 query-aware
+的融合权重，要么再进一步，把检索结果的不确定性也纳入权重预测。</p>
+<p>如果只说一个结论，我现在会这么概括：</p>
+<blockquote>
+<p>四路召回里真正应该学习的，不是一个全局最优权重，而是一个“按 query
+动态分配检索信任”的机制。</p>
+</blockquote>
+<p>这个机制未必要很重，但必须是 query-aware
+的。否则路开得越多，噪声往往也越多。</p>
+<h2 id="参考链接">参考链接</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2409.09046">HyPA-RAG: A Hybrid
+Parameter Adaptive Retrieval-Augmented Generation System for AI Legal
+and Policy Applications</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2503.23013">DAT: Dynamic Alpha Tuning
+for Hybrid Retrieval in Retrieval-Augmented Generation</a></li>
+<li><a target="_blank" rel="noopener" href="https://openreview.net/forum?id=bwGaZOVo0c">Entropy-Based
+Dynamic Hybrid Retrieval for Adaptive Query Weighting in RAG
+Pipelines</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.mdpi.com/2504-4990/8/4/91">Query-Adaptive
+Hybrid Search</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2210.02928">MuRAG: Multimodal
+Retrieval-Augmented Generator for Open Question Answering over Images
+and Text</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.11321">Self-adaptive Multimodal
+Retrieval-Augmented Generation</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2603.05551">AutothinkRAG:
+Complexity-Aware Control of Retrieval-Augmented Reasoning for Image-Text
+Interaction</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/%E6%A3%80%E7%B4%A2/" rel="tag"><i class="fa fa-tag"></i> 检索</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/03/25/%E9%9B%B7%E7%A5%9E%E4%B9%8B%E9%94%A43%E5%80%92%E5%B9%B3%E6%96%B9%E6%A0%B9%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3/" rel="prev" title="雷神之锤3倒平方根算法详解">
+                  <i class="fa fa-angle-left"></i> 雷神之锤3倒平方根算法详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/04/15/%E5%A4%9A%E6%A8%A1%E6%80%81RAG%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86/" rel="next" title="多模态RAG里图片到底该怎么处理">
+                  多模态RAG里图片到底该怎么处理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">48k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:56</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"linyuanlxc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"xcode","dark":"xcode"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="结合近年的多模态RAG、视觉检索和图表理解论文，讨论文档里的图片在RAG里到底该如何索引、检索和利用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多模态RAG里图片到底该怎么处理">
+<meta property="og:url" content="https://linyuanlxc.github.io/2026/04/15/%E5%A4%9A%E6%A8%A1%E6%80%81RAG%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="L&#39;s Blog">
+<meta property="og:description" content="结合近年的多模态RAG、视觉检索和图表理解论文，讨论文档里的图片在RAG里到底该如何索引、检索和利用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-15T14:10:00.000Z">
+<meta property="article:modified_time" content="2026-05-10T08:05:05.238Z">
+<meta property="article:author" content="LJL">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="检索">
+<meta property="article:tag" content="多模态">
+<meta property="article:tag" content="文档理解">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://linyuanlxc.github.io/2026/04/15/%E5%A4%9A%E6%A8%A1%E6%80%81RAG%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://linyuanlxc.github.io/2026/04/15/%E5%A4%9A%E6%A8%A1%E6%80%81RAG%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86/","path":"2026/04/15/多模态RAG图片处理/","title":"多模态RAG里图片到底该怎么处理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>多模态RAG里图片到底该怎么处理 | L's Blog</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">L's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">L的个人学习记录博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%9C%AC-rag%E7%9A%84%E5%B1%80%E9%99%90"><span class="nav-number">1.</span> <span class="nav-text">文本 RAG的局限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E5%8F%AC%E5%9B%9E%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">图片召回问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E5%B1%82%E6%88%91%E6%9B%B4%E5%80%BE%E5%90%91%E4%BA%8E%E4%B8%A4%E5%A5%97%E7%B4%A2%E5%BC%95-%E4%B8%80%E4%B8%AA%E5%85%B3%E8%81%94%E5%9B%BE"><span class="nav-number">2.1.</span> <span class="nav-text">检索层我更倾向于“两套索引 +
+一个关联图”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E7%90%86%E8%A7%A3%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">图片理解问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E7%9C%9F%E7%9A%84%E6%98%AF%E5%BF%85%E9%A1%BB%E7%9A%84%E5%90%97"><span class="nav-number">4.</span> <span class="nav-text">图片真的是必须的吗</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E6%96%B9%E6%A1%88"><span class="nav-number">5.</span> <span class="nav-text">推荐方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E7%BA%BF%E5%BB%BA%E5%BA%93"><span class="nav-number">5.1.</span> <span class="nav-text">离线建库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BA%BF%E6%A3%80%E7%B4%A2"><span class="nav-number">5.2.</span> <span class="nav-text">在线检索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BA%BF%E7%94%9F%E6%88%90"><span class="nav-number">5.3.</span> <span class="nav-text">在线生成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="nav-number">6.</span> <span class="nav-text">一些个人理解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">7.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="LJL"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">LJL</p>
+  <div class="site-description" itemprop="description">枝生高低鸟</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/linyuanlxc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;linyuanlxc" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lxchw@qq.com" title="E-Mail → mailto:lxchw@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://linyuanlxc.github.io/2026/04/15/%E5%A4%9A%E6%A8%A1%E6%80%81RAG%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="LJL">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="L's Blog">
+      <meta itemprop="description" content="枝生高低鸟">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="多模态RAG里图片到底该怎么处理 | L's Blog">
+      <meta itemprop="description" content="结合近年的多模态RAG、视觉检索和图表理解论文，讨论文档里的图片在RAG里到底该如何索引、检索和利用。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多模态RAG里图片到底该怎么处理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-15 22:10:00" itemprop="dateCreated datePublished" datetime="2026-04-15T22:10:00+08:00">2026-04-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">项目开发</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">结合近年的多模态RAG、视觉检索和图表理解论文，讨论文档里的图片在RAG里到底该如何索引、检索和利用。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>做多模态 RAG
+时，一个很现实的问题是：原始文档里明明有图片，但检索阶段真的能把这些图片找出来吗？就算找出来了，大模型又是不是真的能稳定地读懂图里的信息？</p>
+</blockquote>
+<p>这个问题不能只靠“把图片也塞进向量库”来解决。真正难的地方有两个：</p>
+<ol type="1">
+<li><strong>图能不能被召回</strong></li>
+<li><strong>图被召回后，能不能被可靠利用</strong></li>
+</ol>
+<p>这两件事其实是分开的。</p>
+<h2 id="文本-rag的局限">文本 RAG的局限</h2>
+<p>传统 RAG 默认文档先 OCR / parse 成纯文本，再按 chunk
+检索。这个流程对普通段落没问题，但对图文混排文档有天然损失。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.10594">VisRAG</a>
+讲得很直接：很多真实文档里的关键信息就在 layout、figure、page image
+里，纯文本解析会把这些信息丢掉。<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.01449">ColPali</a>
+也是类似判断，它强调文档页本身就是视觉丰富的对象，不应该只被当成 OCR
+后的文本。</p>
+<p>这也是为什么很多系统会出现一种很典型的错误：</p>
+<ul>
+<li>文本 chunk 召回看起来没问题</li>
+<li>但真正支撑答案的证据其实在图里</li>
+<li>结果生成阶段只能“绕着图讲”，讲不准</li>
+</ul>
+<p>再回到多模态。现在一个很现实的问题是,在RAG的原始文档中有图片,但是检索的时候能准确地检索到这些图片吗?就算检索到了这些图片,大模型能否有效地去提取图片中的信息?
+现在我的一个想法是,在图片入库的时候,对图片的前后几个chunk,把这几个chunk做成embedding,然后与这个图片会形成一个映射,比如说把图片的chunkID记录在文字的元数据里面,然后把文字的chunk的ID记录在图片的元数据里面,这样实现一个映射。因为图片的前后几段的文字,大概率是会提到这个图片具体是干嘛的,有哪些内容。然后再针对一些数据图,比如说折线图这些,额外再增加一个小模型去理解这个图片的内容,识别这个图片中的数据,然后把识别到的数据存到元数据里面,这是我的一个想法。</p>
+<h2 id="图片召回问题">图片召回问题</h2>
+<p>如果只说工程落地，其实不止上面那些，还可以做一些改进。我们可以参考知识图谱的思路，为什么不把图片和文本片段看作节点呢，图片节点和文本节点之间应该有关系，这个关系是可以作为显式边的，不能只靠
+embedding 碰运气。</p>
+<p>比较合理的做法是把文档拆成几类节点：</p>
+<ul>
+<li><code>text chunk</code></li>
+<li><code>figure / image crop</code></li>
+<li><code>page</code></li>
+<li><code>table / chart</code></li>
+<li><code>section</code></li>
+</ul>
+<p>然后建立几种关联：</p>
+<ol type="1">
+<li><strong>邻近关系</strong> 图片前后几段文字、同页 chunk、同 section
+chunk。</li>
+<li><strong>引用关系</strong> 例如正文里出现“图 3”“Figure
+2”“如下图所示”。</li>
+<li><strong>标题/说明关系</strong>
+caption、图注、表注通常比前后段落更重要。</li>
+<li><strong>页面归属关系</strong> 图和页、chunk 和页之间的映射。</li>
+</ol>
+<p>这样做以后，检索就不再是“只把图片当独立向量搜一下”，而是可以变成：</p>
+<ul>
+<li>文本命中后，顺着边把相关图片带出来</li>
+<li>图片命中后，顺着边把解释它的文字带出来</li>
+</ul>
+<p>这比单纯把 <code>chunk_id</code> 塞进 metadata
+更进一步。本质上已经接近 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2510.12323">RAG-Anything</a>
+这类工作的思路了：把多模态内容看成<strong>互相连接的知识实体</strong>，而不是彼此孤立的数据块。</p>
+<h3 id="检索层我更倾向于两套索引-一个关联图">检索层我更倾向于“两套索引 +
+一个关联图”</h3>
+<p>从最近几篇论文看，我觉得比较稳的架构不是单索引，而是三层：</p>
+<ol type="1">
+<li>文本索引</li>
+</ol>
+<p>正常做 dense / BM25 / hybrid，这层负责大部分文本问题。</p>
+<ol start="2" type="1">
+<li>视觉索引</li>
+</ol>
+<p>对页面图、图片裁剪、图表裁剪做视觉
+embedding。这里如果是文档检索场景，近两年比较值得参考的是 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.01449">ColPali</a> 和 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2411.04952">M3DocRAG</a>
+这一路：直接把页面当视觉对象来建检索，而不是先把它压成 OCR 文本。</p>
+<ol start="3" type="1">
+<li>关联图</li>
+</ol>
+<p>这层不负责“语义相似检索”，而负责“证据扩展”。</p>
+<p>比如用户问某张结构图的作用，视觉索引可能先找到图片；但真正适合塞进上下文的，往往是：</p>
+<ul>
+<li>图本身</li>
+<li>图注</li>
+<li>图前后的解释段落</li>
+<li>引用该图的正文</li>
+</ul>
+<p>这些内容应该通过图结构扩出来，而不是依赖一次检索全猜对。</p>
+<h2 id="图片理解问题">图片理解问题</h2>
+<p>这是第二个常被低估的问题。</p>
+<p>通用多模态大模型对自然图片、界面截图、简单示意图通常还能看个大概，但一碰到<strong>数据图、复杂表格、密集标注图</strong>，稳定性就会明显下降，尤其是数值抽取。</p>
+<p>看了一些论文，发现其实我想的把图喂给
+VLM，然后由他来做信息提取是不太行的。</p>
+<p>对图表类图片，更靠谱的路线是先做<strong>结构化中间表示</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2212.10505">DePlot</a>
+的核心想法就是把 chart
+理解拆成两步：先把图转成表，再让语言模型基于表做推理。这个确实是个很好的思路，图片更像是文本的高维抽象表示，表格则是文本的被凝练后的关键数据事实。<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2403.09028">ChartInstruct</a> 和 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.09987">OneChart</a>
+也都说明了一件事：图表理解最好有专门模块，尤其数值和结构抽取不能完全指望通用
+VLM。</p>
+<p>所以之前说的“给折线图之类额外加一个小模型，把识别出的数据存进
+metadata”，可以这样做，但是在这之前应该还有很多准备工作。</p>
+<p>其实还可以考虑把图片增强拆成两类</p>
+<p>第一类：普通图片</p>
+<p>比如示意图、界面截图、照片、流程图。</p>
+<p>这类图我会存这些字段：</p>
+<ul>
+<li><code>page_id</code></li>
+<li><code>figure_id</code></li>
+<li><code>caption</code></li>
+<li><code>nearby_chunk_ids</code></li>
+<li><code>ref_chunk_ids</code></li>
+<li><code>ocr_text</code>（如果图里有字）</li>
+<li><code>vision_embedding</code></li>
+<li><code>text_surrogate</code></li>
+</ul>
+<p>这里的 <code>text_surrogate</code>
+很重要。它可以是图注、邻近段落摘要、VLM
+生成的一段简短描述。作用不是替代图片，而是给文本检索一条“搭桥”的路。</p>
+<p>第二类：数据图</p>
+<p>比如折线图、柱状图、散点图、饼图。</p>
+<p>这类图我不会只存 caption，而是尽量存结构化结果：</p>
+<ul>
+<li>图表类型</li>
+<li>坐标轴标题</li>
+<li>图例</li>
+<li>系列名</li>
+<li>抽取出的数据点或表格</li>
+<li>数值置信度</li>
+</ul>
+<p>这样后面回答“峰值在哪”“哪一年开始下降”“A 是否高于
+B”这类问题时，就不必每次在线让大模型重新数轴读图。</p>
+<h2 id="图片真的是必须的吗">图片真的是必须的吗</h2>
+<p>多模态 RAG 的另一个误区是：既然图进库了，那每次都把图也塞给模型。</p>
+<p>我更认同 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.11321">SAM-RAG</a>
+这种思路：<strong>按需引入视觉证据</strong>。它的做法是根据 query
+动态过滤文档，需要时才引入 image
+captions。这个想法很朴素，但很重要。</p>
+<p>如果放到工程里，大概可以这么做：</p>
+<ol type="1">
+<li>先判断 query 是文本型、视觉型、还是图表型。</li>
+<li>文本型优先走文本检索，再通过关联图补图片。</li>
+<li>视觉型优先走视觉检索，再补图注和邻近段落。</li>
+<li>图表型优先查图表结构化元数据，必要时再把原图送进 VLM 复核。</li>
+</ol>
+<p>也就是说，VLM
+更适合做<strong>后验核查和局部理解</strong>，而不是承担整个检索链路的主力。</p>
+<h2 id="推荐方案">推荐方案</h2>
+<p>综上，我觉得比较稳的多模态 RAG 方案大概是这样：</p>
+<h3 id="离线建库">离线建库</h3>
+<ol type="1">
+<li>解析 PDF / 文档版面，切出 page、chunk、figure、chart、table。</li>
+<li>建文本索引。</li>
+<li>建页面/图片视觉索引。</li>
+<li>建
+<code>chunk &lt;-&gt; figure &lt;-&gt; page &lt;-&gt; section</code>
+的关联图。</li>
+<li>对 chart 跑专门解析模型，抽结构化数据。</li>
+<li>给每张图补一个轻量 <code>text surrogate</code>。</li>
+</ol>
+<h3 id="在线检索">在线检索</h3>
+<ol type="1">
+<li>先做 query 路由，判断是否需要视觉证据。</li>
+<li>从文本索引、视觉索引分别召回。</li>
+<li>通过关联图做证据扩展。</li>
+<li>用 reranker 统一排序。</li>
+<li>只把少量高价值图片交给 VLM。</li>
+</ol>
+<h3 id="在线生成">在线生成</h3>
+<ol type="1">
+<li>文本证据负责“讲清楚”</li>
+<li>图片证据负责“补视觉事实”</li>
+<li>图表结构化结果负责“保数值稳定”</li>
+</ol>
+<p>这个方案的关键是把图片从“难处理的附件”变成“有结构的证据节点”。</p>
+<h2 id="一些个人理解">一些个人理解</h2>
+<p>多模态 RAG 真正难的，从来不是能不能把图片也存起来，而是：</p>
+<ul>
+<li>检索时有没有办法把它找出来</li>
+<li>找出来之后有没有可靠的桥把它和文本证据接起来</li>
+<li>生成时有没有必要让模型重新看图，还是应该直接用已经抽好的结构化结果</li>
+</ul>
+<h2 id="参考链接">参考链接</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.10594">VisRAG: Vision-based
+Retrieval-augmented Generation on Multi-modality Documents</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.01449">ColPali: Efficient
+Document Retrieval with Vision Language Models</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2411.04952">M3DocRAG: Multi-modal
+Retrieval is What You Need for Multi-page Multi-document
+Understanding</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2210.02928">MuRAG: Multimodal
+Retrieval-Augmented Generator for Open Question Answering over Images
+and Text</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2410.11321">Self-adaptive Multimodal
+Retrieval-Augmented Generation</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2510.12323">RAG-Anything: All-in-One
+RAG Framework</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2212.10505">DePlot: One-shot visual
+language reasoning by plot-to-table translation</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2403.09028">ChartInstruct:
+Instruction Tuning for Chart Comprehension and Reasoning</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.09987">OneChart: Purify the
+Chart Structural Extraction via One Auxiliary Token</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"><i class="fa fa-tag"></i> RAG</a>
+              <a href="/tags/%E6%A3%80%E7%B4%A2/" rel="tag"><i class="fa fa-tag"></i> 检索</a>
+              <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" rel="tag"><i class="fa fa-tag"></i> 多模态</a>
+              <a href="/tags/%E6%96%87%E6%A1%A3%E7%90%86%E8%A7%A3/" rel="tag"><i class="fa fa-tag"></i> 文档理解</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/04/RAG%E5%A4%9A%E8%B7%AF%E5%8F%AC%E5%9B%9E%E9%87%8C%E7%9A%84%E5%8A%A8%E6%80%81%E6%9D%83%E9%87%8D%E9%97%AE%E9%A2%98/" rel="prev" title="RAG多路召回里的动态权重问题">
+                  <i class="fa fa-angle-left"></i> RAG多路召回里的动态权重问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2023 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">LJL</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">48k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:56</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
